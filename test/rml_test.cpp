@@ -9,7 +9,45 @@
 
 #include "test/rml_test_defines.h"
 
+using std::cout;
+using std::endl;
+
 int main(int argc, char* argv[]){
+
+	const int m = 4, n = 4;
+
+	Eigen::MatrixXd A(m, n), U(m, m), S(m, n), V(n, n);
+	timeval t1, t2;
+	double d;
+
+	for (int col = 0; col < n; col++) {
+		for (int row = 0; row < m; row++) {
+			A(row, col) = rand() / (1.0 + RAND_MAX);
+			S(row, col) = rand() / (1.0 + RAND_MAX);
+		}
+		for (int row = 0; row < n; row++) {
+			V(row, col) = rand() / (1.0 + RAND_MAX);
+		}
+	}
+
+	for (int col = 0; col < m; col++) {
+		for (int row = 0; row < m; row++) {
+			U(row, col) = rand() / (1.0 + RAND_MAX);
+		}
+	}
+
+
+	///////////////////////////////
+	///    MATRIX OPERATIONS    ///
+	///////////////////////////////
+
+	S = rml::RightJuxtapose(A,U);
+	V = rml::UnderJuxtapose(A,U);
+	rml::PrintMatrix(A, "A");
+	rml::PrintMatrix(U, "U");
+	rml::PrintMatrix(S, "rml::RightJuxtapose(A,U)");
+	rml::PrintMatrix(V, "rml::UnderJuxtapose(A,U)");
+
 
 	///////////////////////////////
 	//////     PINV TEST     //////
@@ -37,6 +75,25 @@ int main(int argc, char* argv[]){
 
 	PseudoInverseTest(iterations, input, pinvSpecs, output, r1);
 
+	//	///////////////////////////////
+	//	//////     SVD TEST      //////
+	//	///////////////////////////////
+	//
+	//	const int m = 4, n = 4;
+	//
+	//	Eigen::MatrixXd A(m, n), U(m, m), S(m, n), V(n, n);
+	//		timeval t1, t2;
+	//		double d;
+	//
+	//		for (int col = 0; col < n; col++) {
+	//			for (int row = 0; row < m; row++) {
+	//				A(row, col) = rand() / (1.0 + RAND_MAX);
+	//			}
+	//		}
+	//
+	//	rml::PrintMatrix(A, "A:");
+	//
+	//	rml::SVD(A, U, S, V);
 
 	///////////////////////////////
 	//////     DJDQ TEST     //////

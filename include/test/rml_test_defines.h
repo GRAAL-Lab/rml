@@ -2,7 +2,7 @@
  * rml_test_defines.h
  *
  *  Created on: Feb 16, 2018
- *      Author: fraw
+ *      Author: Francesco Wanderlingh
  */
 
 #ifndef INCLUDE_TEST_RML_TEST_DEFINES_H_
@@ -69,6 +69,8 @@ void PseudoInverseTest(const int iterations, const std::vector<double> &input, c
 	PrintResult("PseudoInverseTest", iterations, specs, d);
 	//cout << B << endl;
 }
+
+
 
 
 #endif /* INCLUDE_TEST_RML_TEST_DEFINES_H_ */

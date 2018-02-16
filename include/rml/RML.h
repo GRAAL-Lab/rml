@@ -15,9 +15,11 @@
 #ifndef INCLUDE_RML_RML_H_
 #define INCLUDE_RML_RML_H_
 
-#include <rml/PseudoInverse.h>
-#include <rml/Futils.h>
+#define EIGEN_MATRIXBASE_PLUGIN <rml/MatrixBaseAddons.h>
 
+#include <rml/Futils.h>
+#include <rml/PseudoInverse.h>
+#include <rml/MatrixOperations.h>
 
 
 #endif /* INCLUDE_RML_RML_H_ */

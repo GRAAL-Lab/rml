@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <eigen3/Eigen/Dense>
+#include <rml/MatrixOperations.h>
 
 namespace rml
 {
@@ -109,17 +110,19 @@ template <typename T> int sgn(T val) {
 	 */
 	double SmoothFunction(double x, double beta, double lambda);
 
-	template<class MatT>
-	void SVD(const MatT& A, const MatT& U, const MatT& S, const MatT& V) {
+	/*template<class MatT>
+	void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 
 		int m = A.rows(), n = A.cols();
+		std::cout << "nxm = " << n <<"x" << m << std::endl;
+
 		double SVD[3 * MaxMatrixDim];
 		double w[MaxMatrixDim];
 
 		int index[MaxMatrixDim];
 
-		Eigen::Matrix Utmp;
-		Eigen::Matrix Vtmp;
+		Eigen::MatrixXd Utmp;
+		Eigen::MatrixXd Vtmp;
 
 		// Matrix to double
 		// Eigen::Map<MatT>(theDoubleWhereMatrixIsCopied, rows, columns) = MatrixToBeCopied;
@@ -138,8 +141,10 @@ template <typename T> int sgn(T val) {
 		Utmp = Eigen::Map<MatT>(U_temp, m, m);
 		Vtmp = Eigen::Map<MatT>(V_temp, n, n);
 
+
+
 		for (int i = 0; i < MaxMatrixDim; i++)
-			index[i] = i + 1;
+			index[i] = i;// + 1;
 
 		double max = 0;
 		int index_max;
@@ -167,20 +172,28 @@ template <typename T> int sgn(T val) {
 		//Vtmp.PrintToDebugConsole("Vtmp");
 		//U = Utmp.GetSubMatrix(1, index[0], m, index[0]);
 		//V = Vtmp.GetSubMatrix(1, index[0], n, index[0]);
-		U = Utmp.block<m,1>(0, index[0]);
-		V = Vtmp.block<n,1>(0, index[0]);
+
+		PrintMatrix(Utmp.block(0, index[0], m, 1), "Utmp.block");
+		PrintMatrix(Vtmp.block(0, index[0], n, 1), "Vtmp.block");
+
+		U = Utmp.block(0, index[0], m, 1);
+		V = Vtmp.block(0, index[0], n, 1);
 		//Utmp.PrintToDebugConsole("Utmp");
 
-		for (int i = 1; i < n; i++) {
+		for (int i = 0; i < n; i++) {
+			std::cout << "i=" << i <<  ", index[i]=" << index[i] <<std::endl;
 			//KAL::DebugConsole::Write(LOG_LEVEL_ERROR, "A1", "%d", i);
 			//V = V.RightJuxtapose(Vtmp.GetSubMatrix(1, index[i], n, index[i]));
-			V = V.RightJuxtapose(Vtmp.block<n,1>(0, index[i]));
+
+			//V = V.RightJuxtapose(Vtmp.block(0, index[i], n, 1));
+			V = RightJuxtapose(V, Vtmp.block(0, index[i], n, 1));
 		}
 
+		/*
 		for (int i = 1; i < m; i++) {
 			//KAL::DebugConsole::Write(LOG_LEVEL_ERROR, "A2", "%d", i);
 			//U = U.RightJuxtapose(Utmp.GetSubMatrix(1, index[i], m, index[i]));
-			U = U.RightJuxtapose(Utmp.block<m,1>(0, index[i]));
+			U = U.RightJuxtapose(Utmp.block(0, index[i], m,1));
 		}
 
 		//U = U.GetSubMatrix(1, 1, m, m);
@@ -188,11 +201,11 @@ template <typename T> int sgn(T val) {
 
 		S.resize(m, n);
 		S.setZero();
-		S.diagonal(w);
+		S.diagonal() = Eigen::Map<Eigen::MatrixXd>( w, 1, S.cols() ); //Create a Set Diagonal?
 
 		//S = S.GetSubMatrix(1, 1, m, n);
-		S = S.block<m, n>(0, 0);
-	}
+		S = S.block(0, 0, m, n);
+	}*/
 
 	/**
 	 *
