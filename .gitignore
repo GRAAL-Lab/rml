@@ -174,7 +174,7 @@ msg/_*.py
 .project
 .cproject
 language.settings.xml
-org.eclipse.cdt.codan.core.prefs
+.settings
 
 # qcreator stuff
 CMakeLists.txt.user
@@ -196,3 +196,5 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+
