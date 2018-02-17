@@ -20,22 +20,10 @@ int main(int argc, char* argv[]){
 	timeval t1, t2;
 	double d;
 
-	for (int col = 0; col < n; col++) {
-		for (int row = 0; row < m; row++) {
-			A(row, col) = rand() / (1.0 + RAND_MAX);
-			S(row, col) = rand() / (1.0 + RAND_MAX);
-		}
-		for (int row = 0; row < n; row++) {
-			V(row, col) = rand() / (1.0 + RAND_MAX);
-		}
-	}
-
-	for (int col = 0; col < m; col++) {
-		for (int row = 0; row < m; row++) {
-			U(row, col) = rand() / (1.0 + RAND_MAX);
-		}
-	}
-
+	A.setRandom();
+	U.setRandom();
+	S.setRandom();
+	V.setRandom();
 
 	///////////////////////////////
 	///    MATRIX OPERATIONS    ///

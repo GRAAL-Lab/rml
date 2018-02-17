@@ -12,6 +12,7 @@ project(RML_project VERSION 0.1 LANGUAGES CXX)
 
 add_library(rml
     src/PseudoInverse.cc
+    src/SVD.cc
 #    src/frob.cpp
     )
 
