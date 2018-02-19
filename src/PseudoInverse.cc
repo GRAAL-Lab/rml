@@ -8,7 +8,7 @@
 #include <iostream>
 #include <rml/PseudoInverse.h>
 #include <rml/MatrixOperations.h>
-#include "SVD.h"
+#include <rml/SVD.h>
 
 namespace rml {
 

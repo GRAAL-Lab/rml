@@ -9,6 +9,7 @@
 
 #include "test/rml_test_defines.h"
 
+
 using std::cout;
 using std::endl;
 
@@ -41,6 +42,8 @@ int main(int argc, char* argv[]){
 	//////     PINV TEST     //////
 	///////////////////////////////
 
+	std::cout << std::endl << tc::white << "PINV Test" << tc::none << std::endl;
+
 	int iterations = 1000;
 	int cols = 4, rows = 4;
 
@@ -63,25 +66,22 @@ int main(int argc, char* argv[]){
 
 	PseudoInverseTest(iterations, input, pinvSpecs, output, r1);
 
-	//	///////////////////////////////
-	//	//////     SVD TEST      //////
-	//	///////////////////////////////
-	//
-	//	const int m = 4, n = 4;
-	//
-	//	Eigen::MatrixXd A(m, n), U(m, m), S(m, n), V(n, n);
-	//		timeval t1, t2;
-	//		double d;
-	//
-	//		for (int col = 0; col < n; col++) {
-	//			for (int row = 0; row < m; row++) {
-	//				A(row, col) = rand() / (1.0 + RAND_MAX);
-	//			}
-	//		}
-	//
-	//	rml::PrintMatrix(A, "A:");
-	//
-	//	rml::SVD(A, U, S, V);
+	///////////////////////////////
+	//////     SVD TEST      //////
+	///////////////////////////////
+
+	std::cout << std::endl << tc::white << "SVD Test" << tc::none << std::endl;
+
+	rml::SVD(A, U, S, V);
+
+	rml::PrintMatrix(A, "A");
+	rml::PrintMatrix(U, "U");
+	rml::PrintMatrix(S, "S");
+	rml::PrintMatrix(V, "V");
+
+	Eigen::MatrixXd A_usv = U * S * V.transpose();
+	rml::PrintMatrix(A_usv, "A as the result of: A = U*S*V'");
+
 
 	///////////////////////////////
 	//////     DJDQ TEST     //////
