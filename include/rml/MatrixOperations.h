@@ -20,7 +20,7 @@ void PrintMatrix(const MatT& A, std::string name){
 	std::cout << tc::white << name << tc::none << std::endl << A << std::endl;
 }
 
-inline void SetDiagonalFromDoubleArray(Eigen::MatrixXd& MatT, double diag[]){
+inline void SetDiagonalFromDouble(Eigen::MatrixXd& MatT, double diag[]){
 	Eigen::ArrayXd wdiag = Eigen::Map<Eigen::ArrayXd>( diag, MatT.cols() );
 	MatT.diagonal() = wdiag;
 }

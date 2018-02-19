@@ -88,11 +88,11 @@ template<class MatT>
 void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 
 	int m = A.rows(), n = A.cols();
+	int MaxMatDim = std::pow(std::max(m,n),2);
+	double SVD[3 * MaxMatDim];
+	double w[MaxMatDim];
 
-	double SVD[3 * MaxMatrixDim];
-	double w[MaxMatrixDim];
-
-	int index[MaxMatrixDim];
+	int index[MaxMatDim];
 
 	Eigen::MatrixXd Utmp;
 	Eigen::MatrixXd Vtmp;
@@ -103,18 +103,19 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 	// double to Matrix
 	// MatT eigenPInv = Eigen::Map<MatT>(JPInv, n, m);
 
-	double U_temp[MaxMatrixDim], V_temp[MaxMatrixDim];
-	//A.CopyTo(U_temp);
+	double U_temp[MaxMatDim], V_temp[MaxMatDim];
+
 	Eigen::Map<MatT>(U_temp, m, n) = A;
 
 	SVD_NumericalRecipes(U_temp, m, n, w, V_temp, SVD);
 
-	//		Utmp.CopyFrom(U_temp);
-	//		Vtmp.CopyFrom(V_temp);
 	Utmp = Eigen::Map<MatT>(U_temp, m, m);
 	Vtmp = Eigen::Map<MatT>(V_temp, n, n);
 
-	for (int i = 0; i < MaxMatrixDim; i++)
+	PrintMatrix(Utmp,"Utmp");
+	PrintMatrix(Vtmp,"Vtmp");
+
+	for (int i = 0; i < MaxMatDim; i++)
 		index[i] = i;// + 1;
 
 	double max = 0;
@@ -122,7 +123,7 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 	for (int i = 0; i < n; i++) {
 		max = w[i];
 		index_max = i;
-		for (int j = i + 1; j < n; j++) {
+		for (int j = i+1; j < n; j++) {
 			if (w[j] > max) {
 				index_max = j;
 				max = w[j];
@@ -140,26 +141,16 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 	Vtmp.conservativeResize(n, n);
 	Utmp.conservativeResize(m, std::max(m, n));
 
-	//U = Utmp.GetSubMatrix(1, index[0], m, index[0]);
-	//V = Vtmp.GetSubMatrix(1, index[0], n, index[0]);
-
-	//PrintMatrix(Utmp.block(0, index[0], m, 1), "Utmp.block");
-	//PrintMatrix(Vtmp.block(0, index[0], n, 1), "Vtmp.block");
 
 	U = Utmp.block(0, index[0], m, 1);
 	V = Vtmp.block(0, index[0], n, 1);
 
-	//rml::PrintMatrix(V, "V before for");
 
 	for (int i = 1; i < n; i++) {
-		//std::cout << "i=" << i <<  ", index[i]=" << index[i] <<std::endl;
-		//V = V.RightJuxtapose(Vtmp.GetSubMatrix(1, index[i], n, index[i]));
 		V = RightJuxtapose(V, Vtmp.block(0, index[i], n, 1));
 	}
 
-
-	for (int i = 0; i < m; i++) {
-		//U = U.RightJuxtapose(Utmp.GetSubMatrix(1, index[i], m, index[i]));
+	for (int i = 1; i < m; i++) {
 		U = RightJuxtapose(U, Utmp.block(0, index[i], m, 1));
 	}
 
@@ -168,12 +159,8 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 
 	S.resize(m, n);
 	S.setZero();
-	//std::cout << "n x m = " << n << "x" << m << std::endl;
 
-	//Eigen::ArrayXd wdiag = Eigen::Map<Eigen::ArrayXd>( w, S.cols() );
-	//PrintMatrix(wdiag, "Eigen Map of w:");
-	SetDiagonalFromDoubleArray(S,w);//S.diagonal() = wdiag;//Create a Set Diagonal?
-	//PrintMatrix(S, "S");
+	SetDiagonalFromDouble(S,w);
 
 	S = S.block(0, 0, m, n);
 }

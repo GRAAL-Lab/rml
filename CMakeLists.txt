@@ -10,7 +10,7 @@ include(GNUInstallDirs)
 # Define library. Only source files here!
 project(RML_project VERSION 0.1 LANGUAGES CXX)
 
-add_library(rml
+add_library(rml SHARED
     src/PseudoInverse.cc
     src/SVD.cc
 #    src/frob.cpp
@@ -42,19 +42,19 @@ target_compile_features(rml
 #    MyOtherLibrary)
 
 # 'make install' to the correct locations (provided by GNUInstallDirs).
-install(TARGETS rml EXPORT MyLibraryConfig
+install(TARGETS rml EXPORT rmlConfig
     ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})  # This is for Windows
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/rml DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # This makes the project importable from the install directory
 # Put config file in per-project dir (name MUST match), can also
 # just go into 'cmake'.
-install(EXPORT MyLibraryConfig DESTINATION share/MyLibrary/cmake)
+install(EXPORT rmlConfig DESTINATION share/rml/cmake)
 
 # This makes the project importable from the build directory
-export(TARGETS rml FILE MyLibraryConfig.cmake)
+export(TARGETS rml FILE rmlConfig.cmake)
 
 # Every library has unit tests, of course
 add_executable(rml_test

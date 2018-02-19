@@ -43,31 +43,23 @@ double TimeDiff(timeval t1, timeval t2) {
 }
 
 void PrintResult(const std::string type, const int iter, const PinvSpecs specs, const double time){
-	std::cout << type << "\t" << specs.nRows << "x" << specs.nCols << " \t " << tc::white << time << " ms"
+	std::cout << type << "\t" << specs.nRows << "x" << specs.nCols << " \t " << tc::white << time/1000 << " us"
 			<< tc::none << "\t(" << iter << " iterations)" << std::endl;
 }
 
-void PseudoInverseTest(const int iterations, const std::vector<double> &input, const PinvSpecs specs, std::vector<double> &output, TimeResults &results) {
+void PseudoInverseTest(const int iterations, const Eigen::MatrixXd& A, const PinvSpecs specs, Eigen::MatrixXd& Apinv, TimeResults &results) {
 
-	Eigen::MatrixXd A(specs.nRows, specs.nCols), B(specs.nCols, specs.nRows);
 	timeval t1, t2;
 	double d;
 
-	for (int col = 0; col < specs.nCols; col++) {
-		for (int row = 0; row < specs.nRows; row++) {
-			A(row, col) = input[row + col * specs.nRows];
-		}
-	}
-
 	gettimeofday(&t1, NULL);
 	for (int i = 0; i < iterations; i++) {
-		B = rml::RegularizedPseudoInverse(A, specs.thresh, specs.lambda);
+		Apinv = rml::RegularizedPseudoInverse(A, specs.thresh, specs.lambda);
 	}
 	gettimeofday(&t2, NULL);
 	d = TimeDiff(t1, t2);
 	results.inv = d;
 	PrintResult("PseudoInverseTest", iterations, specs, d);
-	//cout << B << endl;
 }
 
 
