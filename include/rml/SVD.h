@@ -13,24 +13,6 @@
 
 namespace rml{
 
-const double RPY2VectEpsilon = 0.000000001;
-const double VersorLemmaThreshold = 0.000000001;
-const unsigned long int MaxMatrixDim = 1300;           ///< Max matrices dimension
-const double SVDEpsilon = 0.00000001;
-
-//#define PI					3.14159265358979323846
-
-//#define MATRIXLIB_SIGN(a,b)	((b) >= 0.0 ? fabs(a) : -fabs(a))
-//#define MATRIXLIB_MAX(a,b)	((a) > (b)  ? (a) : (b))
-//#define MATRIXLIB_MIN(a,b)	((a) < (b)  ? (a) : (b))
-
-
-/**
- * @internal for internal use only
- *
- * @return  sqrt(a*a+b*b) (@see CMAT::GT_svdcmp)
- */
-double GT_pythag(double a, double b);
 /**
  * @internal for internal use only
  *
@@ -41,35 +23,6 @@ double GT_pythag(double a, double b);
  * The matrix U is output as V_[n*n].
  */
 void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double *rv1);
-/**
- * @internal for internal use only
- *
- * @brief Raised cosine function  (out = lambda*cos[(in/th)*(PI/2)]).
- */
-double GT_RaisedCos(double in, double th, double lambda);
-/**
- * @internal for internal use only
- *
- * @brief Product of two matrices
- */
-short GT_MultMatrix(const double* A, int m, int n, const double* B, char k, char p, double* OUT);
-/**
- * @internal for internal use only
- *
- * @brief Transpose a matrix
- *
- * @note the input and the output matrices must be different!!!
- */
-void GT_TransMatrix(const double* A, int m, int n, double* OUT);
-
-/**
- * @internal for internal use only
- */
-double SmoothTransition(double x, double beta, double xmin, double lambda);
-/**
- * @internal for internal use only
- */
-double SmoothFunction(double x, double beta, double lambda);
 
 
 /**
@@ -112,8 +65,8 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 	Utmp = Eigen::Map<MatT>(U_temp, m, m);
 	Vtmp = Eigen::Map<MatT>(V_temp, n, n);
 
-	PrintMatrix(Utmp,"Utmp");
-	PrintMatrix(Vtmp,"Vtmp");
+	//PrintMatrix(Utmp,"Utmp");
+	//PrintMatrix(Vtmp,"Vtmp");
 
 	for (int i = 0; i < MaxMatDim; i++)
 		index[i] = i;// + 1;

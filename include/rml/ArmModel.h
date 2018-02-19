@@ -9,11 +9,11 @@
 #define __ARMMODEL_H__
 
 #include <vector>
-#include <algorithm>		// for std::copy
-#include <OrtoMath.h>
+#include <algorithm>
 #include <eigen3/Eigen/Dense>
+#include "rml/RML.h"
 
-namespace CTRL {
+namespace rml {
 
 /**
  * @brief Arm Model base class
@@ -45,7 +45,7 @@ public:
 	/**
 	 * @brief Specialized swap() to implement the copy-assignment-operator by reusing the copy-constructor
 	 */
-	friend void swap(CTRL::ArmModel& first, CTRL::ArmModel& second);
+	friend void swap(ArmModel& first, ArmModel& second);
 
 	/**
 	 * @brief Copy Assignment Operator
@@ -93,7 +93,7 @@ public:
 	 * @brief Get the joint position
 	 * @param[in] q the joint position vector (an armJoints x 1 vector)
 	 */
-	const Eigen::Vector4d& GetJointPosition() const;
+	const Eigen::VectorXd& GetJointPosition() const;
 
 	/**
 	 * @brief Evaluates the Jacobian of the arm
@@ -121,7 +121,7 @@ public:
 	 * @param[out] mu the manipulability measure
 	 * @param[out] wJt the manipulability measure Jacobian
 	 */
-	void EvaluateManipulability(Eigen::Matrix4d& mu, CMAT::Matrix& Jmu);
+	void EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu);
 
 	/**
 	 * @brief Evaluates the transformation matrix (w.r.t. world) of the specified joint
@@ -147,14 +147,8 @@ public:
 	 *
 	 * @param[out] dJdq
 	 */
-	void EvaluatedJdqNumeric(std::vector<Eigen::MatrixXd> dJdq);
+	void EvaluatedJdqNumeric(std::vector<Eigen::MatrixXd>& dJdq);
 
-	/**
-	 * @brief Evaluates the Jacobian derivative w.r.t. joint variations
-	 *
-	 * @param[out] dJdq
-	 */
-	virtual void EvaluatedJdq(std::vector<Eigen::MatrixXd> dJdq);
 
 	int GetNumJoints() const {
 		return numberOfJoints_;

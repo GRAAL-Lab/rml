@@ -22,5 +22,9 @@
 #include <rml/MatrixOperations.h>
 #include <rml/SVD.h>
 
+namespace Eigen{
+typedef Eigen::Matrix<double, 1, 6> Vector6d;
+typedef Eigen::RotationBase::RotationMatrixType<double, 3, 3> RotationMatrix;
+}
 
 #endif /* INCLUDE_RML_RML_H_ */
