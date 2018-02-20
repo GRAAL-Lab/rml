@@ -60,12 +60,6 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 	Eigen::MatrixXd Utmp;
 	Eigen::MatrixXd Vtmp;
 
-	// Matrix to double
-	// Eigen::Map<MatT>(theDoubleWhereMatrixIsCopied, rows, columns) = MatrixToBeCopied;
-
-	// double to Matrix
-	// MatT eigenPInv = Eigen::Map<MatT>(JPInv, n, m);
-
 	double U_temp[MaxMatDim], V_temp[MaxMatDim];
 
 	Eigen::Map<MatT>(U_temp, m, n) = A;

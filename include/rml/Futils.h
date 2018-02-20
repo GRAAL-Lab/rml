@@ -148,7 +148,13 @@ inline std::string DebugMsg(const LogEntities entity, const std::string inputMsg
     return strstr.str();
 }
 
-namespace FUTILS {
+namespace futils {
+
+template<class Object>
+void PrettyPrint(const Object& A, std::string name){
+	std::cout << tc::white << name << tc::none << std::endl << A << std::endl;
+}
+
 /**
  * @brief Create folder if not existing
  *

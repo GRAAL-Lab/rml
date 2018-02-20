@@ -16,9 +16,12 @@
 
 namespace rml {
 
-template<class MatT>
-void PrintMatrix(const MatT& A, std::string name){
-	std::cout << tc::white << name << tc::none << std::endl << A << std::endl;
+inline void Double2Matrix(double dmat[], int rows, int cols, Eigen::MatrixXd& MatT){
+	MatT = Eigen::Map<Eigen::MatrixXd>(dmat, rows, cols);
+}
+
+inline void Matrix2Double(const Eigen::MatrixXd& MatT, int rows, int cols, double dmat[]){
+	Eigen::Map<Eigen::MatrixXd>(dmat, rows, cols) = MatT;
 }
 
 inline void SetDiagonalFromDouble(Eigen::MatrixXd& MatT, double diag[]){
@@ -59,6 +62,14 @@ inline void SetFirstVect3(Eigen::Vector6d& vect6, const Eigen::Vector3d& vect3){
 
 inline void SetSecondVect3(Eigen::Vector6d& vect6, const Eigen::Vector3d& vect3){
 	vect6.block(3,0,3,1) = vect3;
+}
+
+inline Eigen::Vector3d GetTrasl(Eigen::Matrix4d& tMat){
+	return tMat.block(0,3,3,1);
+}
+
+inline Eigen::RotationMatrix GetRotMatrix(Eigen::Matrix4d& tMat){
+	return tMat.block(0,0,3,3);
 }
 
 }

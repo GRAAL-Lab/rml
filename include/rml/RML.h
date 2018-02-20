@@ -22,5 +22,6 @@
 #include <rml/MatrixOperations.h>
 #include <rml/SVD.h>
 #include <rml/Defines.h>
+#include <rml/ArmModel.h>
 
 #endif /* INCLUDE_RML_RML_H_ */

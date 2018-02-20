@@ -26,11 +26,12 @@ struct TimeResults {
 struct PinvSpecs {
 	int nRows;
 	int nCols;
-	double thresh;
-	double lambda;
+	rml::SVDParameters SVDparams;
 
 	PinvSpecs() :
-		nRows(0), nCols(0), thresh(0.01), lambda(0.0001) {
+		nRows(0), nCols(0) {
+		SVDparams.threshold = 0.01;
+		SVDparams.lambda = 0.0001;
 	}
 };
 
@@ -47,14 +48,17 @@ void PrintResult(const std::string type, const int iter, const PinvSpecs specs, 
 			<< tc::none << "\t(" << iter << " iterations)" << std::endl;
 }
 
-void PseudoInverseTest(const int iterations, const Eigen::MatrixXd& A, const PinvSpecs specs, Eigen::MatrixXd& Apinv, TimeResults &results) {
+void PseudoInverseTest(const int iterations, Eigen::MatrixXd& A, const PinvSpecs &specs, Eigen::MatrixXd& Apinv, TimeResults &results) {
 
 	timeval t1, t2;
 	double d;
 
+	A.resize(specs.nRows, specs.nCols);
+	A.setRandom();
+
 	gettimeofday(&t1, NULL);
 	for (int i = 0; i < iterations; i++) {
-		Apinv = rml::RegularizedPseudoInverse(A, specs.thresh, specs.lambda);
+		Apinv = rml::RegularizedPseudoInverse(A, specs.SVDparams.threshold, specs.SVDparams.lambda);
 	}
 	gettimeofday(&t2, NULL);
 	d = TimeDiff(t1, t2);

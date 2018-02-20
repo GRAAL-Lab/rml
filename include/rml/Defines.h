@@ -13,7 +13,7 @@
 namespace Eigen{
 
 typedef Eigen::Matrix<double, 6, 1> Vector6d;
-typedef Eigen::RotationBase<double, 3> RotationMatrix;
+typedef Eigen::Matrix3d RotationMatrix;
 
 }
 

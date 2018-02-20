@@ -173,8 +173,7 @@ public:
         return wTt_;
     }
 
-    const Eigen::Matrix4d& GetbTt() const {
-        //EvaluatewTt(wTt_);
+    const Eigen::Matrix4d& GetbTt() {
         bTt_ = wTb0_.inverse() * wTt_;
         return bTt_;
     }
@@ -184,7 +183,7 @@ public:
 		return eTt_;
 	}
 
-	void SeteTt(const Eigen::Matrix4d& eTt) const {
+	void SeteTt(const Eigen::Matrix4d& eTt) {
 		eTt_ = eTt;
 	}
 
@@ -207,7 +206,7 @@ protected:
 	void BackwardDirectGeometry(int jointNumber, int endEffectorIndex);
 	void BackwardDirectGeometryToolFrame(int jointNumber);
 
-
+	bool hasBeenInitialized_;
 	int numberOfJoints_;
 	Eigen::VectorXd q_;
 	std::vector<Eigen::Matrix4d> wTei_; 		///< Matrice di Trasformazione dal mondo all'endeffector della BRU i-esima
@@ -232,7 +231,7 @@ protected:
 	std::vector<double> arrayQ_;
 	Eigen::Matrix3d I3_;
 	Eigen::VectorXd ZeroQ_;
-	bool modelReadFromFile;
+	bool modelReadFromFile_;
 
 };
 

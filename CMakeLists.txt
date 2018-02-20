@@ -15,8 +15,8 @@ add_library(rml SHARED
     src/PseudoInverse_Internal.cc
     src/SVD.cc
     src/SVD_Internal.cc
-#    src/frob.cpp
-    )
+    src/ArmModel.cc
+)
 
 set_target_properties(rml PROPERTIES LINKER_LANGUAGE CXX)
 
