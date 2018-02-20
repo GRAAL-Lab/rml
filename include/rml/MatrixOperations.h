@@ -12,6 +12,7 @@
 #include <string>
 #include <eigen3/Eigen/Dense>
 #include <rml/Futils.h>
+#include <rml/Defines.h>
 
 namespace rml {
 
@@ -50,6 +51,14 @@ inline Eigen::MatrixXd UnderJuxtapose(const Eigen::MatrixXd& A, const Eigen::Mat
 
 inline Eigen::MatrixXd UpperJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	return UnderJuxtapose(B, A);
+}
+
+inline void SetFirstVect3(Eigen::Vector6d& vect6, const Eigen::Vector3d& vect3){
+	vect6.block(0,0,3,1) = vect3;
+}
+
+inline void SetSecondVect3(Eigen::Vector6d& vect6, const Eigen::Vector3d& vect3){
+	vect6.block(3,0,3,1) = vect3;
 }
 
 }

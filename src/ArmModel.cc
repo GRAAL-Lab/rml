@@ -9,7 +9,6 @@
 #define CMAT_STANDALONE
 #endif
 
-//#include "ctrl.h"
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -22,6 +21,7 @@
 #include "rml/ArmModel.h"
 #include "rml/MatrixOperations.h"
 #include "rml/PseudoInverse.h"
+#include "rml/Defines.h"
 
 #define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
 
@@ -44,11 +44,10 @@ ArmModel::ArmModel() {
 	dJdq_ = NULL;
 }
 
-ArmModel::ArmModel(const ArmModel& other) :
-				                						numberOfJoints_(other.numberOfJoints_), q_(other.q_), wTb0_(
-				                								other.wTb0_), wTbi_(other.wTbi_), Tz_(other.Tz_), w_ki_(other.w_ki_), wTt_(other.wTt_), eTt_(
-				                										other.eTt_), w_r_et_(other.w_r_et_), Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_), wTe_(
-				                												other.wTe_), wJt_(other.wJt_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
+ArmModel::ArmModel(const ArmModel& other) : numberOfJoints_(other.numberOfJoints_), q_(other.q_), wTb0_(
+	other.wTb0_), wTbi_(other.wTbi_), Tz_(other.Tz_), w_ki_(other.w_ki_), wTt_(other.wTt_),
+	eTt_(other.eTt_), w_r_et_(other.w_r_et_), Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
+	wTe_(other.wTe_), wJt_(other.wJt_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
 
 	/*
 	 * If the arm model we are copying is not initialised we have to initialise all the pointers to NULL since
@@ -202,7 +201,7 @@ void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex) {
 	// Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione
 	// ogni giunto ruota lungo z si ha che ri_ki = ei_ki = [ 0 0 1 ]'
 	// Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
-	w_ki_ = (wTei_[jointNumber - 1].GetSubMatrix(1, 3, 3, 3));
+	w_ki_ = wTei_.at(jointNumber - 1).block(0,2,3,1); //GetSubMatrix(1, 3, 3, 3));
 
 	h_[jointNumber - 1].SetFirstVect3(w_ki_);
 	h_[jointNumber - 1].SetSecondVect3(w_ki_.CrossProd((wTei_[endEffectorIndex - 1].GetTrasl() - wTei_[jointNumber - 1].GetTrasl())));
@@ -287,7 +286,8 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu)
 	if(numberOfJoints_ < 6){
 		/// For defective manipulators
 		//std::cout << "nrow: " << dJdq_[0].GetNumRows() << " ncol:" << dJdq_[0].GetNumColumns() << std::endl;
-		Jpinv_ = wJt_.transpose().RegPseudoInverse(0.0001, 0.0001, mu(1,1), flag);
+		rml::RegularizedPseudoInverse(wJt_.transpose(), 0.0001, 0.0001, &mu(1,1), &flag);
+		//Jpinv_ = .RegPseudoInverse(, );
 
 		for(int k = 0; k < numberOfJoints_; k++)
 		{
@@ -301,7 +301,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu)
 		}
 		//mu.PrintMtx("mu");
 	} else {
-		Jpinv_ = wJt_.RegPseudoInverse(0.01, 0.01, mu(1, 1), flag);
+		Jpinv_ = rml::RegularizedPseudoInverse(wJt_,0.01, 0.01, &mu(1, 1), &flag);
 
 		for (int k = 0; k < numberOfJoints_; k++) {
 			Jmu(k + 1) = 0;

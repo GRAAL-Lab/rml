@@ -13,6 +13,16 @@
 
 namespace rml{
 
+struct SVDParameters
+{
+	double threshold; 	// the value below which the raised cosine becomes > 0
+	double lambda;    	// the maximum value of the raised cosine
+	double mu;
+	int flag;
+
+	SVDParameters(): threshold(0.0), lambda(0.0), mu(0.0), flag(0) {}
+};
+
 /**
  * @internal for internal use only
  *
@@ -65,9 +75,6 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 	Utmp = Eigen::Map<MatT>(U_temp, m, m);
 	Vtmp = Eigen::Map<MatT>(V_temp, n, n);
 
-	//PrintMatrix(Utmp,"Utmp");
-	//PrintMatrix(Vtmp,"Vtmp");
-
 	for (int i = 0; i < MaxMatDim; i++)
 		index[i] = i;// + 1;
 
@@ -94,10 +101,8 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 	Vtmp.conservativeResize(n, n);
 	Utmp.conservativeResize(m, std::max(m, n));
 
-
 	U = Utmp.block(0, index[0], m, 1);
 	V = Vtmp.block(0, index[0], n, 1);
-
 
 	for (int i = 1; i < n; i++) {
 		V = RightJuxtapose(V, Vtmp.block(0, index[i], n, 1));
@@ -107,7 +112,6 @@ void SVD(const MatT& A, MatT& U, MatT& S, MatT& V) {
 		U = RightJuxtapose(U, Utmp.block(0, index[i], m, 1));
 	}
 
-	//U = U.GetSubMatrix(1, 1, m, m);
 	U = U.block(0, 0, m, m);
 
 	S.resize(m, n);

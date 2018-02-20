@@ -10,8 +10,7 @@
 
 #include <eigen3/Eigen/Dense>
 
-namespace rml
-{
+namespace rml {
 
 /**
  * @internal for internal use only
@@ -20,16 +19,11 @@ namespace rml
  */
 void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, double lambda, double* prod, int* flag);
 
-/**
- *
- * @param mat
- * @param threshold
- * @param lambda
- * @return
- */
+
+
 template<class MatT>
-Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(const MatT &mat,
-		double threshold, double lambda) // choose appropriately
+Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
+		const MatT &mat, const double threshold, const double lambda, double *mu, int *flag) // choose appropriately
 		{
 
 	int m = mat.rows(), n = mat.cols();
@@ -41,10 +35,10 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	 */
 	Eigen::Map<MatT>(J, m, n) = mat;
 
-	double mu;
-	int flag;
+	//double mu;
+	//int flag;
 
-	GT_RegPinv(J, m, n, JPInv, threshold, lambda, &mu, &flag);
+	GT_RegPinv(J, m, n, JPInv, threshold, lambda, mu, flag);
 
 	/**
 	 * Here the results of the GT_RegPinv algorithm are mapped back to the input type
@@ -52,10 +46,28 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	MatT eigenPinv = Eigen::Map<MatT>(JPInv, n, m);
 
 	return eigenPinv;
-		}
+}
+
+template<class MatT>
+Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
+		const MatT &mat, const double threshold, const double lambda, double *mu) // choose appropriately
+		{
+
+	int flag;
+	return RegularizedPseudoInverse(mat, threshold, lambda, mu, &flag);
+}
+
+template<class MatT>
+Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
+		const MatT &mat, const double threshold, const double lambda) // choose appropriately
+		{
+
+	double mu;
+	int flag;
+	return RegularizedPseudoInverse(mat, threshold, lambda, &mu, &flag);
+
+}
 
 } //namespace rml
-
-
 
 #endif /* INCLUDE_RML_PSEUDOINVERSE_H_ */

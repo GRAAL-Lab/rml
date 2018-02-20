@@ -9,7 +9,6 @@
 
 #include "test/rml_test_defines.h"
 
-
 using std::cout;
 using std::endl;
 
@@ -39,7 +38,19 @@ int main(int argc, char* argv[]){
 	rml::PrintMatrix(S, "rml::RightJuxtapose(A,U)");
 	rml::PrintMatrix(V, "rml::UnderJuxtapose(A,U)");
 
+	Eigen::Vector6d vect6;
+	Eigen::Vector3d vect3_1, vect3_2;
+	vect3_1.setConstant(1);
+	vect3_2.setConstant(2);
+	vect6.setZero();
+	rml::PrintMatrix(vect6.transpose(), "vect6'");
+	rml::PrintMatrix(vect3_1.transpose(), "vect3_1'");
+	rml::PrintMatrix(vect3_2.transpose(), "vect3_2'");
 
+	rml::SetFirstVect3(vect6, vect3_1);
+	rml::PrintMatrix(vect6.transpose(), "vect6' after SetFirstVect3()");
+	rml::SetSecondVect3(vect6, vect3_2);
+	rml::PrintMatrix(vect6.transpose(), "vect6' after SetSecondVect3()");
 	///////////////////////////////
 	//////     PINV TEST     //////
 	///////////////////////////////
@@ -67,34 +78,6 @@ int main(int argc, char* argv[]){
 			PseudoInverseTest(iterations, A, pinvSpecs, Apinv, timings);
 		}
 	}
-
-
-
-
-
-//	std::cout << std::endl << tc::yel << "### PINV Test ###" << tc::none << std::endl;
-//
-//	int iterations = 1000;
-//	int cols = 4, rows = 4;
-//
-//	vector<double> input(cols*rows), output(rows*cols);
-//
-//	// Fill with random values
-//	for (int c = 0; c < cols; c++) {
-//		for (int r = 0; r < rows; r++) {
-//			input.at(r + c*rows) = (rand() / (1.0 + RAND_MAX));
-//		}
-//	}
-//
-//	TimeResults r1, r2;
-//	PinvSpecs pinvSpecs;
-//
-//	pinvSpecs.nRows = rows;
-//	pinvSpecs.nCols = cols;
-//	pinvSpecs.thresh = 0.01;
-//	pinvSpecs.lambda = 0.0001;
-//
-//	PseudoInverseTest(iterations, input, pinvSpecs, output, r1);
 
 	///////////////////////////////
 	//////     SVD TEST      //////
