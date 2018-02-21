@@ -23,8 +23,7 @@
 #include "rml/PseudoInverse.h"
 #include "rml/Defines.h"
 
-#define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
-
+//#define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
 //#define DBG_PRINT
 
 using std::cout;
@@ -37,9 +36,9 @@ ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), hasBeenIni
 }
 
 ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenInitialized_), numberOfJoints_(other.numberOfJoints_),
-		q_(other.q_), wTb0_(other.wTb0_), wTbi_(other.wTbi_), Tz_(other.Tz_), w_ki_(other.w_ki_), wTt_(other.wTt_),
-	eTt_(other.eTt_), w_r_et_(other.w_r_et_), Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
-	wTe_(other.wTe_), wJt_(other.wJt_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
+		q_(other.q_), wTb0_(other.wTb0_), wTbi_(other.wTbi_), Tz_(other.Tz_), w_ki_(other.w_ki_), eTt_(other.eTt_),
+		w_r_et_(other.w_r_et_), Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
+	wTe_(other.wTe_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
 
 	/*
 	 * If the arm model we are copying is not initialised we have to initialise all the pointers to NULL since
@@ -90,10 +89,8 @@ void ArmModel::SetJointPosition(const Eigen::VectorXd& q) {
 	}
 	q_ = q;
 
-	EvaluatewTt(wTt_);
-	EvaluatebTt(bTt_);
-	EvaluatewJt(wJt_);
-	EvaluatebJt(bJt_);
+	EvaluatebTt();
+	EvaluatebJt();
 	EvaluatedJdqNumeric();
 }
 
@@ -114,7 +111,7 @@ void ArmModel::SetArmJoints(int armJoints) {
 		dJdq_.at(i) = Eigen::MatrixXd::Zero(6, numberOfJoints_);
 	}
 
-	wJt_.resize(6, numberOfJoints_);
+	bJt_.resize(6, numberOfJoints_);
 	ZeroQ_ = Eigen::MatrixXd::Zero(numberOfJoints_, 1);
 	q_ = ZeroQ_;
 
@@ -135,6 +132,36 @@ void ArmModel::InitMatrix(std::string init_matrices_path) {
 	wTb0_ = Eigen::Matrix4d::Identity();
 	eTt_ = Eigen::Matrix4d::Identity();
 	ReadModelMatricesFromFile(init_matrices_path);
+}
+
+
+
+void ArmModel::EvaluatebJt() {
+	//std::cerr << "I'm in EvaluateJwt" << std::endl;
+
+	//EvaluatebTt(bTt_);
+	for (int jointNumber = numberOfJoints_ - 1; jointNumber >= 0; jointNumber--)
+		BackwardDirectGeometryToolFrame(jointNumber);
+
+	bJt_ = (h_[0]);
+	//wJt.PrintMtx("wJt start");
+	for (int i = 1; i < numberOfJoints_; i++) {
+		bJt_ = RightJuxtapose(bJt_, h_[i]);
+		//wJt.PrintMtx("wJt");
+	}
+}
+
+
+void ArmModel::EvaluatebTt() {
+	Eigen::Matrix4d orig_wTb = wTb0_;
+	wTb0_ = Eigen::Matrix4d::Identity();
+
+	for (int jointNumber = 0; jointNumber < numberOfJoints_; jointNumber++) {
+		ForwardDirectGeometry(jointNumber);
+	}
+	bTt_ = wTei_[numberOfJoints_ - 1] * eTt_;
+	wTb0_ = orig_wTb;
+
 }
 
 
@@ -187,6 +214,8 @@ void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex) {
 	SetSecondVect3(h_[jointNumber],w_ki_.cross((GetTrasl(wTei_[endEffectorIndex]) - GetTrasl(wTei_[jointNumber]))));
 }
 
+
+
 void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 	// Calcolo w_ki
 	// Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione
@@ -195,65 +224,12 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 	w_ki_ = wTei_.at(jointNumber).block(0,2,3,1);//GetSubMatrix(1, 3, 3, 3));
 
 	SetFirstVect3(h_[jointNumber],w_ki_);
-	SetSecondVect3(h_[jointNumber],w_ki_.cross((GetTrasl(wTt_) - GetTrasl(wTei_[jointNumber]))));
+	SetSecondVect3(h_[jointNumber],w_ki_.cross((GetTrasl(bTt_) - GetTrasl(wTei_[jointNumber]))));
 
 	//cout << "backward index = " << jointNumber << endl;
 	//wTei_[jointNumber - 1].PrintMtx("wTei");
 	//w_ki_.PrintMtx("wki");
 	//h_[jointNumber - 1].PrintMtx("h");
-}
-
-void ArmModel::EvaluatewJt(Eigen::MatrixXd& wJt) {
-	//std::cerr << "I'm in EvaluateJwt" << std::endl;
-
-	for (int jointNumber = numberOfJoints_ - 1; jointNumber >= 0; jointNumber--)
-		BackwardDirectGeometryToolFrame(jointNumber);
-
-	wJt = (h_[0]);
-	//wJt.PrintMtx("wJt start");
-	for (int i = 1; i < numberOfJoints_; i++) {
-		wJt = RightJuxtapose(wJt, h_[i]);
-		//wJt.PrintMtx("wJt");
-	}
-
-}
-
-void ArmModel::EvaluatebJt(Eigen::MatrixXd& bJt) {
-	//std::cerr << "I'm in EvaluateJwt" << std::endl;
-
-	//EvaluatebTt(bTt_);
-	for (int jointNumber = numberOfJoints_ - 1; jointNumber >= 0; jointNumber--)
-		BackwardDirectGeometryToolFrame(jointNumber);
-
-	bJt = (h_[0]);
-	//wJt.PrintMtx("wJt start");
-	for (int i = 1; i < numberOfJoints_; i++) {
-		bJt = RightJuxtapose(bJt, h_[i]);
-		//wJt.PrintMtx("wJt");
-	}
-}
-
-void ArmModel::EvaluatewTt(Eigen::TransfMatrix& wTt) {
-
-	for (int jointNumber = 0; jointNumber < numberOfJoints_; jointNumber++) {
-		ForwardDirectGeometry(jointNumber);
-	}
-	wTt_ = wTei_[numberOfJoints_ - 1] * eTt_;
-	wTt = wTt_;
-
-}
-
-void ArmModel::EvaluatebTt(Eigen::TransfMatrix& bTt) {
-	Eigen::Matrix4d orig_wTb = wTb0_;
-	wTb0_ = Eigen::Matrix4d::Identity();
-
-	for (int jointNumber = 0; jointNumber < numberOfJoints_; jointNumber++) {
-		ForwardDirectGeometry(jointNumber);
-	}
-	bTt_ = wTei_[numberOfJoints_ - 1] * eTt_;
-	bTt = bTt_;
-	wTb0_ = orig_wTb;
-
 }
 
 void ArmModel::EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu) {
@@ -265,7 +241,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu)
 	if(numberOfJoints_ < 6){
 		/// For defective manipulators
 		//std::cout << "nrow: " << dJdq_[0].GetNumRows() << " ncol:" << dJdq_[0].GetNumColumns() << std::endl;
-		rml::RegularizedPseudoInverse((Eigen::MatrixXd)wJt_.transpose(), 0.0001, 0.0001, &myMu, &flag);
+		rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), 0.0001, 0.0001, &myMu, &flag);
 		//Jpinv_ = .RegPseudoInverse(, );
 
 		for(int k = 0; k < numberOfJoints_; k++)
@@ -280,7 +256,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu)
 		}
 		//mu.PrintMtx("mu");
 	} else {
-		Jpinv_ = rml::RegularizedPseudoInverse(wJt_,0.01, 0.01, &myMu, &flag);
+		Jpinv_ = rml::RegularizedPseudoInverse(bJt_,0.01, 0.01, &myMu, &flag);
 
 		for (int k = 0; k < numberOfJoints_; k++) {
 			Jmu(k + 1) = 0;
@@ -296,11 +272,11 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu)
 
 void ArmModel::EvaluatedJdqNumeric() {
 
-	Eigen::MatrixXd wJt_0, wJt_dQ;
+	Eigen::MatrixXd bJt_0, bJt_dQ;
 	Eigen::MatrixXd dQ, qVar, q_orig;
 	double delta_q = 1E-6;
 	q_orig = q_;
-	wJt_0 = GetwJt();
+	bJt_0 = GetbJt();
 	//futils::PrettyPrint(wJt_0,"wJt_0");
 
 	/// Here we iterate till "numJoints - 1" since the last joint will not influence
@@ -314,23 +290,23 @@ void ArmModel::EvaluatedJdqNumeric() {
 		/// Computing scalar delta_q (the denominator of the numerical integration).
 		q_ = qVar;
 
-		EvaluatewTt(wTt_);
-		EvaluatewJt(wJt_dQ);// = GetwJt();;
+		EvaluatebTt();
+		EvaluatebJt();
+		bJt_dQ = GetbJt();
 		//futils::PrettyPrint(wJt_dQ,"wJt_dQ");
 		for (int iJrow = 0; iJrow < 6; ++iJrow) {
 			for (int iJcol = 0; iJcol < numberOfJoints_; ++iJcol) {
 				//std::cout << "(i,j) = " << iJrow << "," << iJcol << std::endl;
 				//futils::PrettyPrint(dJdq_[i],"dJdq[i]");
-				dJdq_.at(i)(iJrow, iJcol) = (wJt_dQ(iJrow, iJcol) -  wJt_0(iJrow, iJcol))/delta_q;
+				dJdq_.at(i)(iJrow, iJcol) = (bJt_dQ(iJrow, iJcol) -  bJt_0(iJrow, iJcol))/delta_q;
 				if(std::fabs(dJdq_.at(i)(iJrow, iJcol)) < 1E-6) dJdq_.at(i)(iJrow, iJcol) = 0.0;
 			}
 		}
 	}
 	q_ = q_orig;
-	EvaluatewTt(wTt_);
-	EvaluatebTt(bTt_);
-	EvaluatewJt(wJt_);
-	EvaluatebJt(bJt_);
+
+	EvaluatebTt();
+	EvaluatebJt();
 }
 
 
@@ -431,7 +407,7 @@ void swap(rml::ArmModel& first, rml::ArmModel& second) {
 	swap(first.Tz_, second.Tz_);
 	swap(first.w_ki_, second.w_ki_);
 	swap(first.h_, second.h_);
-	swap(first.wTt_, second.wTt_);
+	swap(first.bTt_, second.bTt_);
 	swap(first.eTt_, second.eTt_);
 	swap(first.w_r_et_, second.w_r_et_);
 
@@ -440,7 +416,7 @@ void swap(rml::ArmModel& first, rml::ArmModel& second) {
 	swap(first.djdqJpinv_, second.djdqJpinv_);
 
 	swap(first.wTe_, second.wTe_);
-	swap(first.wJt_, second.wJt_);
+	swap(first.bJt_, second.bJt_);
 	swap(first.I3_, second.I3_);
 	swap(first.ZeroQ_, second.ZeroQ_);
 }

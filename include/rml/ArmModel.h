@@ -100,20 +100,14 @@ public:
 	 * This method returns the Jacobian matrix
 	 * @param[out] wJt the Jacobian matrix
 	 */
-	void EvaluatewJt(Eigen::MatrixXd& wJt);
-
-	void EvaluatebJt(Eigen::MatrixXd& bJt);
+	void EvaluatebJt();
 
 	/**
 	 * @brief Evaluates the tool transformation matrix
 	 * This method returns tool transformation matrix
 	 * @param[out] wJt the tool transformation matrix
 	 */
-	void EvaluatewTt(Eigen::TransfMatrix& wTt);
-
-
-
-	void EvaluatebTt(Eigen::TransfMatrix& bTt);
+	void EvaluatebTt();
 
 	/**
 	 * @brief Evaluates the manipulability measure and its Jacobian
@@ -151,23 +145,12 @@ public:
 		wTb0_ = wTb;
 	}
 
-	const Eigen::MatrixXd& GetwJt() const {
-		//EvaluatewJt(wJt_);
-		return wJt_;
-	}
-
     const Eigen::MatrixXd& GetbJt() const {
-        //EvaluatewJt(wJt_);
         return bJt_;
     }
 
-    const Eigen::TransfMatrix& GetwTt() const {
-        //EvaluatewTt(wTt_);
-        return wTt_;
-    }
 
     const Eigen::TransfMatrix& GetbTt() {
-        bTt_ = wTb0_.inverse() * wTt_;
         return bTt_;
     }
 
@@ -212,12 +195,12 @@ protected:
 	std::vector<Eigen::TransfMatrix> wTei_; 		///< Matrice di Trasformazione dal mondo all'endeffector della BRU i-esima
 	std::vector<Eigen::TransfMatrix> biTri_;		///< Matrice di Trasformazione dalla base all'endeffector della BRU i-esima (costante)
 	std::vector<Eigen::TransfMatrix> biTei_;		///< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
-	Eigen::TransfMatrix wTb0_;		///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
+	Eigen::TransfMatrix wTb0_;						///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
 	Eigen::TransfMatrix wTbi_;
 	Eigen::TransfMatrix Tz_;
 	Eigen::Vector3d w_ki_;
 	std::vector<Eigen::Vector6d> h_;
-	Eigen::TransfMatrix wTt_, bTt_;
+	Eigen::TransfMatrix bTt_;
 	Eigen::TransfMatrix eTt_;		///< Matrice di Trasformazione dall'endeffector al tool(costante)
 	Eigen::Vector3d w_r_et_;	// vector of the distance between the end effector frame and the tool frame, projected on the world frame
 
@@ -226,7 +209,7 @@ protected:
 	Eigen::MatrixXd djdqJpinv_;
 
 	Eigen::TransfMatrix wTe_;
-	Eigen::MatrixXd wJt_, bJt_;
+	Eigen::MatrixXd bJt_;
 	Eigen::RotMatrix I3_;
 	Eigen::VectorXd ZeroQ_;
 	bool modelReadFromFile_;
