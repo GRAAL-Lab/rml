@@ -20,7 +20,6 @@ int main(int argc, char* argv[]){
 
 	Eigen::MatrixXd A(m, n), U(m, m), S(m, n), V(n, n);
 	timeval t1, t2;
-	double d;
 
 	A.setRandom();
 	U.setRandom();
@@ -40,19 +39,19 @@ int main(int argc, char* argv[]){
 	PrettyPrint(S, "rml::RightJuxtapose(A,U)");
 	PrettyPrint(V, "rml::UnderJuxtapose(A,U)");
 
-	Eigen::Vector6d vect6;
+	Eigen::Vector6d vect6_1, vect6_2;
 	Eigen::Vector3d vect3_1, vect3_2;
 	vect3_1.setConstant(1);
 	vect3_2.setConstant(2);
-	vect6.setZero();
-	PrettyPrint(vect6.transpose(), "vect6'");
+	vect6_1.setZero();
+	PrettyPrint(vect6_1.transpose(), "vect6'");
 	PrettyPrint(vect3_1.transpose(), "vect3_1'");
 	PrettyPrint(vect3_2.transpose(), "vect3_2'");
 
-	rml::SetFirstVect3(vect6, vect3_1);
-	PrettyPrint(vect6.transpose(), "vect6' after SetFirstVect3()");
-	rml::SetSecondVect3(vect6, vect3_2);
-	PrettyPrint(vect6.transpose(), "vect6' after SetSecondVect3()");
+	rml::SetFirstVect3(vect6_1, vect3_1);
+	PrettyPrint(vect6_1.transpose(), "vect6' after SetFirstVect3()");
+	rml::SetSecondVect3(vect6_1, vect3_2);
+	PrettyPrint(vect6_1.transpose(), "vect6' after SetSecondVect3()");
 
 	Eigen::Matrix4d AtMat = A;
 
@@ -61,6 +60,9 @@ int main(int argc, char* argv[]){
 
 	Eigen::TransfMatrix Tmat;
 	PrettyPrint(Tmat, "Tmat");
+
+	vect6_2.setZero();
+	Eigen::Vector6d maxvect6 = rml::GreatestNormVector(vect6_1, vect6_2);
 
 
 	///////////////////////////////
@@ -89,7 +91,7 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	Apinv = rml::RegularizedPseudoInverse(A, pinvSpecs.SVDparams.threshold, pinvSpecs.SVDparams.lambda);
+	Apinv = rml::RegularizedPseudoInverse(A, pinvSpecs.SVDparams);
 	PrettyPrint((A * Apinv), "A * Apinv (4x4)");
 
 	///////////////////////////////

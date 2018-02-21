@@ -24,6 +24,14 @@ inline void Matrix2Double(const Eigen::MatrixXd& MatT, int rows, int cols, doubl
 	Eigen::Map<Eigen::MatrixXd>(dmat, rows, cols) = MatT;
 }
 
+inline void Double2Vector(double dmat[], int rows, int cols, Eigen::VectorXd& MatT){
+	MatT = Eigen::Map<Eigen::VectorXd>(dmat, rows, cols);
+}
+
+inline void Vector2Double(const Eigen::VectorXd& MatT, int rows, int cols, double dmat[]){
+	Eigen::Map<Eigen::VectorXd>(dmat, rows, cols) = MatT;
+}
+
 inline void SetDiagonalFromDouble(Eigen::MatrixXd& MatT, double diag[]){
 	Eigen::ArrayXd wdiag = Eigen::Map<Eigen::ArrayXd>( diag, MatT.cols() );
 	MatT.diagonal() = wdiag;
@@ -71,6 +79,24 @@ inline Eigen::Vector3d GetTrasl(Eigen::Matrix4d& tMat){
 inline Eigen::Matrix3d GetRotMatrix(Eigen::Matrix4d& tMat){
 	return tMat.block(0,0,3,3);
 }
+
+//Product each element for each element of two matrices
+/*Matrix& Matrix::ElementProd(const Matrix& b) const
+{
+	if (numRows_ != b.numRows_ || numColumns_ != b.numColumns_)
+		KAL::DebugConsole::Write(LOG_LEVEL_ERROR, "Matrix", "ElementProduct: different size (%dx%d) * (%dx%d)", numRows_, numColumns_, b.numRows_, b.numColumns_);
+
+	Matrix& temp = GetBuffer(tid_);
+
+
+	temp.numColumns_ = numColumns_;
+	temp.numRows_ = numRows_;
+
+	for (int index = 0; index < numRows_ * numColumns_; index++)
+		temp.M_[index] = M_[index] * b.M_[index];
+
+	return temp;
+}*/
 
 }
 

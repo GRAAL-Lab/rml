@@ -9,6 +9,9 @@
 #define INCLUDE_RML_PSEUDOINVERSE_H_
 
 #include <eigen3/Eigen/Dense>
+#include <rml/Defines.h>
+#include <rml/SVD.h>
+
 
 namespace rml {
 
@@ -23,7 +26,7 @@ void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, d
 
 template<class MatT>
 Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
-		const MatT &mat, const double threshold, const double lambda, double *mu, int *flag) // choose appropriately
+		const MatT& mat, SVDParameters& svdParams) // choose appropriately
 		{
 
 	int m = mat.rows(), n = mat.cols();
@@ -38,7 +41,7 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	//double mu;
 	//int flag;
 
-	GT_RegPinv(J, m, n, JPInv, threshold, lambda, mu, flag);
+	GT_RegPinv(J, m, n, JPInv, svdParams.threshold, svdParams.lambda, &(svdParams.mu), &(svdParams.flag));
 
 	/**
 	 * Here the results of the GT_RegPinv algorithm are mapped back to the input type
@@ -48,6 +51,7 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	return eigenPinv;
 }
 
+/*
 template<class MatT>
 Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
 		const MatT &mat, const double threshold, const double lambda, double *mu) // choose appropriately
@@ -67,7 +71,7 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	return RegularizedPseudoInverse(mat, threshold, lambda, &mu, &flag);
 
 }
-
+*/
 } //namespace rml
 
 #endif /* INCLUDE_RML_PSEUDOINVERSE_H_ */

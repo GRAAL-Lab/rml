@@ -16,6 +16,16 @@
 namespace rml {
 
 /**
+ * @brief Exception to be thrown when the joint index out of bounds
+ */
+class ArmModelException: public std::exception
+{
+	virtual const char* what() const throw () {
+		return "[ArmModel] Wrong joint index!";
+	}
+};
+
+/**
  * @brief Arm Model base class
  * This class implements a base arm model class
  * The derived class should re-implement the InitMatrix method, to set the geometry of the arm and the
@@ -64,7 +74,7 @@ public:
 	 * It initializes all the matrices to be later used in the evaluation methods
 	 */
 	virtual void InitMatrix();
-	
+
 	/**
 	 * @brief Internal matrices initialization taken from external files
 	 * This method *must* be called before any other, but after the SetArmJoints
@@ -115,7 +125,7 @@ public:
 	 * @param[out] mu the manipulability measure
 	 * @param[out] wJt the manipulability measure Jacobian
 	 */
-	void EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu);
+	void EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu);
 
 	/**
 	 * @brief Evaluates the transformation matrix (w.r.t. world) of the specified joint
@@ -126,12 +136,12 @@ public:
 	void EvaluateWorld2JointTransf(Eigen::TransfMatrix& wTj, int jointIndex);
 
 	void EvaluateBase2JointTransf(Eigen::TransfMatrix& bTj, int jointIndex);
-    /**
-     * @brief Evaluates the jacobian matrix (w.r.t. world) of the specified joint
-     *
-     * @param[out] bJj          Joint jacobian matrix
-     * @param[in] jointIndex    Joint index
-     */
+	/**
+	 * @brief Evaluates the jacobian matrix (w.r.t. world) of the specified joint
+	 *
+	 * @param[out] bJj          Joint jacobian matrix
+	 * @param[in] jointIndex    Joint index
+	 */
 	void EvaluateWorld2JointJacobian(Eigen::MatrixXd& wJj, int jointIndex);
 
 	void EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex);
@@ -145,14 +155,14 @@ public:
 		wTb0_ = wTb;
 	}
 
-    const Eigen::MatrixXd& GetbJt() const {
-        return bJt_;
-    }
+	const Eigen::MatrixXd& GetbJt() const {
+		return bJt_;
+	}
 
 
-    const Eigen::TransfMatrix& GetbTt() {
-        return bTt_;
-    }
+	const Eigen::TransfMatrix& GetbTt() {
+		return bTt_;
+	}
 
 
 	const Eigen::TransfMatrix& GeteTt() const {
@@ -164,8 +174,22 @@ public:
 	}
 
 	const std::vector<Eigen::MatrixXd>& GetdJdq() const {
-        return dJdq_;
-    }
+		return dJdq_;
+	}
+
+	const double GetJointMinLimit(int jointIndex) throw (ArmModelException) {
+		if(jointIndex < numberOfJoints_)
+			return jointLimitsMin_.at(jointIndex);
+		else
+			throw ArmModelException();
+	}
+
+	const double GetJointMaxLimit(int jointIndex){
+		if(jointIndex < numberOfJoints_)
+			return jointLimitsMAX_.at(jointIndex);
+		else
+			throw ArmModelException();
+	}
 
 protected:
 
@@ -212,19 +236,13 @@ protected:
 	Eigen::MatrixXd bJt_;
 	Eigen::RotMatrix I3_;
 	Eigen::VectorXd ZeroQ_;
+	std::vector< double > jointLimitsMin_;
+	std::vector< double > jointLimitsMAX_;
 	bool modelReadFromFile_;
 
 };
 
-/**
- * @brief Exception to be thrown when the joint index out of bounds
- */
-class ArmModelException: public std::exception
-{
-	virtual const char* what() const throw () {
-		return "[ArmModel] Wrong joint index!";
-	}
-};
+
 
 /*
  * NOTE on CRTP C++ Pattern

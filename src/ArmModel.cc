@@ -22,6 +22,7 @@
 #include "rml/MatrixOperations.h"
 #include "rml/PseudoInverse.h"
 #include "rml/Defines.h"
+#include "rml/SVD.h"
 
 //#define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
 //#define DBG_PRINT
@@ -38,7 +39,7 @@ ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), hasBeenIni
 ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenInitialized_), numberOfJoints_(other.numberOfJoints_),
 		q_(other.q_), wTb0_(other.wTb0_), wTbi_(other.wTbi_), Tz_(other.Tz_), w_ki_(other.w_ki_), eTt_(other.eTt_),
 		w_r_et_(other.w_r_et_), Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
-	wTe_(other.wTe_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
+		wTe_(other.wTe_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
 
 	/*
 	 * If the arm model we are copying is not initialised we have to initialise all the pointers to NULL since
@@ -56,6 +57,8 @@ ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenIni
 		biTei_.resize(numberOfJoints_);
 		h_.resize(numberOfJoints_);
 		dJdq_.resize(numberOfJoints_);
+		jointLimitsMin_.resize(numberOfJoints_);
+		jointLimitsMAX_.resize(numberOfJoints_);
 		for (int i = 0; i < numberOfJoints_; i++) {
 			wTei_[i] = other.wTei_[i];
 			biTri_[i] = other.biTri_[i];
@@ -106,6 +109,8 @@ void ArmModel::SetArmJoints(int armJoints) {
 	biTei_.resize(numberOfJoints_);
 	h_.resize(numberOfJoints_);
 	dJdq_.resize(numberOfJoints_);
+	jointLimitsMin_.resize(numberOfJoints_);
+	jointLimitsMAX_.resize(numberOfJoints_);
 
 	for (int i = 0; i < numberOfJoints_; ++i) {
 		dJdq_.at(i) = Eigen::MatrixXd::Zero(6, numberOfJoints_);
@@ -232,42 +237,48 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 	//h_[jointNumber - 1].PrintMtx("h");
 }
 
-void ArmModel::EvaluateManipulability(Eigen::MatrixXd& mu, Eigen::MatrixXd& Jmu) {
+void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 	int flag;
 	double myMu;
 	//EvaluatewJt(wJt_);
 	//EvaluatedJdqNumeric(dJdq_);
 
+	SVDParameters mySVD;
+
 	if(numberOfJoints_ < 6){
+		mySVD.lambda = 0.0001;
+		mySVD.threshold = 0.0001;
 		/// For defective manipulators
 		//std::cout << "nrow: " << dJdq_[0].GetNumRows() << " ncol:" << dJdq_[0].GetNumColumns() << std::endl;
-		rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), 0.0001, 0.0001, &myMu, &flag);
+		rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), mySVD);
 		//Jpinv_ = .RegPseudoInverse(, );
 
 		for(int k = 0; k < numberOfJoints_; k++)
 		{
-			Jmu(k + 1) = 0;
+			Jmu(k) = 0;
 			djdqJpinv_ = dJdq_[k].transpose() * Jpinv_;
 
-			for(int i = 1; i <= 5; i++) // now 5 is correct
-				Jmu(k + 1) += djdqJpinv_(i,i);
+			for(int i = 0; i < 5; i++) // now 5 is correct
+				Jmu(k) += djdqJpinv_(i,i);
 
-			Jmu(k + 1) *= mu(1,1);
+			Jmu(k) *= mySVD.mu;
 		}
 		//mu.PrintMtx("mu");
 	} else {
-		Jpinv_ = rml::RegularizedPseudoInverse(bJt_,0.01, 0.01, &myMu, &flag);
+		mySVD.lambda = 0.01;
+		mySVD.threshold = 0.01;
+		Jpinv_ = rml::RegularizedPseudoInverse(bJt_, mySVD);
 
 		for (int k = 0; k < numberOfJoints_; k++) {
-			Jmu(k + 1) = 0;
+			Jmu(k) = 0;
 			djdqJpinv_ = dJdq_[k] * Jpinv_;
-			for (int i = 1; i <= 6; i++)
-				Jmu(k + 1) += djdqJpinv_(i, i);
-			Jmu(k + 1) *= mu(1, 1);
+			for (int i = 0; i < 6; i++)
+				Jmu(k) += djdqJpinv_(i, i);
+			Jmu(k) *= mySVD.mu;
 		}
 	}
 
-	mu(0,0) = myMu;
+	mu = mySVD.mu;
 }
 
 void ArmModel::EvaluatedJdqNumeric() {
@@ -410,6 +421,9 @@ void swap(rml::ArmModel& first, rml::ArmModel& second) {
 	swap(first.bTt_, second.bTt_);
 	swap(first.eTt_, second.eTt_);
 	swap(first.w_r_et_, second.w_r_et_);
+
+	swap(first.jointLimitsMin_, second.jointLimitsMin_);
+	swap(first.jointLimitsMAX_, second.jointLimitsMAX_);
 
 	swap(first.dJdq_, second.dJdq_);
 	swap(first.Jpinv_, second.Jpinv_);

@@ -48,6 +48,15 @@ public:
     TransfMatrix(const Eigen::MatrixBase<OtherDerived>& other)
         : Eigen::Matrix4d(other)
     { }
+
+    RotMatrix GetRotMatrix() {
+    	return this->block(0,0,3,3);
+    }
+
+    Vector3d GetTransl() {
+    	return this->block(0,3,3,1);
+    }
+
     // This method allows you to assign Eigen expressions to TransfMatrix
     template<typename OtherDerived>
     TransfMatrix& operator=(const Eigen::MatrixBase <OtherDerived>& other)

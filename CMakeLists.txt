@@ -11,6 +11,7 @@ include(GNUInstallDirs)
 project(RML_project VERSION 0.1 LANGUAGES CXX)
 
 add_library(rml SHARED
+    src/Functions.cc
     src/PseudoInverse.cc
     src/PseudoInverse_Internal.cc
     src/SVD.cc
