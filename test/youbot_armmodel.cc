@@ -12,7 +12,7 @@
 #define CMAT_STANDALONE
 #endif
 
-#include "youbot_armmodel.h"
+#include "test/youbot_armmodel.h"
 
 #define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
 
@@ -21,7 +21,7 @@
 using std::cout;
 using std::endl;
 
-namespace CTRL {
+namespace rml {
 
 YouBotArmModel::YouBotArmModel()
 {
@@ -42,45 +42,44 @@ YouBotArmModel::~YouBotArmModel()
 
 void YouBotArmModel::InitMatrix()
 {
-
 	ArmModel::InitMatrix();
 
-	wTb0_ = CMAT::Matrix::Eye(4);
-	eTt_ = CMAT::Matrix::Eye(4);
+	wTb0_ = Eigen::Matrix4d::Identity();
+	eTt_ = Eigen::Matrix4d::Identity();
 
-	biTri_[0](1,1) = 1;      biTri_[0](1,2) = 0;      biTri_[0](1,3) = 0;   biTri_[0](1,4) = 0;
-	biTri_[0](2,1) = 0;      biTri_[0](2,2) = -1;     biTri_[0](2,3) = 0;   biTri_[0](2,4) = 0;
-	biTri_[0](3,1) = 0;      biTri_[0](3,2) = 0;      biTri_[0](3,3) = -1;  biTri_[0](3,4) = 0.072;
-	biTri_[0](4,1) = 0;      biTri_[0](4,2) = 0;      biTri_[0](4,3) = 0;   biTri_[0](4,4) = 1;
+	biTri_[0](0,0) = 1;      biTri_[0](0,1) = 0;      biTri_[0](0,2) = 0;  biTri_[0](0,3) = 0;
+	biTri_[0](1,0) = 0;      biTri_[0](1,1) = -1;     biTri_[0](1,2) = 0;  biTri_[0](1,3) = 0;
+	biTri_[0](2,0) = 0;      biTri_[0](2,1) = 0;      biTri_[0](2,2) = -1; biTri_[0](2,3) = 0.072;
+	biTri_[0](3,0) = 0;      biTri_[0](3,1) = 0;      biTri_[0](3,2) = 0;  biTri_[0](3,3) = 1;
 
-	biTri_[1](1,1) = 1;      biTri_[1](1,2) = 0;      biTri_[1](1,3) = 0;   biTri_[1](1,4) = 0;
-	biTri_[1](2,1) = 0;      biTri_[1](2,2) = 0;      biTri_[1](2,3) = 1;   biTri_[1](2,4) = 0;
-	biTri_[1](3,1) = 0;      biTri_[1](3,2) = -1;     biTri_[1](3,3) = 0;   biTri_[1](3,4) = -0.075;
-	biTri_[1](4,1) = 0;      biTri_[1](4,2) = 0;      biTri_[1](4,3) = 0;   biTri_[1](4,4) = 1;
+	biTri_[1](0,0) = 1;      biTri_[1](0,1) = 0;      biTri_[1](0,2) = 0;  biTri_[1](0,3) = 0;
+	biTri_[1](1,0) = 0;      biTri_[1](1,1) = 0;      biTri_[1](1,2) = 1;  biTri_[1](1,3) = 0;
+	biTri_[1](2,0) = 0;      biTri_[1](2,1) = -1;     biTri_[1](2,2) = 0;  biTri_[1](2,3) = -0.075;
+	biTri_[1](3,0) = 0;      biTri_[1](3,1) = 0;      biTri_[1](3,2) = 0;  biTri_[1](3,3) = 1;
 
-	biTri_[2](1,1) = 1;      biTri_[2](1,2) = 0;      biTri_[2](1,3) = 0;  biTri_[2](1,4) = 0;
-	biTri_[2](2,1) = 0;      biTri_[2](2,2) = 1;      biTri_[2](2,3) = 0;  biTri_[2](2,4) = 0.155;
-	biTri_[2](3,1) = 0;      biTri_[2](3,2) = 0;      biTri_[2](3,3) = 1;  biTri_[2](3,4) = 0;
-	biTri_[2](4,1) = 0;      biTri_[2](4,2) = 0;      biTri_[2](4,3) = 0;  biTri_[2](4,4) = 1;
+	biTri_[2](0,0) = 1;      biTri_[2](0,1) = 0;      biTri_[2](0,2) = 0;  biTri_[2](0,3) = 0;
+	biTri_[2](1,0) = 0;      biTri_[2](1,1) = 1;      biTri_[2](1,2) = 0;  biTri_[2](1,3) = 0.155;
+	biTri_[2](2,0) = 0;      biTri_[2](2,1) = 0;      biTri_[2](2,2) = 1;  biTri_[2](2,3) = 0;
+	biTri_[2](3,0) = 0;      biTri_[2](3,1) = 0;      biTri_[2](3,2) = 0;  biTri_[2](3,3) = 1;
 
-	biTri_[3](1,1) = 1;      biTri_[3](1,2) = 0;      biTri_[3](1,3) = 0;  biTri_[3](1,4) = 0;
-	biTri_[3](2,1) = 0;      biTri_[3](2,2) = 1;      biTri_[3](2,3) = 0;  biTri_[3](2,4) = 0.135;
-	biTri_[3](3,1) = 0;      biTri_[3](3,2) = 0;      biTri_[3](3,3) = 1;  biTri_[3](3,4) = 0;
-	biTri_[3](4,1) = 0;      biTri_[3](4,2) = 0;      biTri_[3](4,3) = 0;  biTri_[3](4,4) = 1;
+	biTri_[3](0,0) = 1;      biTri_[3](0,1) = 0;      biTri_[3](0,2) = 0;  biTri_[3](0,3) = 0;
+	biTri_[3](1,0) = 0;      biTri_[3](1,1) = 1;      biTri_[3](1,2) = 0;  biTri_[3](1,3) = 0.135;
+	biTri_[3](2,0) = 0;      biTri_[3](2,1) = 0;      biTri_[3](2,2) = 1;  biTri_[3](2,3) = 0;
+	biTri_[3](3,0) = 0;      biTri_[3](3,1) = 0;      biTri_[3](3,2) = 0;  biTri_[3](3,3) = 1;
 
-	biTri_[4](1,1) = 1;      biTri_[4](1,2) = 0;      biTri_[4](1,3) = 0;  biTri_[4](1,4) = 0;
-	biTri_[4](2,1) = 0;      biTri_[4](2,2) = 0;      biTri_[4](2,3) = -1; biTri_[4](2,4) = 0.113;
-	biTri_[4](3,1) = 0;      biTri_[4](3,2) = 1;      biTri_[4](3,3) = 0;  biTri_[4](3,4) = 0;
-	biTri_[4](4,1) = 0;      biTri_[4](4,2) = 0;      biTri_[4](4,3) = 0;  biTri_[4](4,4) = 1;
+	biTri_[4](0,0) = 1;      biTri_[4](0,1) = 0;      biTri_[4](0,2) = 0;  biTri_[4](0,3) = 0;
+	biTri_[4](1,0) = 0;      biTri_[4](1,1) = 0;      biTri_[4](1,2) = -1; biTri_[4](1,3) = 0.113;
+	biTri_[4](2,0) = 0;      biTri_[4](2,1) = 1;      biTri_[4](2,2) = 0;  biTri_[4](2,3) = 0;
+	biTri_[4](3,0) = 0;      biTri_[4](3,1) = 0;      biTri_[4](3,2) = 0;  biTri_[4](3,3) = 1;
 
-	eTt_(1,1) =  1;   eTt_(1,2) =  0;   eTt_(1,3) =  0;   eTt_(1,4) = 0;
-	eTt_(2,1) =  0;   eTt_(2,2) =  1;   eTt_(2,3) =  0;   eTt_(2,4) = 0;
-	eTt_(3,1) =  0;   eTt_(3,2) =  0;   eTt_(3,3) =  1;   eTt_(3,4) = 0;//eTt_(3,4) = -0.105;
-	eTt_(4,1) =  0;   eTt_(4,2) =  0;   eTt_(4,3) =  0;   eTt_(4,4) = 1;
+	eTt_(0,0) =  1;   eTt_(0,1) =  0;   eTt_(0,2) =  0;   eTt_(0,3) = 0;
+	eTt_(1,0) =  0;   eTt_(1,1) =  1;   eTt_(1,2) =  0;   eTt_(1,3) = 0;
+	eTt_(2,0) =  0;   eTt_(2,1) =  0;   eTt_(2,2) =  1;   eTt_(2,3) = 0;
+	eTt_(3,0) =  0;   eTt_(3,1) =  0;   eTt_(3,2) =  0;   eTt_(3,3) = 1;
 
 }
 
-
+/*
 void YouBotArmModel::EvaluatedJdq(CMAT::Matrix* dJdq)
 {
 	double q[5], out1[30], out2[30], out3[30], out4[30], out5[30];
@@ -268,7 +267,7 @@ void YouBotArmModel::EvaluatedJdq(double* q, double* out1, double* out2, double*
 	out5[28] = 0.0;
 	out5[29] = 0.0;
 }
-
+*/
 
 }
 

@@ -18,6 +18,9 @@ add_library(rml SHARED
     src/ArmModel.cc
 )
 
+#add_library(youBotModel include/test/youbot_armmodel.cc
+#)
+
 set_target_properties(rml PROPERTIES LINKER_LANGUAGE CXX)
 
 # Define headers for this library. PUBLIC headers are used for
@@ -60,9 +63,12 @@ export(TARGETS rml FILE rmlConfig.cmake)
 
 # Every library has unit tests, of course
 add_executable(rml_test
-    test/rml_test.cpp)
+    test/rml_test.cpp
+    test/youbot_armmodel.cc
+)
 
 target_link_libraries(rml_test
-    rml)
+    rml
+)
 
 add_test(rml_test rml_test)

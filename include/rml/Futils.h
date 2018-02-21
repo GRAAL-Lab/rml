@@ -1,10 +1,10 @@
 /**
  * @author Francesco Wanderlingh
- * @date Year 2017
+ * @date Year 2018
  *
  * @brief A set of useful C++ utilities ironically called "futils".
  *
- * @details The utilities implemented, meant primarily for Linux-based OS, include:
+ * @details The utilities implemented, for Linux-based OS, include:
  * 			- Elapsing Spinner Command-Line Animation
  * 			- Waiting Dotter Command-Line Animation
  * 			- Executable file self path retrieval for path-safe file saving, loading
@@ -46,10 +46,6 @@
 #	define dout 0 && std::cerr
 #	define d_out(x) 0 && std::cerr
 #endif
-
-//#define CTRL_out(x) (std::cout << tc::bluL << "[controller] " << tc::none << x)
-//#define DRIVER_out(x) (std::cout << tc::magL << "[driver] " << tc::none << x)
-//#define LOGGER_out(x) (std::cout << tc::grnL << "[logger] " << tc::none << x)
 
 /** Escape sequence
  *  \033[<code>m or \e[<code>m
@@ -151,8 +147,8 @@ inline std::string DebugMsg(const LogEntities entity, const std::string inputMsg
 namespace futils {
 
 template<class Object>
-void PrettyPrint(const Object& A, std::string name){
-	std::cout << tc::white << name << tc::none << std::endl << A << std::endl;
+void PrettyPrint(const Object& A, std::string name, const char* color = tc::white){
+	std::cout << color << name << tc::none << std::endl << A << std::endl;
 }
 
 /**

@@ -68,7 +68,7 @@ inline Eigen::Vector3d GetTrasl(Eigen::Matrix4d& tMat){
 	return tMat.block(0,3,3,1);
 }
 
-inline Eigen::RotationMatrix GetRotMatrix(Eigen::Matrix4d& tMat){
+inline Eigen::Matrix3d GetRotMatrix(Eigen::Matrix4d& tMat){
 	return tMat.block(0,0,3,3);
 }
 

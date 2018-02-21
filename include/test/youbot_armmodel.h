@@ -13,17 +13,12 @@
 
 #include <vector>
 #include <algorithm>	// for std::copy
-#include <ortos/ortos.h>
-#include <cmat/cmat.h>
+#include "rml/RML.h"
 
-#include "ctrl_defines.h"
-#include "ctrl_armmodel.h"
+namespace rml {
 
-namespace CTRL {
-
-class YouBotArmModel : public ArmModel_CRTP<YouBotArmModel>
+class YouBotArmModel : public ArmModel
 {
-	//friend class ::ArmCtrl;
 
 public:
 	YouBotArmModel();
@@ -31,10 +26,10 @@ public:
 
     virtual void InitMatrix();
 
-    virtual void EvaluatedJdq(CMAT::Matrix* dJdq);
+    /*virtual void EvaluatedJdq(CMAT::Matrix* dJdq);
 
 private:
-    virtual void EvaluatedJdq(double* q, double* out1, double* out2, double* out3, double* out4, double* out5);
+    virtual void EvaluatedJdq(double* q, double* out1, double* out2, double* out3, double* out4, double* out5);*/
 
 };
 

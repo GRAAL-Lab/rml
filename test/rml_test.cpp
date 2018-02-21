@@ -8,6 +8,7 @@
  */
 
 #include "test/rml_test_defines.h"
+#include "test/youbot_armmodel.h"
 
 using std::cout;
 using std::endl;
@@ -57,6 +58,9 @@ int main(int argc, char* argv[]){
 
 	PrettyPrint(rml::GetRotMatrix(AtMat), "rml::GetRotMatrix(A)");
 	PrettyPrint(rml::GetTrasl(AtMat), "rml::GetTrasl(A)");
+
+	Eigen::TransfMatrix Tmat;
+	PrettyPrint(Tmat, "Tmat");
 
 
 	///////////////////////////////
@@ -120,11 +124,11 @@ int main(int argc, char* argv[]){
 	double elapsed_OLD(0), elapsed_NEW(0);
 
 	//std::shared_ptr<CTRL::BaxterLeftArmModel> baxterAM = std::make_shared<CTRL::BaxterLeftArmModel>();
-	//std::shared_ptr<CTRL::YouBotArmModel> youbotAM = std::make_shared<CTRL::YouBotArmModel>();
+	std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
 
 	std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>();
 
-	//armModel = youbotAM;
+	armModel = youbotAM;
 
 	numJoints = armModel->GetNumJoints();
 	armModel->InitMatrix();
@@ -150,6 +154,7 @@ int main(int argc, char* argv[]){
 	}
 
 	Eigen::MatrixXd q_0 = Eigen::MatrixXd(numJoints, 1);//, q_0_doub);
+	rml::Double2Matrix(q_0_doub, numJoints, 1, q_0);
 	PrettyPrint(q_0.transpose(),"q_0");
 	Eigen::MatrixXd dQ, qVar;
 	double delta_q = 1E-6;
@@ -157,18 +162,15 @@ int main(int argc, char* argv[]){
 
 	gettimeofday(&t1, NULL);
 	armModel->SetJointPosition(q_0);
-	//armModel->EvaluatewJt(wJt_0);
-	//wJt_0.PrintMtx("wJt_0");
-	armModel->EvaluatedJdqNumeric(dJdq_NEW);
+
+	dJdq_NEW = armModel->GetdJdq();
 	gettimeofday(&t2, NULL);
 	elapsed_NEW += TimeDiff(t1, t2);
 
 	for (int i = 0; i < numJoints - 1; ++i) {
-
 		cout << i << "_NEW_";
-		PrettyPrint(dJdq_NEW[i],"dJdq:");
+		PrettyPrint(dJdq_NEW.at(i),"dJdq:");
 		cout << "------------------------------------------------------------" << endl;
-
 	}
 
 
