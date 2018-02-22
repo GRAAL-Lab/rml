@@ -5,30 +5,38 @@
  *      Author: fraw
  */
 
-#include <vector>
-#include <algorithm>
-#include <iostream>
-#include <vector>
+
+
+#include <initializer_list>
 #include "rml/Functions.h"
+#include "rml/MatrixOperations.h"
 
 namespace rml {
 
-template<typename T, template<class, class ...> class C, class... Args>
-std::ostream& operator <<(std::ostream& os, const C<T,Args...>& objs)
-{
-	os << __PRETTY_FUNCTION__ << '\n';
-	for (auto const& obj : objs)
-	os << obj << ' ';
-	return os;
+const double VersorLemmaThreshold = 0.000000001;
+
+Eigen::Vector6d GreatestNormVector(Eigen::Vector6d& vect1, Eigen::Vector6d& vect2, Eigen::Vector6d& vect3){
+
+	std::vector<Eigen::Vector6d> vecs = {vect1,vect2,vect3};
+	//Eigen::Vector3d max = ;
+	return *std::max_element(vecs.begin(), vecs.end(), [](Eigen::Vector6d a, Eigen::Vector6d b){ return a.norm() < b.norm(); });
 }
 
+Eigen::Vector3d GreatestNormVector(Eigen::Vector3d& vect1, Eigen::Vector3d& vect2, Eigen::Vector3d& vect3){
 
-Eigen::Vector3d GreatestNormVector(Eigen::Vector3d& vect3...) {
-
-	std::vector<Eigen::Vector3d> vecs = {vect3...};
-	return std::max_element(vecs.begin(), vecs.end(), vect3_norm_compare);
-
+	std::vector<Eigen::Vector3d> vecs = {vect1,vect2,vect3};
+	//Eigen::Vector3d max = ;
+	return *std::max_element(vecs.begin(), vecs.end(), [](Eigen::Vector3d a, Eigen::Vector3d b){ return a.norm() < b.norm(); });
 }
+
+/*Eigen::Vector3d GreatestNormVectorVariadic(Eigen::Vector3d& vect...) {
+
+	std::vector<Eigen::Vector3d> vecs = {vect...};
+	//Eigen::Vector3d max = ;
+	return *std::max_element(vecs.begin(), vecs.end(), vect3_norm_compare);
+}*/
+
+
 
 Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2) {
 	//Init
@@ -107,11 +115,9 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 			 Vect3 temp2(h.GetSubMatrix(1,2,3,2));
 			 Vect3 temp3(h.GetSubMatrix(1,3,3,3));*/
 
-			temp1 = h.col(1);	//block(1,1,3,1);//GetSubMatrix(1,1,3,1);
+			temp1 = h.col(1);
 			temp2 = h.col(2);
-			;	//block(1,2,3,1);//GetSubMatrix(1,2,3,2);
 			temp3 = h.col(3);
-			;	//block(1,3,3,1);//GetSubMatrix(1,3,3,3);
 
 			temp1 = GreatestNormVector(temp1, temp2, temp3);
 
@@ -130,7 +136,7 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 }
 
 // Cartesian 3-components vector (Roll, -Pitch, Yaw) to Rotation Matrix
-Eigen::RotMatrix& Vect2RPY(const Eigen::Vector3d& vec)
+Eigen::RotMatrix Vect2RPY(const Eigen::Vector3d& vec)
 {
 	Eigen::RotMatrix R;// = CMAT::RotMatrix::GetRotMatrixBuffer(tid_);
 
@@ -171,38 +177,40 @@ Eigen::RotMatrix& Vect2RPY(const Eigen::Vector3d& vec)
 
 
 // Computes 3-components Cartesian error with 2 6-components vectors as input
-Eigen::Vector3d& VersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2) {
+Eigen::Vector3d VersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2) {
 	return VersorLemma(Vect2RPY(v1), Vect2RPY(v2));
 }
-/*
+
 // Computes 6-components Cartesian error with 2 Transformation matrices as input
-Eigen::Vector6d& CartError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2) {
+Eigen::Vector6d CartError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2) {
 
-	Vect6& temp = CMAT::Vect6::GetVect6Buffer(in1.tid_);
-	Vect3& temp3 = CMAT::Vect3::GetVect3Buffer(in1.tid_);
+	Eigen::Vector6d temp;// = CMAT::Vect6::GetVect6Buffer(in1.tid_);
+	Eigen::Vector3d temp3;// = CMAT::Vect3::GetVect3Buffer(in1.tid_);
 
-	//KAL::DebugConsole::Write(LOG_LEVEL_ERROR, "Vect3", "before setfirst");
+
 	temp3 = (VersorLemma(in1.GetRotMatrix(), in2.GetRotMatrix())) * (-1);
-	//temp3 *= -1;
-	temp.SetFirstVect3(temp3);
-	//KAL::DebugConsole::Write(LOG_LEVEL_ERROR, "Vect3", "before setsecond");
-	temp3 = in1.GetTrasl() - in2.GetTrasl();
-	temp.SetSecondVect3(temp3);
+	SetFirstVect3(temp,temp3);
+
+	temp3 = in1.GetTransl() - in2.GetTransl();
+	SetSecondVect3(temp,temp3);
 
 	return temp;
 }
 
 // Computes 6-components Cartesian error with 2 6-components vectors as input
-Vect6& CartError(const Vect6& v1, const Vect6& v2) {
+Eigen::Vector6d CartError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2) {
 
-	Vect6& temp = CMAT::Vect6::GetVect6Buffer(v1.tid_);
+	Eigen::Vector6d temp;
 
-	temp.SetFirstVect3(VersorLemma(v1.GetFirstVect3().Vect2RPY(), v2.GetFirstVect3().Vect2RPY()) * (-1));
-	temp.SetSecondVect3(v1.GetSecondVect3() - v2.GetSecondVect3());
+	Eigen::Vector3d ciao1 = VersorLemma(Vect2RPY(GetFirstVect3(v1)), Vect2RPY(GetFirstVect3(v2))) * (-1);
+	SetFirstVect3(temp,ciao1);
+
+	Eigen::Vector3d ciao2 = GetSecondVect3(v1) - GetSecondVect3(v2);
+	SetSecondVect3(temp,ciao2);
 
 	return temp;
 }
-*/
+
 double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) {
 	if (x <= xmin) {
 		return ymax;

@@ -38,8 +38,7 @@ target_compile_features(rml
     PUBLIC
         cxx_auto_type
         cxx_range_for
-        
-#    PRIVATE cxx_variadic_templates
+        cxx_variadic_templates
 )
 
 # Depend on a library that we defined in the top-level file

@@ -8,14 +8,29 @@
 #ifndef INCLUDE_RML_FUNCTIONS_H_
 #define INCLUDE_RML_FUNCTIONS_H_
 
+
+#include <array>
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <vector>
 #include <rml/Defines.h>
 
 namespace rml {
 
-//template<class MatT>
-static bool vect3_norm_compare(Eigen::Vector3d& a, Eigen::Vector3d& b) {
+/*template <typename Derived>
+static bool vect3_norm_compare(Eigen::MatrixBase<Derived>& a, Eigen::MatrixBase<Derived>& b) {
 	return (a.norm() < b.norm());
-}
+}*/
+
+/*template <typename Derived>
+Eigen::MatrixBase<Derived> GreatestNormVector(const Eigen::MatrixBase<Derived>& vect1, const Eigen::MatrixBase<Derived>& vect2, const Eigen::MatrixBase<Derived>& vect3) {
+
+	std::vector<Eigen::MatrixBase<Derived>> vecs = {vect1, vect2, vect3};
+	//Eigen::Vector3d max = ;
+	return *std::max_element(vecs.begin(), vecs.end(), [](Eigen::MatrixBase<Derived> a, Eigen::MatrixBase<Derived> b){ return a.norm() < b.norm(); });
+}*/
+
 
 /*template <typename Derived>
  void print_inv_cond(const Eigen::MatrixBase<Derived>& a)
@@ -25,15 +40,9 @@ static bool vect3_norm_compare(Eigen::Vector3d& a, Eigen::Vector3d& b) {
  std::cout << "inv cond: " << sing_vals(sing_vals.size()-1) / sing_vals(0) << std::endl;
  }*/
 
-template<typename Derived>
-Eigen::MatrixBase<Derived> GreatestNormVector(Eigen::MatrixBase<Derived>& vect3...) {
+//Eigen::Vector6d GreatestNormVector(Eigen::Vector6d& vect1, Eigen::Vector6d& vect2, Eigen::Vector6d& vect3);
 
-	std::vector<Eigen::MatrixBase<Derived>> vecs = {vect3...};
-	return std::max_element(vecs.begin(), vecs.end(), vect3_norm_compare);
-}
-
-Eigen::Vector3d GreatestNormVector(Eigen::Vector3d& vect3...);
-
+Eigen::Vector3d GreatestNormVector(Eigen::Vector3d& vect1, Eigen::Vector3d& vect2, Eigen::Vector3d& vect3);
 
 
 /**
@@ -50,7 +59,10 @@ Eigen::Vector3d GreatestNormVector(Eigen::Vector3d& vect3...);
  * @note the two rotation matrix should be w.r.t a common frame, i.e. r1 = cRa, r2 = cRb then the versor lemma gives the rotation vector
  *       that brings frame <a> over frame <b> projected on <c>
  */
-Eigen::Vector3d& VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2);
+Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2);
+
+
+Eigen::RotMatrix Vect2RPY(const Eigen::Vector3d& vec);
 
 /**
  * @brief Compute the versor lemma between the two rotation matrices.
@@ -68,7 +80,7 @@ Eigen::Vector3d& VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix&
  * @note the two vector should represent rotation matrices computed w.r.t a common frame, i.e. r1 = cRa, r2 = cRb then the versor lemma gives the rotation vector
  *       that brings frame <a> over frame <b> projected on <c>
  */
-Eigen::Vector3d& VersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
+Eigen::Vector3d VersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
 
 /**
  * @brief Compute the Cartesian error between two transformation matrices.
@@ -86,7 +98,7 @@ Eigen::Vector3d& VersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v
  *
  * @note the two transformation matrix should have a common base frame, i.e. CartError(wTg, wTt) brings the tool frame <t> towards a goal frame <g>, and returns the error projected on frame <w>
  */
-Eigen::Vector6d& CartError(const Eigen::TransfMatrix&  in1, const Eigen::TransfMatrix&  in2);
+Eigen::Vector6d CartError(const Eigen::TransfMatrix&  in1, const Eigen::TransfMatrix&  in2);
 
 /**
  * @brief Compute the Cartesian error between two transformation matrices
@@ -108,7 +120,7 @@ Eigen::Vector6d& CartError(const Eigen::TransfMatrix&  in1, const Eigen::TransfM
  * @note the two vector should represent transformation matrix computed w.r.t a common frame, i.e. v1 = wTg, v2 = wTt then CartError(v1, v2)
  *       brings the tool frame <t> towards a goal frame <g>, and returns the error projected on frame <w>
  */
-Eigen::Vector6d& CartError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2);
+//Eigen::Vector6d& CartError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2);
 
 /**
  * @brief A decreasing bell shaped (sigmoid) function.

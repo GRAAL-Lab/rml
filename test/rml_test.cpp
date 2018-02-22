@@ -39,8 +39,8 @@ int main(int argc, char* argv[]){
 	PrettyPrint(S, "rml::RightJuxtapose(A,U)");
 	PrettyPrint(V, "rml::UnderJuxtapose(A,U)");
 
-	Eigen::Vector6d vect6_1, vect6_2;
-	Eigen::Vector3d vect3_1, vect3_2;
+	Eigen::Vector6d vect6_1;
+	Eigen::Vector3d vect3_1, vect3_2, vect3_3;
 	vect3_1.setConstant(1);
 	vect3_2.setConstant(2);
 	vect6_1.setZero();
@@ -48,21 +48,30 @@ int main(int argc, char* argv[]){
 	PrettyPrint(vect3_1.transpose(), "vect3_1'");
 	PrettyPrint(vect3_2.transpose(), "vect3_2'");
 
+	//PrettyPrint(rml::GetFirstVect3(vect6_1).transpose(), "vect6' GetFirstVect3()");
+	//PrettyPrint(GetSecondVect3(vect6_1).transpose(), "vect6' GetSecondVect3()");
+
 	rml::SetFirstVect3(vect6_1, vect3_1);
 	PrettyPrint(vect6_1.transpose(), "vect6' after SetFirstVect3()");
-	rml::SetSecondVect3(vect6_1, vect3_2);
+	rml::SetSecondVect3(vect6_1,vect3_2);
 	PrettyPrint(vect6_1.transpose(), "vect6' after SetSecondVect3()");
 
 	Eigen::Matrix4d AtMat = A;
 
 	PrettyPrint(rml::GetRotMatrix(AtMat), "rml::GetRotMatrix(A)");
-	PrettyPrint(rml::GetTrasl(AtMat), "rml::GetTrasl(A)");
+	PrettyPrint(rml::GetTransl(AtMat), "rml::GetTrasl(A)");
 
-	Eigen::TransfMatrix Tmat;
+	Eigen::TransfMatrix Tmat = A;
 	PrettyPrint(Tmat, "Tmat");
+	PrettyPrint(Tmat.GetRotMatrix(), "A.GetRotMatrix()");
+	PrettyPrint(Tmat.GetTransl(), "A.GetTrasl()");
 
-	vect6_2.setZero();
-	Eigen::Vector6d maxvect6 = rml::GreatestNormVector(vect6_1, vect6_2);
+	vect3_3.setConstant(3);
+	PrettyPrint(vect3_1.transpose(), "vect3_1");
+	PrettyPrint(vect3_2.transpose(), "vect3_2");
+	PrettyPrint(vect3_3.transpose(), "vect3_3");
+	Eigen::Vector3d maxvect3 = rml::GreatestNormVector(vect3_1, vect3_2, vect3_3);
+	futils::PrettyPrint(maxvect3.transpose(), "maxvect3");
 
 
 	///////////////////////////////

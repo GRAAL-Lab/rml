@@ -13,7 +13,6 @@
 namespace rml {
 
 const double RPY2VectEpsilon = 0.000000001;
-const double VersorLemmaThreshold = 0.000000001;
 const unsigned long int MaxMatrixDim = 1300;           ///< Max matrices dimension
 const double SVDEpsilon = 0.00000001;
 

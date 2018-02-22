@@ -83,7 +83,6 @@ ArmModel::~ArmModel() {
 
 }
 
-
 void ArmModel::SetJointPosition(const Eigen::VectorXd& q) {
 
 	if(!hasBeenInitialized_){
@@ -97,9 +96,11 @@ void ArmModel::SetJointPosition(const Eigen::VectorXd& q) {
 	EvaluatedJdqNumeric();
 }
 
+
 const Eigen::VectorXd& ArmModel::GetJointPosition() const {
 	return q_;
 }
+
 
 void ArmModel::SetArmJoints(int armJoints) {
 	numberOfJoints_ = armJoints;
@@ -124,11 +125,13 @@ void ArmModel::SetArmJoints(int armJoints) {
 
 }
 
+
 void ArmModel::InitMatrix() {
 	//I3_ = Eigen::Matrix3d::Identity();
 	//Tz_ = Eigen::Matrix4d::Identity();
 
 }
+
 
 void ArmModel::InitMatrix(std::string init_matrices_path) {
 
@@ -216,9 +219,8 @@ void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex) {
 	w_ki_ = wTei_.at(jointNumber).block(0,2,3,1); //GetSubMatrix(1, 3, 3, 3));
 
 	SetFirstVect3(h_[jointNumber],w_ki_);
-	SetSecondVect3(h_[jointNumber],w_ki_.cross((GetTrasl(wTei_[endEffectorIndex]) - GetTrasl(wTei_[jointNumber]))));
+	SetSecondVect3(h_[jointNumber],w_ki_.cross(wTei_[endEffectorIndex].GetTransl() - wTei_[jointNumber].GetTransl()));
 }
-
 
 
 void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
@@ -229,13 +231,14 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 	w_ki_ = wTei_.at(jointNumber).block(0,2,3,1);//GetSubMatrix(1, 3, 3, 3));
 
 	SetFirstVect3(h_[jointNumber],w_ki_);
-	SetSecondVect3(h_[jointNumber],w_ki_.cross((GetTrasl(bTt_) - GetTrasl(wTei_[jointNumber]))));
+	SetSecondVect3(h_[jointNumber],w_ki_.cross(bTt_.GetTransl() - wTei_[jointNumber].GetTransl()));
 
 	//cout << "backward index = " << jointNumber << endl;
 	//wTei_[jointNumber - 1].PrintMtx("wTei");
 	//w_ki_.PrintMtx("wki");
 	//h_[jointNumber - 1].PrintMtx("h");
 }
+
 
 void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 	int flag;

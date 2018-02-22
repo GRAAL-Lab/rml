@@ -64,6 +64,14 @@ inline Eigen::MatrixXd UpperJuxtapose(const Eigen::MatrixXd& A, const Eigen::Mat
 	return UnderJuxtapose(B, A);
 }
 
+inline Eigen::Vector3d GetFirstVect3(const Eigen::Vector6d& vect6) {
+	return vect6.block(0,0,3,1);// = vect3;
+}
+
+inline Eigen::Vector3d GetSecondVect3(const Eigen::Vector6d& vect6) {
+	return vect6.block(3,0,3,1);// = vect3;
+}
+
 inline void SetFirstVect3(Eigen::Vector6d& vect6, const Eigen::Vector3d& vect3){
 	vect6.block(0,0,3,1) = vect3;
 }
@@ -72,7 +80,7 @@ inline void SetSecondVect3(Eigen::Vector6d& vect6, const Eigen::Vector3d& vect3)
 	vect6.block(3,0,3,1) = vect3;
 }
 
-inline Eigen::Vector3d GetTrasl(Eigen::Matrix4d& tMat){
+inline Eigen::Vector3d GetTransl(Eigen::Matrix4d& tMat){
 	return tMat.block(0,3,3,1);
 }
 
