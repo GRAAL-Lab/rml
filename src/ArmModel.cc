@@ -218,8 +218,8 @@ void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex) {
 	// Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
 	w_ki_ = wTei_.at(jointNumber).block(0,2,3,1); //GetSubMatrix(1, 3, 3, 3));
 
-	SetFirstVect3(h_[jointNumber],w_ki_);
-	SetSecondVect3(h_[jointNumber],w_ki_.cross(wTei_[endEffectorIndex].GetTransl() - wTei_[jointNumber].GetTransl()));
+	h_[jointNumber].SetFirstVect3(w_ki_);
+	h_[jointNumber].SetSecondVect3(w_ki_.cross(wTei_[endEffectorIndex].GetTransl() - wTei_[jointNumber].GetTransl()));
 }
 
 
@@ -230,8 +230,8 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 	// Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
 	w_ki_ = wTei_.at(jointNumber).block(0,2,3,1);//GetSubMatrix(1, 3, 3, 3));
 
-	SetFirstVect3(h_[jointNumber],w_ki_);
-	SetSecondVect3(h_[jointNumber],w_ki_.cross(bTt_.GetTransl() - wTei_[jointNumber].GetTransl()));
+	h_[jointNumber].SetFirstVect3(w_ki_);
+	h_[jointNumber].SetSecondVect3(w_ki_.cross(bTt_.GetTransl() - wTei_[jointNumber].GetTransl()));
 
 	//cout << "backward index = " << jointNumber << endl;
 	//wTei_[jointNumber - 1].PrintMtx("wTei");

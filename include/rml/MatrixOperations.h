@@ -51,6 +51,7 @@ inline Eigen::MatrixXd LeftJuxtapose(const Eigen::MatrixXd& A, const Eigen::Matr
 	return RightJuxtapose(B, A);
 }
 
+
 inline Eigen::MatrixXd UnderJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	Eigen::MatrixXd res;
 	eigen_assert(A.cols() == B.cols());
@@ -63,7 +64,7 @@ inline Eigen::MatrixXd UnderJuxtapose(const Eigen::MatrixXd& A, const Eigen::Mat
 inline Eigen::MatrixXd UpperJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	return UnderJuxtapose(B, A);
 }
-
+/*
 inline Eigen::Vector3d GetFirstVect3(const Eigen::Vector6d& vect6) {
 	return vect6.block(0,0,3,1);// = vect3;
 }
@@ -86,25 +87,8 @@ inline Eigen::Vector3d GetTransl(Eigen::Matrix4d& tMat){
 
 inline Eigen::Matrix3d GetRotMatrix(Eigen::Matrix4d& tMat){
 	return tMat.block(0,0,3,3);
-}
-
-//Product each element for each element of two matrices
-/*Matrix& Matrix::ElementProd(const Matrix& b) const
-{
-	if (numRows_ != b.numRows_ || numColumns_ != b.numColumns_)
-		KAL::DebugConsole::Write(LOG_LEVEL_ERROR, "Matrix", "ElementProduct: different size (%dx%d) * (%dx%d)", numRows_, numColumns_, b.numRows_, b.numColumns_);
-
-	Matrix& temp = GetBuffer(tid_);
-
-
-	temp.numColumns_ = numColumns_;
-	temp.numRows_ = numRows_;
-
-	for (int index = 0; index < numRows_ * numColumns_; index++)
-		temp.M_[index] = M_[index] * b.M_[index];
-
-	return temp;
 }*/
+
 
 }
 

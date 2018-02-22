@@ -51,15 +51,10 @@ int main(int argc, char* argv[]){
 	//PrettyPrint(rml::GetFirstVect3(vect6_1).transpose(), "vect6' GetFirstVect3()");
 	//PrettyPrint(GetSecondVect3(vect6_1).transpose(), "vect6' GetSecondVect3()");
 
-	rml::SetFirstVect3(vect6_1, vect3_1);
+	vect6_1.SetFirstVect3(vect3_1);
 	PrettyPrint(vect6_1.transpose(), "vect6' after SetFirstVect3()");
-	rml::SetSecondVect3(vect6_1,vect3_2);
+	vect6_1.SetSecondVect3(vect3_2);
 	PrettyPrint(vect6_1.transpose(), "vect6' after SetSecondVect3()");
-
-	Eigen::Matrix4d AtMat = A;
-
-	PrettyPrint(rml::GetRotMatrix(AtMat), "rml::GetRotMatrix(A)");
-	PrettyPrint(rml::GetTransl(AtMat), "rml::GetTrasl(A)");
 
 	Eigen::TransfMatrix Tmat = A;
 	PrettyPrint(Tmat, "Tmat");

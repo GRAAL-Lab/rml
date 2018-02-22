@@ -189,10 +189,10 @@ Eigen::Vector6d CartError(const Eigen::TransfMatrix& in1, const Eigen::TransfMat
 
 
 	temp3 = (VersorLemma(in1.GetRotMatrix(), in2.GetRotMatrix())) * (-1);
-	SetFirstVect3(temp,temp3);
+	temp.SetFirstVect3(temp3);
 
 	temp3 = in1.GetTransl() - in2.GetTransl();
-	SetSecondVect3(temp,temp3);
+	temp.SetSecondVect3(temp3);
 
 	return temp;
 }
@@ -202,11 +202,11 @@ Eigen::Vector6d CartError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2) 
 
 	Eigen::Vector6d temp;
 
-	Eigen::Vector3d ciao1 = VersorLemma(Vect2RPY(GetFirstVect3(v1)), Vect2RPY(GetFirstVect3(v2))) * (-1);
-	SetFirstVect3(temp,ciao1);
+	Eigen::Vector3d ciao1 = VersorLemma(Vect2RPY(v1.GetFirstVect3()), Vect2RPY(v2.GetFirstVect3())) * (-1);
+	temp.SetFirstVect3(ciao1);
 
-	Eigen::Vector3d ciao2 = GetSecondVect3(v1) - GetSecondVect3(v2);
-	SetSecondVect3(temp,ciao2);
+	Eigen::Vector3d ciao2 = v1.GetSecondVect3() - v2.GetSecondVect3();
+	temp.SetSecondVect3(ciao2);
 
 	return temp;
 }

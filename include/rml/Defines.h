@@ -34,21 +34,23 @@ public:
 		return *this;
 	}
 
-	/*Vector3d GetFirstVect3() const {
+	Vector3d GetFirstVect3() const {
 		return this->block(0,0,3,1);
 	}
 
 	Vector3d GetSecondVect3() const {
-		return this->block(0,3,3,1);
+		return this->block(3,0,3,1);
 	}
 
-	void SetFirstVect3(Vector3d& vec3) {
+	template<typename OtherDerived>
+	void SetFirstVect3(const Eigen::MatrixBase <OtherDerived>& vec3) {
 		this->block(0,0,3,1) = vec3;
 	}
 
-	void SetSecondVect3(Vector3d& vec3) {
-		this->block(0,3,3,1) = vec3;
-	}*/
+	template<typename OtherDerived>
+	void SetSecondVect3(const Eigen::MatrixBase <OtherDerived>& vec3) {
+		this->block(3,0,3,1) = vec3;
+	}
 
 };
 
