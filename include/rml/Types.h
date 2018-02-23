@@ -5,10 +5,52 @@
  *      Author: fraw
  */
 
-#ifndef INCLUDE_RML_DEFINES_H_
-#define INCLUDE_RML_DEFINES_H_
+#ifndef INCLUDE_RML_TYPES_H_
+#define INCLUDE_RML_TYPES_H_
 
+#include <iostream>
 #include <eigen3/Eigen/Dense>
+
+/// Forward declaration
+namespace Eigen{
+class RotMatrix;
+}
+
+namespace rml{
+
+class EulerYPR
+{
+public:
+	EulerYPR();
+	EulerYPR(double yaw, double pitch, double roll);
+	EulerYPR(Eigen::Vector3d vec3);
+
+	virtual ~EulerYPR() {}
+
+	friend std::ostream& operator <<(std::ostream& os, EulerYPR const& a)
+	{
+		return os << a.yaw_ << "\t" << a.pitch_ << "\t" << a.roll_ << "\t";
+	}
+
+	double GetYaw() const;
+	void SetYaw(double yaw);
+
+	double GetPitch() const;
+	void SetPitch(double pitch);
+
+	double GetRoll() const;
+	void SetRoll(double roll);
+
+	void SetYPR(double yaw, double pitch, double roll);
+	void SetYPR(Eigen::Vector3d& vec3);
+
+	Eigen::Vector3d ToVect3() const;
+	Eigen::RotMatrix ToRotMatrix() const;
+
+private:
+	double yaw_, pitch_, roll_;
+};
+}
 
 namespace Eigen{
 
@@ -26,6 +68,11 @@ public:
 	Vector6d(const Eigen::MatrixBase<OtherDerived>& other)
 	: Eigen::Vector6dBase(other)
 	{ }
+
+	Vector6d(const Vector3d& first, const Vector3d& second){
+		this->SetFirstVect3(first);
+		this->SetSecondVect3(second);
+	}
 	// This method allows you to assign Eigen expressions to TransfMatrix
 	template<typename OtherDerived>
 	Vector6d& operator=(const Eigen::MatrixBase <OtherDerived>& other)
@@ -51,7 +98,6 @@ public:
 	void SetSecondVect3(const Eigen::MatrixBase <OtherDerived>& vec3) {
 		this->block(3,0,3,1) = vec3;
 	}
-
 };
 
 class RotMatrix : public Eigen::Matrix3d
@@ -71,6 +117,10 @@ public:
 	{
 		this->Eigen::Matrix3d::operator=(other);
 		return *this;
+	}
+
+	rml::EulerYPR GetEulerYPR() const{
+		return this->eulerAngles(2, 1, 0);
 	}
 };
 
@@ -101,6 +151,13 @@ public:
 	Vector3d GetTransl() const {
 		return this->block(0,3,3,1);
 	}
+
+	Vector6d GetYPRXYZ() const {
+		Vector6d a;
+		a.SetFirstVect3(this->GetRotMatrix().GetEulerYPR().ToVect3());
+		a.SetSecondVect3(this->GetTransl());
+		return a;
+	}
 };
 
 }
@@ -108,4 +165,4 @@ public:
 
 
 
-#endif /* INCLUDE_RML_DEFINES_H_ */
+#endif /* INCLUDE_RML_TYPES_H_ */

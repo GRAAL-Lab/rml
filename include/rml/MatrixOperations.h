@@ -11,8 +11,8 @@
 #include <iostream>
 #include <string>
 #include <eigen3/Eigen/Dense>
-#include <rml/Futils.h>
-#include <rml/Defines.h>
+
+#include <rml/Types.h>
 
 namespace rml {
 
@@ -37,7 +37,7 @@ inline void SetDiagonalFromDouble(Eigen::MatrixXd& MatT, double diag[]){
 	MatT.diagonal() = wdiag;
 }
 
-//template<class MatT>
+//template<typename OtherDerived>
 inline Eigen::MatrixXd RightJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	Eigen::MatrixXd res;
 	eigen_assert(A.rows() == B.rows());
@@ -47,10 +47,10 @@ inline Eigen::MatrixXd RightJuxtapose(const Eigen::MatrixXd& A, const Eigen::Mat
 	return res;
 }
 
-inline Eigen::MatrixXd LeftJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
+/*inline Eigen::MatrixXd LeftJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	return RightJuxtapose(B, A);
 }
-
+*/
 
 inline Eigen::MatrixXd UnderJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	Eigen::MatrixXd res;
@@ -61,9 +61,9 @@ inline Eigen::MatrixXd UnderJuxtapose(const Eigen::MatrixXd& A, const Eigen::Mat
 	return res;
 }
 
-inline Eigen::MatrixXd UpperJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
+/*inline Eigen::MatrixXd UpperJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	return UnderJuxtapose(B, A);
-}
+}*/
 /*
 inline Eigen::Vector3d GetFirstVect3(const Eigen::Vector6d& vect6) {
 	return vect6.block(0,0,3,1);// = vect3;

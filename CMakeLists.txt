@@ -17,6 +17,7 @@ add_library(rml SHARED
     src/SVD.cc
     src/SVD_Internal.cc
     src/ArmModel.cc
+    src/Types.cc
 )
 
 #add_library(youBotModel include/test/youbot_armmodel.cc
@@ -62,13 +63,14 @@ install(EXPORT rmlConfig DESTINATION share/rml/cmake)
 export(TARGETS rml FILE rmlConfig.cmake)
 
 # Every library has unit tests, of course
-add_executable(rml_test
-    test/rml_test.cpp
+add_executable(rml_test test/rml_test.cpp)
+
+add_executable(rml_test_model test/rml_test_model.cpp
     test/youbot_armmodel.cc
 )
 
-target_link_libraries(rml_test
-    rml
-)
+target_link_libraries(rml_test rml)
+target_link_libraries(rml_test_model rml)
 
 add_test(rml_test rml_test)
+add_test(rml_test_model rml_test_model)

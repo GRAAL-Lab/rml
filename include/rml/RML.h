@@ -17,9 +17,8 @@
 
 #define EIGEN_MATRIXBASE_PLUGIN <rml/MatrixBaseAddons.h>
 
-#include <rml/Defines.h>
+#include <rml/Types.h>
 #include <rml/MatrixOperations.h>
-#include <rml/Futils.h>
 #include <rml/Functions.h>
 #include <rml/PseudoInverse.h>
 #include <rml/SVD.h>

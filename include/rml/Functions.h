@@ -14,36 +14,22 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#include <rml/Defines.h>
+
+#include <rml/Types.h>
 
 namespace rml {
 
-/*template <typename Derived>
-static bool vect3_norm_compare(Eigen::MatrixBase<Derived>& a, Eigen::MatrixBase<Derived>& b) {
+template <class MatT>
+static bool norm_compare(MatT& a, MatT& b) {
 	return (a.norm() < b.norm());
-}*/
+}
 
-/*template <typename Derived>
-Eigen::MatrixBase<Derived> GreatestNormVector(const Eigen::MatrixBase<Derived>& vect1, const Eigen::MatrixBase<Derived>& vect2, const Eigen::MatrixBase<Derived>& vect3) {
+template<class MatT>
+MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3){
 
-	std::vector<Eigen::MatrixBase<Derived>> vecs = {vect1, vect2, vect3};
-	//Eigen::Vector3d max = ;
-	return *std::max_element(vecs.begin(), vecs.end(), [](Eigen::MatrixBase<Derived> a, Eigen::MatrixBase<Derived> b){ return a.norm() < b.norm(); });
-}*/
-
-
-/*template <typename Derived>
- void print_inv_cond(const Eigen::MatrixBase<Derived>& a)
- {
- const typename Eigen::JacobiSVD<typename Derived::PlainObject>::SingularValuesType&
- sing_vals = a.jacobiSvd().singularValues();
- std::cout << "inv cond: " << sing_vals(sing_vals.size()-1) / sing_vals(0) << std::endl;
- }*/
-
-//Eigen::Vector6d GreatestNormVector(Eigen::Vector6d& vect1, Eigen::Vector6d& vect2, Eigen::Vector6d& vect3);
-
-Eigen::Vector3d GreatestNormVector(Eigen::Vector3d& vect1, Eigen::Vector3d& vect2, Eigen::Vector3d& vect3);
-
+	std::vector<MatT> vecs = {vect1,vect2,vect3};
+	return *std::max_element(vecs.begin(), vecs.end(), norm_compare<MatT>);
+}
 
 /**
  * @brief Compute the versor lemma between the two rotation matrices.
@@ -62,7 +48,7 @@ Eigen::Vector3d GreatestNormVector(Eigen::Vector3d& vect1, Eigen::Vector3d& vect
 Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2);
 
 
-Eigen::RotMatrix Vect2RPY(const Eigen::Vector3d& vec);
+//Eigen::RotMatrix Vect2RPY(const Eigen::Vector3d& vec);
 
 /**
  * @brief Compute the versor lemma between the two rotation matrices.
@@ -98,7 +84,7 @@ Eigen::Vector3d VersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2
  *
  * @note the two transformation matrix should have a common base frame, i.e. CartError(wTg, wTt) brings the tool frame <t> towards a goal frame <g>, and returns the error projected on frame <w>
  */
-Eigen::Vector6d CartError(const Eigen::TransfMatrix&  in1, const Eigen::TransfMatrix&  in2);
+Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::TransfMatrix&  in2);
 
 /**
  * @brief Compute the Cartesian error between two transformation matrices

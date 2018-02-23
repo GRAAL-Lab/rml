@@ -21,7 +21,7 @@
 #include "rml/ArmModel.h"
 #include "rml/MatrixOperations.h"
 #include "rml/PseudoInverse.h"
-#include "rml/Defines.h"
+#include "rml/Types.h"
 #include "rml/SVD.h"
 
 //#define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
@@ -37,8 +37,8 @@ ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), hasBeenIni
 }
 
 ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenInitialized_), numberOfJoints_(other.numberOfJoints_),
-		q_(other.q_), wTb0_(other.wTb0_), wTbi_(other.wTbi_), Tz_(other.Tz_), w_ki_(other.w_ki_), eTt_(other.eTt_),
-		w_r_et_(other.w_r_et_), Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
+		q_(other.q_), baseTb0_(other.baseTb0_), baseTbi_(other.baseTbi_), Tz_(other.Tz_), base_ki_(other.base_ki_), eTt_(other.eTt_),
+		Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
 		wTe_(other.wTe_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
 
 	/*
@@ -48,11 +48,12 @@ ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenIni
 	if (numberOfJoints_ == 0) {
 		modelReadFromFile_ = false;
 	}
+
 	/*
 	 * While if the arm has been already initialised we can copy all the necessary containers.
 	 */
 	else {
-		wTei_.resize(numberOfJoints_);
+		baseTei_.resize(numberOfJoints_);
 		biTri_.resize(numberOfJoints_);
 		biTei_.resize(numberOfJoints_);
 		h_.resize(numberOfJoints_);
@@ -60,13 +61,12 @@ ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenIni
 		jointLimitsMin_.resize(numberOfJoints_);
 		jointLimitsMAX_.resize(numberOfJoints_);
 		for (int i = 0; i < numberOfJoints_; i++) {
-			wTei_[i] = other.wTei_[i];
+			baseTei_[i] = other.baseTei_[i];
 			biTri_[i] = other.biTri_[i];
 			biTei_[i] = other.biTei_[i];
 			h_[i] = other.h_[i];
 			dJdq_[i] = other.dJdq_[i];
 		}
-
 	}
 }
 
@@ -105,7 +105,7 @@ const Eigen::VectorXd& ArmModel::GetJointPosition() const {
 void ArmModel::SetArmJoints(int armJoints) {
 	numberOfJoints_ = armJoints;
 
-	wTei_.resize(numberOfJoints_);
+	baseTei_.resize(numberOfJoints_);
 	biTri_.resize(numberOfJoints_);
 	biTei_.resize(numberOfJoints_);
 	h_.resize(numberOfJoints_);
@@ -122,13 +122,10 @@ void ArmModel::SetArmJoints(int armJoints) {
 	q_ = ZeroQ_;
 
 	hasBeenInitialized_ = true;
-
 }
 
 
 void ArmModel::InitMatrix() {
-	//I3_ = Eigen::Matrix3d::Identity();
-	//Tz_ = Eigen::Matrix4d::Identity();
 
 }
 
@@ -137,7 +134,7 @@ void ArmModel::InitMatrix(std::string init_matrices_path) {
 
 	InitMatrix();
 
-	wTb0_ = Eigen::Matrix4d::Identity();
+	baseTb0_ = Eigen::Matrix4d::Identity();
 	eTt_ = Eigen::Matrix4d::Identity();
 	ReadModelMatricesFromFile(init_matrices_path);
 }
@@ -161,14 +158,14 @@ void ArmModel::EvaluatebJt() {
 
 
 void ArmModel::EvaluatebTt() {
-	Eigen::Matrix4d orig_wTb = wTb0_;
-	wTb0_ = Eigen::Matrix4d::Identity();
+	/*Eigen::Matrix4d orig_wTb = baseTb0_;
+	baseTb0_ = Eigen::Matrix4d::Identity();*/
 
 	for (int jointNumber = 0; jointNumber < numberOfJoints_; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
 	}
-	bTt_ = wTei_[numberOfJoints_ - 1] * eTt_;
-	wTb0_ = orig_wTb;
+	bTt_ = baseTei_[numberOfJoints_ - 1] * eTt_;
+	//baseTb0_ = orig_wTb;
 
 }
 
@@ -176,11 +173,11 @@ void ArmModel::EvaluatebTt() {
 void ArmModel::ForwardDirectGeometry(int jointNumber) {
 	// wTbi is the transformation between the base of joint <jointNumber> and the world frame <w>
 	if (jointNumber == 0) {
-		wTbi_ = wTb0_;
+		baseTbi_ = baseTb0_;
 	} else {
 		// in this case, the base of joint <jointNumber> is the position of the end-effector of the joint <jointNumber - 1>
 		// a further one is subtracted because arrays are indexed from 0
-		wTbi_ = wTei_[jointNumber - 1];
+		baseTbi_ = baseTei_[jointNumber - 1];
 	}
 
 	// biTri is the constant transformation between the base of the joint <i> and its end-effector
@@ -188,10 +185,8 @@ void ArmModel::ForwardDirectGeometry(int jointNumber) {
 	// biTei = biTri * Tz(qi)
 	double cos_q, sin_q;
 
-	cos_q = std::cos(static_cast<long double>(q_(jointNumber)));
-	sin_q = std::sin(static_cast<long double>(q_(jointNumber)));
-	//cos_q = cos( q_(jointNumber) );
-	//sin_q = sin( q_(jointNumber) );
+	cos_q = std::cos(q_(jointNumber));
+	sin_q = std::sin(q_(jointNumber));
 
 	Tz_(0, 0) = cos_q;
 	Tz_(0, 1) = -sin_q;
@@ -203,7 +198,7 @@ void ArmModel::ForwardDirectGeometry(int jointNumber) {
 
 	// wTei is the transformation between the end-effector of joint <i> and world frame <w>
 	// wTei = wTbi * biTei
-	wTei_[jointNumber] = wTbi_ * biTei_[jointNumber];
+	baseTei_[jointNumber] = baseTbi_ * biTei_[jointNumber];
 
 	//cout << "forward index = " << jointNumber << endl;
 	//biTri_[jointNumber - 1].PrintMtx("biTri");
@@ -216,10 +211,10 @@ void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex) {
 	// Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione
 	// ogni giunto ruota lungo z si ha che ri_ki = ei_ki = [ 0 0 1 ]'
 	// Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
-	w_ki_ = wTei_.at(jointNumber).block(0,2,3,1); //GetSubMatrix(1, 3, 3, 3));
+	base_ki_ = baseTei_.at(jointNumber).block(0,2,3,1); //GetSubMatrix(1, 3, 3, 3));
 
-	h_[jointNumber].SetFirstVect3(w_ki_);
-	h_[jointNumber].SetSecondVect3(w_ki_.cross(wTei_[endEffectorIndex].GetTransl() - wTei_[jointNumber].GetTransl()));
+	h_[jointNumber].SetFirstVect3(base_ki_);
+	h_[jointNumber].SetSecondVect3(base_ki_.cross(baseTei_[endEffectorIndex].GetTransl() - baseTei_[jointNumber].GetTransl()));
 }
 
 
@@ -228,10 +223,10 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 	// Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione
 	// ogni giunto ruota lungo z si ha che ri_ki = ei_ki = [ 0 0 1 ]'
 	// Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
-	w_ki_ = wTei_.at(jointNumber).block(0,2,3,1);//GetSubMatrix(1, 3, 3, 3));
+	base_ki_ = baseTei_.at(jointNumber).block(0,2,3,1);//GetSubMatrix(1, 3, 3, 3));
 
-	h_[jointNumber].SetFirstVect3(w_ki_);
-	h_[jointNumber].SetSecondVect3(w_ki_.cross(bTt_.GetTransl() - wTei_[jointNumber].GetTransl()));
+	h_[jointNumber].SetFirstVect3(base_ki_);
+	h_[jointNumber].SetSecondVect3(base_ki_.cross(bTt_.GetTransl() - baseTei_[jointNumber].GetTransl()));
 
 	//cout << "backward index = " << jointNumber << endl;
 	//wTei_[jointNumber - 1].PrintMtx("wTei");
@@ -284,6 +279,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 	mu = mySVD.mu;
 }
 
+
 void ArmModel::EvaluatedJdqNumeric() {
 
 	Eigen::MatrixXd bJt_0, bJt_dQ;
@@ -324,49 +320,15 @@ void ArmModel::EvaluatedJdqNumeric() {
 }
 
 
-void ArmModel::EvaluateWorld2JointTransf(Eigen::TransfMatrix& wTj, int jointIndex) {
-	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
-		ForwardDirectGeometry(jointNumber);
-	}
-	wTj = wTei_[jointIndex];
-}
-
 void ArmModel::EvaluateBase2JointTransf(Eigen::TransfMatrix& bTj, int jointIndex) {
-
-	Eigen::Matrix4d orig_wTb = wTb0_;
-	wTb0_ = Eigen::Matrix4d::Identity();
-
 	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
 	}
-	wTb0_ = orig_wTb;
-	bTj = wTei_[jointIndex];
+	bTj = baseTei_[jointIndex];
 }
 
-
-void ArmModel::EvaluateWorld2JointJacobian(Eigen::MatrixXd& wJj, int jointIndex) {
-
-	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
-		ForwardDirectGeometry(jointNumber);
-	}
-	for (int jointNumber = jointIndex; jointNumber >= 0; jointNumber--)
-		BackwardDirectGeometry(jointNumber, jointIndex);
-
-	for (int i = jointIndex; i < numberOfJoints_; i++) {
-		h_[i].setZero();
-	}
-
-	wJj = (h_[0]);
-	for (int i = 1; i < numberOfJoints_; i++) {
-		wJj = RightJuxtapose(wJj, h_[i]);
-	}
-
-}
 
 void ArmModel::EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex) {
-
-	Eigen::Matrix4d orig_wTb = wTb0_;
-	wTb0_ = Eigen::Matrix4d::Identity();
 
 	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
@@ -383,7 +345,6 @@ void ArmModel::EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex) 
 		bJj = RightJuxtapose(bJj, h_[i]);
 	}
 
-	wTb0_ = orig_wTb;
 }
 
 void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
@@ -394,7 +355,7 @@ void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
 
 #ifdef DBG_PRINT
 	cout << endl;
-	wTb0_.PrintToDebugConsole("wtb0");
+	baseTb0_.PrintToDebugConsole("wtb0");
 	char j_i[INTSTRSIZE];
 	for (int n = 0; n < numberOfJoints_; n++) {
 		sprintf(j_i, "%d", n);
@@ -413,17 +374,16 @@ void swap(rml::ArmModel& first, rml::ArmModel& second) {
 	swap(first.hasBeenInitialized_, second.hasBeenInitialized_);
 	swap(first.numberOfJoints_, second.numberOfJoints_);
 	swap(first.q_, second.q_);
-	swap(first.wTei_, second.wTei_);
+	swap(first.baseTei_, second.baseTei_);
 	swap(first.biTri_, second.biTri_);
 	swap(first.biTei_, second.biTei_);
-	swap(first.wTb0_, second.wTb0_);
-	swap(first.wTbi_, second.wTbi_);
+	swap(first.baseTb0_, second.baseTb0_);
+	swap(first.baseTbi_, second.baseTbi_);
 	swap(first.Tz_, second.Tz_);
-	swap(first.w_ki_, second.w_ki_);
+	swap(first.base_ki_, second.base_ki_);
 	swap(first.h_, second.h_);
 	swap(first.bTt_, second.bTt_);
 	swap(first.eTt_, second.eTt_);
-	swap(first.w_r_et_, second.w_r_et_);
 
 	swap(first.jointLimitsMin_, second.jointLimitsMin_);
 	swap(first.jointLimitsMAX_, second.jointLimitsMAX_);

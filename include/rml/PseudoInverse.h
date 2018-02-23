@@ -9,8 +9,8 @@
 #define INCLUDE_RML_PSEUDOINVERSE_H_
 
 #include <eigen3/Eigen/Dense>
-#include <rml/Defines.h>
 #include <rml/SVD.h>
+#include "Types.h"
 
 
 namespace rml {

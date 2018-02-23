@@ -8,7 +8,6 @@
  */
 
 #include "test/rml_test_defines.h"
-#include "test/youbot_armmodel.h"
 
 using std::cout;
 using std::endl;
@@ -19,7 +18,6 @@ int main(int argc, char* argv[]){
 	const int m = 4, n = 4;
 
 	Eigen::MatrixXd A(m, n), U(m, m), S(m, n), V(n, n);
-	timeval t1, t2;
 
 	A.setRandom();
 	U.setRandom();
@@ -38,6 +36,8 @@ int main(int argc, char* argv[]){
 	PrettyPrint(U, "U");
 	PrettyPrint(S, "rml::RightJuxtapose(A,U)");
 	PrettyPrint(V, "rml::UnderJuxtapose(A,U)");
+	/*A = rml::RightJuxtapose(A,A);
+	PrettyPrint(A, "rml::UnderJuxtapose(A,A)");*/
 
 	Eigen::Vector6d vect6_1;
 	Eigen::Vector3d vect3_1, vect3_2, vect3_3;
@@ -48,15 +48,12 @@ int main(int argc, char* argv[]){
 	PrettyPrint(vect3_1.transpose(), "vect3_1'");
 	PrettyPrint(vect3_2.transpose(), "vect3_2'");
 
-	//PrettyPrint(rml::GetFirstVect3(vect6_1).transpose(), "vect6' GetFirstVect3()");
-	//PrettyPrint(GetSecondVect3(vect6_1).transpose(), "vect6' GetSecondVect3()");
-
 	vect6_1.SetFirstVect3(vect3_1);
 	PrettyPrint(vect6_1.transpose(), "vect6' after SetFirstVect3()");
 	vect6_1.SetSecondVect3(vect3_2);
 	PrettyPrint(vect6_1.transpose(), "vect6' after SetSecondVect3()");
 
-	Eigen::TransfMatrix Tmat = A;
+	Eigen::TransfMatrix Tmat = A.setRandom(4,4);
 	PrettyPrint(Tmat, "Tmat");
 	PrettyPrint(Tmat.GetRotMatrix(), "A.GetRotMatrix()");
 	PrettyPrint(Tmat.GetTransl(), "A.GetTrasl()");
@@ -65,8 +62,14 @@ int main(int argc, char* argv[]){
 	PrettyPrint(vect3_1.transpose(), "vect3_1");
 	PrettyPrint(vect3_2.transpose(), "vect3_2");
 	PrettyPrint(vect3_3.transpose(), "vect3_3");
-	Eigen::Vector3d maxvect3 = rml::GreatestNormVector(vect3_1, vect3_2, vect3_3);
+	Eigen::Vector3d maxvect3 = rml::GreatestNormElement(vect3_1, vect3_2, vect3_3);
 	futils::PrettyPrint(maxvect3.transpose(), "maxvect3");
+
+	rml::EulerYPR ypr;
+	ypr.SetYPR(M_PI,0.0,0.0);
+	PrettyPrint(ypr, "ypr cout");
+	PrettyPrint(ypr.ToRotMatrix(), "ypr.ToRotMatrix()");
+	PrettyPrint(ypr.ToRotMatrix().GetEulerYPR(), "ypr.ToRotMatrix().GetEulerYPR()");
 
 
 	///////////////////////////////
@@ -119,67 +122,6 @@ int main(int argc, char* argv[]){
 
 	Eigen::MatrixXd A_usv = U * S * V.transpose();
 	PrettyPrint(A_usv, "A as the result of: A = U*S*V'");
-
-	///////////////////////////////
-	//////  ARM MODEL TEST   //////
-	///////////////////////////////
-
-	std::cout << std::endl << tc::yel << "### Arm Model Test ###" << tc::none << std::endl;
-
-	int numJoints(0);
-	double elapsed_OLD(0), elapsed_NEW(0);
-
-	//std::shared_ptr<CTRL::BaxterLeftArmModel> baxterAM = std::make_shared<CTRL::BaxterLeftArmModel>();
-	std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
-
-	std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>();
-
-	armModel = youbotAM;
-
-	numJoints = armModel->GetNumJoints();
-	armModel->InitMatrix();
-
-	cout << tc::magL << "*dJdq Test*" << tc::none << std::endl;
-	cout << "numJoints=" << armModel->GetNumJoints() << endl;
-	//std::vector<Eigen::MatrixXd> dJdq_OLD(numJoints, Eigen::MatrixXd::Zero(6,numJoints));
-	std::vector<Eigen::MatrixXd> dJdq_NEW(numJoints, Eigen::MatrixXd::Zero(6,numJoints));
-
-
-	Eigen::MatrixXd wJt_0, wJt_dQ;
-	Eigen::Matrix4d wTt_0, wTt_dQ;
-	Eigen::MatrixXd zeroQ = Eigen::MatrixXd::Zero(numJoints, 1);
-	double q_0_generic[7] = { 0.0, 0.5, 1.0, 0.7, 0.3, 0.0, 0.0 }, q_0_doub[numJoints];
-
-	if(numJoints < 7){
-		for(int i=0; i<7; i++){
-			q_0_doub[i] = q_0_generic[i];
-		}
-	}else{
-		std::cerr << "Max num joint exceeded, exiting" << std::endl;
-		exit(0);
-	}
-
-	Eigen::MatrixXd q_0 = Eigen::MatrixXd(numJoints, 1);//, q_0_doub);
-	rml::Double2Matrix(q_0_doub, numJoints, 1, q_0);
-	PrettyPrint(q_0.transpose(),"q_0");
-	Eigen::MatrixXd dQ, qVar;
-	double delta_q = 1E-6;
-
-
-	gettimeofday(&t1, NULL);
-	armModel->SetJointPosition(q_0);
-
-	dJdq_NEW = armModel->GetdJdq();
-	gettimeofday(&t2, NULL);
-	elapsed_NEW += TimeDiff(t1, t2);
-
-	for (int i = 0; i < numJoints - 1; ++i) {
-		cout << i << "_NEW_";
-		PrettyPrint(dJdq_NEW.at(i),"dJdq:");
-		cout << "------------------------------------------------------------" << endl;
-	}
-
-
 
 	return 0;
 }

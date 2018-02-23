@@ -6,7 +6,7 @@
  */
 
 #include "rml/SVD.h"
-#include "SVD_Internal.h"
+#include "rml_internal/SVD_Internal.h"
 
 namespace rml {
 void RegPinvEnrico(const double *J, int m, int n, double *JPInv, double M, double xidotmax, double* prod, int* flag) {

@@ -6,12 +6,13 @@
  */
 
 #include <iostream>
-#include "rml/Defines.h"
 #include "rml/PseudoInverse.h"
+
+#include "../include/rml/Types.h"
 #include "rml/MatrixOperations.h"
 #include "rml/SVD.h"
-#include "SVD_Internal.h"
-#include "PseudoInverse_Internal.h"
+#include "rml_internal/SVD_Internal.h"
+#include "rml_internal/PseudoInverse_Internal.h"
 
 namespace rml {
 

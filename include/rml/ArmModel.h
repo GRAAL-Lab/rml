@@ -128,22 +128,19 @@ public:
 	void EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu);
 
 	/**
-	 * @brief Evaluates the transformation matrix (w.r.t. world) of the specified joint
+	 * @brief Evaluates the transformation matrix (w.r.t. robot base) of the specified joint
 	 *
 	 * @param[out] bTelw        Joint transformation matrix
 	 * @param[in] jointIndex    Joint index
 	 */
-	void EvaluateWorld2JointTransf(Eigen::TransfMatrix& wTj, int jointIndex);
-
 	void EvaluateBase2JointTransf(Eigen::TransfMatrix& bTj, int jointIndex);
+
 	/**
-	 * @brief Evaluates the jacobian matrix (w.r.t. world) of the specified joint
+	 * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
 	 *
 	 * @param[out] bJj          Joint jacobian matrix
 	 * @param[in] jointIndex    Joint index
 	 */
-	void EvaluateWorld2JointJacobian(Eigen::MatrixXd& wJj, int jointIndex);
-
 	void EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex);
 
 
@@ -152,7 +149,7 @@ public:
 	}
 
 	void SetwTb(const Eigen::TransfMatrix& wTb) {
-		wTb0_ = wTb;
+		baseTb0_ = wTb;
 	}
 
 	const Eigen::MatrixXd& GetbJt() const {
@@ -216,17 +213,17 @@ protected:
 	bool hasBeenInitialized_;
 	int numberOfJoints_;
 	Eigen::VectorXd q_;
-	std::vector<Eigen::TransfMatrix> wTei_; 		///< Matrice di Trasformazione dal mondo all'endeffector della BRU i-esima
+	std::vector<Eigen::TransfMatrix> baseTei_; 		///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
 	std::vector<Eigen::TransfMatrix> biTri_;		///< Matrice di Trasformazione dalla base all'endeffector della BRU i-esima (costante)
 	std::vector<Eigen::TransfMatrix> biTei_;		///< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
-	Eigen::TransfMatrix wTb0_;						///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
-	Eigen::TransfMatrix wTbi_;
+	Eigen::TransfMatrix baseTb0_;						///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
+	Eigen::TransfMatrix baseTbi_;
 	Eigen::TransfMatrix Tz_;
-	Eigen::Vector3d w_ki_;
+	Eigen::Vector3d base_ki_;
 	std::vector<Eigen::Vector6d> h_;
 	Eigen::TransfMatrix bTt_;
 	Eigen::TransfMatrix eTt_;		///< Matrice di Trasformazione dall'endeffector al tool(costante)
-	Eigen::Vector3d w_r_et_;	// vector of the distance between the end effector frame and the tool frame, projected on the world frame
+	//Eigen::Vector3d w_r_et_;	// vector of the distance between the end effector frame and the tool frame, projected on the world frame
 
 	std::vector<Eigen::MatrixXd> dJdq_;
 	Eigen::MatrixXd Jpinv_;
@@ -241,36 +238,6 @@ protected:
 	bool modelReadFromFile_;
 
 };
-
-
-
-/*
- * NOTE on CRTP C++ Pattern
- * ------------------------
- *
- * CRTP: Curiously recurring template
- *
- * In short, CRTP is when a class A has a base class which is a template specialization for the class A itself. E.g.
- *
- *    template <class T> class X{...};
- *    class A : public X<A> {...};
- *
- * It is curiously recurring, isn't it? :)
- * Now, what does this give you? This actually gives the X template the ability to be a base class for its specializations.
- *
- * This was needed since ArmModel can be either a specialized class for a particular robot (especially where dJdq is defined
- * for calculating the manipulability) or a generic class where the model is loaded runtime.
- */
-
-//template <typename Derived>
-//class ArmModel_CRTP : public ArmModel {
-//public:
-//    virtual ArmModel *clone() const {
-//        return new Derived(static_cast<Derived const&>(*this));
-//    }
-//};
-
-
 
 }
 

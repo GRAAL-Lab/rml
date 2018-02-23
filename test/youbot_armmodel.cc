@@ -44,7 +44,7 @@ void YouBotArmModel::InitMatrix()
 {
 	ArmModel::InitMatrix();
 
-	wTb0_ = Eigen::Matrix4d::Identity();
+	baseTb0_ = Eigen::Matrix4d::Identity();
 	eTt_ = Eigen::Matrix4d::Identity();
 
 	biTri_[0](0,0) = 1;      biTri_[0](0,1) = 0;      biTri_[0](0,2) = 0;  biTri_[0](0,3) = 0;
