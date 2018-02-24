@@ -8,7 +8,7 @@ Its major features are:
 0. Implementation of a very fast SVD algorithm (for robot-wise matrix dimensions) with optional regularization parameters. 
 0. Implementation of a Pseudo Inversion algorithm. 
 0. Implementation of a slim Robot Model class able to manage multi arm mobile robotic platforms, including dJdq and manipulability measurements. 
-0. Providing a set of robotic evaluation related functions such as: lemma versor, bell shaped functions, point to plane distance and more. 
+0. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more. 
 
 ## Dependencies 
 
