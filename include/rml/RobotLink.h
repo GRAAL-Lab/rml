@@ -64,6 +64,22 @@ public:
     int GetIndex();
 
     virtual ~RobotLink();
+
+	double getJointLimitsMax() const {
+		return jointLimitsMAX_;
+	}
+
+	void setJointLimitsMax(double jointLimitsMax) {
+		jointLimitsMAX_ = jointLimitsMax;
+	}
+
+	double getJointLimitsMin() const {
+		return jointLimitsMin_;
+	}
+
+	void setJointLimitsMin(double jointLimitsMin) {
+		jointLimitsMin_ = jointLimitsMin;
+	}
 };
 
 }

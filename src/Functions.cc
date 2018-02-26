@@ -80,6 +80,12 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 	return out;
 }
 
+// Computes 3-components Cartesian error with 2 EulerYPR elements as imput
+Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2) {
+	return VersorLemma(v1.ToRotMatrix(), v2.ToRotMatrix());
+}
+
+
 // Computes 6-components Cartesian error with 2 Transformation matrices as input
 Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2) {
 
@@ -87,11 +93,6 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::Tran
 	Eigen::Vector3d linear = in2.GetTransl() - in1.GetTransl();
 
 	return Eigen::Vector6d(angular, linear);
-}
-
-// Computes 3-components Cartesian error with 2 6-components vectors as input
-Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2) {
-	return VersorLemma(v1.ToRotMatrix(), v2.ToRotMatrix());
 }
 
 // Computes 6-components Cartesian error with 2 6-components vectors as input
@@ -127,6 +128,52 @@ double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
 	double cosarg;
 	cosarg = (x - xmin) * M_PI / (xmax - xmin) + M_PI;
 	return (ymax - ymin) * (0.5 * cos(cosarg) + 0.5) + ymin;
+}
+
+void SaturateVector(const int vecSize, const double sat, Eigen::VectorXd &vect)
+{
+	double curr_max = 0.0;
+	for (int i = 0; i < vecSize; i++) {
+		if (curr_max < std::fabs(vect(i))) {
+			curr_max = std::fabs(vect(i));
+		}
+	}
+	if (curr_max > sat) {
+		for (int i = 0; i < vecSize; i++) {
+			vect(i + 1) = vect(i + 1) * (sat / curr_max);
+		}
+	}
+}
+
+void SaturateScalar(double sat, double& value)
+{
+	if (value > sat)
+		value = sat;
+	else if (value < -sat)
+		value = -sat;
+}
+
+double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters &planeParams)
+{
+    double numerator = std::fabs(planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3) + planeParams.D);
+    double denominator = std::sqrt(planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C);
+
+    //cout << "n d: " << numerator << " " << denominator << "\n";
+    return (numerator/denominator);
+}
+
+Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlaneParameters &planeParams)
+{
+	Eigen::Vector3d resultingPoint = Eigen::Vector3d::Zero();
+    double alpha_num, alpha_den, alpha;
+    alpha_num = -(planeParams.D + planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3));
+    alpha_den = planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C;
+    alpha = alpha_num/alpha_den;
+    resultingPoint(1) = point(1) + alpha * planeParams.A;
+    resultingPoint(2) = point(2) + alpha * planeParams.B;
+    resultingPoint(3) = point(3) + alpha * planeParams.C;
+
+    return resultingPoint;
 }
 
 }

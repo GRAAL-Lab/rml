@@ -18,21 +18,13 @@
 #include <iterator>
 #include <climits>
 #include <stdlib.h>
-#include <ortos/ortos.h>
-#include <cmat/cmat.h>
+#include "rml/VehicleModel.h"
 
-#include "futils.h"
-#include "ctrl_task_defines.h"
-#include "ctrl_vehiclemodel.h"
-
-#define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
-
-//#define DBG_PRINT
 
 using std::cout;
 using std::endl;
 
-namespace CTRL {
+namespace rml {
 
 VehicleModel::VehicleModel() {
 	vehicleDOFs_ = 0;
@@ -128,7 +120,7 @@ void VehicleModel::Get6DVelocity(CMAT::Vect6& vehicleVel) {
 			"Using empty call Get6DVelocityVector(), missing specialization");
 }
 
-void swap(CTRL::VehicleModel& first, CTRL::VehicleModel& second) {
+void swap(rml::VehicleModel& first, rml::VehicleModel& second) {
 
 	using std::swap;
 	swap(first.q_, second.q_);

@@ -19,6 +19,17 @@
 
 namespace rml {
 
+/**
+ * Using four parameters represention in the form:
+ * Ax + By + Cz + D = 0;
+ */
+struct PlaneParameters
+{
+    double A, B, C, D;
+
+    PlaneParameters() : A(0), B(0), C(0), D(0) {}
+};
+
 template <class MatT>
 static bool norm_compare(MatT& a, MatT& b) {
 	return (a.norm() < b.norm());
@@ -66,19 +77,17 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
  * @note the two vector should represent rotation matrices computed w.r.t a common frame, i.e. r1 = cRa, r2 = cRb then the versor lemma gives the rotation vector
  *       that brings frame <a> over frame <b> projected on <c>
  */
-Eigen::Vector3d VersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
+Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2);
 
 /**
  * @brief Compute the Cartesian error between two transformation matrices.
  *
  * The method computes the misalignment error and the position error between two transformation matrices
  * It uses the VersorLemma to compute the misalignment, and a simple difference to compute the linear distance
- * The result is the error that brings in2 towards in1
+ * The result is the error that brings in1 towards in2
  *
- * @note for historical reasons this method brings the second frame towards the first, as opposed to what the implementation of VersorLemma does
- *
- * @param[in] in1 the goal transformation matrix
- * @param[in] in2 the initial transformation matrix
+ * @param[in] in1 the initial transformation matrix
+ * @param[in] in2 the goal transformation matrix
  *
  * @return the Vect6 representing the axis around which in2 should rotate to reach in1 and the linear distance
  *
@@ -94,19 +103,17 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::Tra
  * v = [yaw -pitch roll x y z] leading to the following rotational part
  * R = Rz(yaw) * Ry(pitch) * Rx(roll)
  * It uses the VersorLemma to compute the misalignment, and a simple difference to compute the linear distance
- * The result is the error that brings in2 towards in1
+ * The result is the error that brings in1 towards in2
  *
- * @note for historical reasons this method brings the second frame towards the first, as opposed to what the implementation of VersorLemma does
- *
- * @param[in] in1 the goal transformation matrix expressed as its 6 parameter representation
- * @param[in] in2 the initial transformation matrix expressed as its 6 parameter representation
+ * @param[in] in1 the initial transformation matrix expressed as its 6 parameter representation
+ * @param[in] in2 the goal transformation matrix expressed as its 6 parameter representation
  *
  * @return the Vect6 representing the axis around which in2 should rotate to reach in1 and the linear distance
  *
- * @note the two vector should represent transformation matrix computed w.r.t a common frame, i.e. v1 = wTg, v2 = wTt then CartError(v1, v2)
+ * @note the two vector should represent transformation matrix computed w.r.t a common frame, i.e. v1 = wTt, v2 = wTg then CartError(v1, v2)
  *       brings the tool frame <t> towards a goal frame <g>, and returns the error projected on frame <w>
  */
-//Eigen::Vector6d& CartError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2);
+Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2);
 
 /**
  * @brief A decreasing bell shaped (sigmoid) function.
@@ -142,7 +149,39 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
  */
 double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x);
 
+/**
+ * @brief Saturate the scalar to a given maximum value
+ * @param[in] sat 			the value of the saturation
+ * @param[in,out] value 	the value which is saturated to the maximum value
+ */
+void SaturateScalar(double sat, double& value);
 
+/**
+ * @brief Saturate the vector to a given maximum value applying normalization for preserving the vector direction
+ *
+ * @param[in] sat 			the value of the saturation
+ * @param[in] n				size of vector, to avoid unnecessary size identifications
+ * @param[in,out] vector 	the vector which is saturated to the maximum value
+ */
+void SaturateVector(const int vecSize, const double sat, Eigen::VectorXd& vect);
+
+/**
+ * @brief Evaluates the norm of the shortest distance vector among a point and a given plane
+ *
+ * @param point[in] 		The point from where calculate the distance
+ * @param planeParams[in]	The target plane
+ * @return The distance norm
+ */
+double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams);
+
+/**
+ * @brief Given a point and a plane evaluates the coordinates of the closest point on plane w.r.t the input one.
+ *
+ * @param[in] point 		The point from where calculate the distance
+ * @param[in] planeParams	The target plane
+ * @return	The 3d coordinates of the closest point laying on the plane
+ */
+Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams);
 
 }
 

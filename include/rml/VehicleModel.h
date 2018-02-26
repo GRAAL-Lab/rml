@@ -10,11 +10,10 @@
 
 #include <vector>
 #include <algorithm>	// for std::copy
-#include <cmat/cmat.h>
 
-#include "ctrl_defines.h"
+#include <rml/Types.h>
 
-namespace CTRL {
+namespace rml {
 
 /**
  * @brief Vehicle Model base class
@@ -46,7 +45,7 @@ public:
 	/**
 	 * @brief Specialized swap() to implement the copy-assignment-operator by reusing the copy-constructor
 	 */
-	friend void swap(CTRL::VehicleModel& first, CTRL::VehicleModel& second);
+	friend void swap(rml::VehicleModel& first, rml::VehicleModel& second);
 
 	/**
 	 * @brief Copy Assignment Operator
@@ -73,7 +72,7 @@ public:
 	 * with the given dimensions
 	 * @param[in] baseDOFs the number of base degrees of freedom
 	 */
-	void SetBaseDOFs(int armJoints);
+	void SetBaseDOFs(int baseDOFs);
 
 	/**
 	 * @brief Set the base position
@@ -87,7 +86,7 @@ public:
 	 * @brief Set the base position
 	 * The method updates the internal base position state. This method should be called before the evaluate methods in order to
 	 * have the updated values
-	 * @param[in] q the base position vector (must be an armJoints x 1 vector)
+	 * @param[in] qdot the base position vector (must be an armJoints x 1 vector)
 	 */
 	void SetVelocity(const CMAT::Matrix& qdot);
 
@@ -121,7 +120,7 @@ public:
 
 	/**
 	 * @brief Get the joint position
-	 * @param[in] q the joint position vector (a baseDOFs x 1 vector)
+	 * @return the joint position vector (a baseDOFs x 1 vector)
 	 */
 	const CMAT::Matrix& GetPosition() const {
 		return q_;
@@ -166,32 +165,6 @@ protected:
 	CMAT::Matrix I3_;
 	CMAT::Matrix Zeros_;
 
-};
-
-/*
- * NOTE on CRTP C++ Pattern
- * ------------------------
- *
- * CRTP: Curiously recurring template
- *
- * In short, CRTP is when a class A has a base class which is a template specialization for the class A itself. E.g.
- *
- *    template <class T> class X{...};
- *    class A : public X<A> {...};
- *
- * It is curiously recurring, isn't it? :)
- * Now, what does this give you? This actually gives the X template the ability to be a base class for its specializations.
- *
- * This was needed since BaseModel can be either a specialized class for a particular robot (especially where dJdq is defined
- * for calculating the manipulability) or a generic class where the model is loaded runtime.
- */
-
-template <typename Derived>
-class VehicleModel_CRTP : public VehicleModel {
-public:
-    virtual VehicleModel *clone() const {
-        return new Derived(static_cast<Derived const&>(*this));
-    }
 };
 
 }

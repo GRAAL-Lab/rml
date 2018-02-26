@@ -103,21 +103,21 @@ public:
 
 	/**
 	 * @brief Get the joint position
-	 * @param[in] q the joint position vector (an armJoints x 1 vector)
+	 * @return q the joint position vector (an armJoints x 1 vector)
 	 */
 	const Eigen::VectorXd& GetJointPosition() const;
 
 	/**
 	 * @brief Evaluates the Jacobian of the arm
 	 * This method returns the Jacobian matrix
-	 * @param[out] wJt the Jacobian matrix
+	 * @return wJt the Jacobian matrix
 	 */
 	void EvaluatebJt();
 
 	/**
 	 * @brief Evaluates the tool transformation matrix
 	 * This method returns tool transformation matrix
-	 * @param[out] wJt the tool transformation matrix
+	 * @return the tool transformation matrix
 	 */
 	void EvaluatebTt();
 
@@ -125,14 +125,14 @@ public:
 	 * @brief Evaluates the manipulability measure and its Jacobian
 	 * This method returns he manipulability measure and its Jacobian
 	 * @param[out] mu the manipulability measure
-	 * @param[out] wJt the manipulability measure Jacobian
+	 * @param[out] Jmu the manipulability measure Jacobian
 	 */
 	void EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu);
 
 	/**
 	 * @brief Evaluates the transformation matrix (w.r.t. robot base) of the specified joint
 	 *
-	 * @param[out] bTelw        Joint transformation matrix
+	 * @param[out] bTj        Joint transformation matrix
 	 * @param[in] jointIndex    Joint index
 	 */
 	void EvaluateBase2JointTransf(Eigen::TransfMatrix& bTj, int jointIndex);
@@ -188,7 +188,6 @@ public:
 	}
 
 protected:
-
 	/**
 	 * @brief Loads the model matrices from the files located in file_path
 	 * (file names: wTb0, eTt, biTri1, biTri2, biTri3, etc...)
@@ -199,8 +198,6 @@ protected:
 
 	/**
 	 * @brief Evaluates numerically the Jacobian derivative w.r.t. joint variations
-	 *
-	 * @param[out] dJdq
 	 */
 	void EvaluatedJdqNumeric();
 
@@ -222,8 +219,7 @@ protected:
 	Eigen::Vector3d base_ki_;
 	std::vector<Eigen::Vector6d> h_;
 	Eigen::TransfMatrix bTt_;
-	Eigen::TransfMatrix eTt_;		///< Matrice di Trasformazione dall'endeffector al tool(costante)
-	//Eigen::Vector3d w_r_et_;	// vector of the distance between the end effector frame and the tool frame, projected on the world frame
+	Eigen::TransfMatrix eTt_;		///< Matrice di Trasformazione dall'endeffector al tool (costante)
 
 	std::vector<Eigen::MatrixXd> dJdq_;
 	Eigen::MatrixXd Jpinv_;
