@@ -18,6 +18,7 @@ add_library(rml SHARED
     src/SVD_Internal.cc
     src/ArmModel.cc
     src/Types.cc
+    src/RobotLink.cc
 )
 
 #add_library(youBotModel include/test/youbot_armmodel.cc
@@ -67,6 +68,7 @@ add_executable(rml_test test/rml_test.cpp)
 
 add_executable(rml_test_model test/rml_test_model.cpp
     test/youbot_armmodel.cc
+    test/baxterLeft_armmodel.cc
 )
 
 target_link_libraries(rml_test rml)

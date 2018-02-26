@@ -20,8 +20,8 @@
 #include <rml/Types.h>
 #include <rml/MatrixOperations.h>
 #include <rml/Functions.h>
-#include <rml/PseudoInverse.h>
 #include <rml/SVD.h>
+#include <rml/PseudoInverse.h>
 #include <rml/ArmModel.h>
 
 #endif /* INCLUDE_RML_RML_H_ */

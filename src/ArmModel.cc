@@ -18,14 +18,14 @@
 #include <climits>
 #include <stdlib.h>
 
-#include "rml/ArmModel.h"
+
 #include "rml/MatrixOperations.h"
 #include "rml/PseudoInverse.h"
 #include "rml/Types.h"
 #include "rml/SVD.h"
+#include "rml/ArmModel.h"
+#include "rml/RobotLink.h"
 
-//#define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
-//#define DBG_PRINT
 
 using std::cout;
 using std::endl;
@@ -39,7 +39,7 @@ ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), hasBeenIni
 ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenInitialized_), numberOfJoints_(other.numberOfJoints_),
 		q_(other.q_), baseTb0_(other.baseTb0_), baseTbi_(other.baseTbi_), Tz_(other.Tz_), base_ki_(other.base_ki_), eTt_(other.eTt_),
 		Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
-		wTe_(other.wTe_), I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
+		I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
 
 	/*
 	 * If the arm model we are copying is not initialised we have to initialise all the pointers to NULL since
@@ -58,14 +58,14 @@ ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenIni
 		biTei_.resize(numberOfJoints_);
 		h_.resize(numberOfJoints_);
 		dJdq_.resize(numberOfJoints_);
-		jointLimitsMin_.resize(numberOfJoints_);
-		jointLimitsMAX_.resize(numberOfJoints_);
+		links_.resize(numberOfJoints_);
 		for (int i = 0; i < numberOfJoints_; i++) {
-			baseTei_[i] = other.baseTei_[i];
-			biTri_[i] = other.biTri_[i];
-			biTei_[i] = other.biTei_[i];
-			h_[i] = other.h_[i];
-			dJdq_[i] = other.dJdq_[i];
+			links_.at(i) = other.links_.at(i);
+			baseTei_.at(i) = other.baseTei_.at(i);
+			biTri_.at(i) = other.biTri_.at(i);
+			biTei_.at(i) = other.biTei_.at(i);
+			h_.at(i) = other.h_.at(i);
+			dJdq_.at(i) = other.dJdq_.at(i);
 		}
 	}
 }
@@ -75,9 +75,9 @@ ArmModel& ArmModel::operator=(ArmModel other) {
 	return *this;
 }
 
-ArmModel* ArmModel::clone() const {
-	return new ArmModel(*this);
-}
+//ArmModel* ArmModel::clone() const {
+//	return new ArmModel(*this);
+//}
 
 ArmModel::~ArmModel() {
 
@@ -86,7 +86,7 @@ ArmModel::~ArmModel() {
 void ArmModel::SetJointPosition(const Eigen::VectorXd& q) {
 
 	if(!hasBeenInitialized_){
-		std::cout << "ERROR: Called SetJointPosition() on an unitialized ArmModel().\nExiting..." << std::endl;
+		std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
 		exit(0);
 	}
 	q_ = q;
@@ -110,8 +110,7 @@ void ArmModel::SetArmJoints(int armJoints) {
 	biTei_.resize(numberOfJoints_);
 	h_.resize(numberOfJoints_);
 	dJdq_.resize(numberOfJoints_);
-	jointLimitsMin_.resize(numberOfJoints_);
-	jointLimitsMAX_.resize(numberOfJoints_);
+	links_.resize(numberOfJoints_);
 
 	for (int i = 0; i < numberOfJoints_; ++i) {
 		dJdq_.at(i) = Eigen::MatrixXd::Zero(6, numberOfJoints_);
@@ -385,14 +384,12 @@ void swap(rml::ArmModel& first, rml::ArmModel& second) {
 	swap(first.bTt_, second.bTt_);
 	swap(first.eTt_, second.eTt_);
 
-	swap(first.jointLimitsMin_, second.jointLimitsMin_);
-	swap(first.jointLimitsMAX_, second.jointLimitsMAX_);
+	swap(first.links_, second.links_);
 
 	swap(first.dJdq_, second.dJdq_);
 	swap(first.Jpinv_, second.Jpinv_);
 	swap(first.djdqJpinv_, second.djdqJpinv_);
 
-	swap(first.wTe_, second.wTe_);
 	swap(first.bJt_, second.bJt_);
 	swap(first.I3_, second.I3_);
 	swap(first.ZeroQ_, second.ZeroQ_);

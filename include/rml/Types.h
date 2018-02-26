@@ -119,7 +119,7 @@ public:
 		return *this;
 	}
 
-	rml::EulerYPR GetEulerYPR() const{
+	rml::EulerYPR ToEulerYPR() const{
 		return this->eulerAngles(2, 1, 0);
 	}
 };
@@ -154,7 +154,7 @@ public:
 
 	Vector6d GetYPRXYZ() const {
 		Vector6d a;
-		a.SetFirstVect3(this->GetRotMatrix().GetEulerYPR().ToVect3());
+		a.SetFirstVect3(this->GetRotMatrix().ToEulerYPR().ToVect3());
 		a.SetSecondVect3(this->GetTransl());
 		return a;
 	}

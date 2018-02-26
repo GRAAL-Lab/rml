@@ -4,7 +4,7 @@
  *  Created on: Feb 15, 2018
  *      Author: Francesco Wanderlingh
  *
- *  This executable tests all the functionalities of the Robotic Mathematical Library (RML)
+ *  This executable validates the mathematical functionalities of the Robotic Mathematical Library (RML)
  */
 
 #include "test/rml_test_defines.h"
@@ -66,10 +66,10 @@ int main(int argc, char* argv[]){
 	futils::PrettyPrint(maxvect3.transpose(), "maxvect3");
 
 	rml::EulerYPR ypr;
-	ypr.SetYPR(M_PI,0.0,0.0);
+	ypr.SetYPR(0.0,0.0,M_PI);
 	PrettyPrint(ypr, "ypr cout");
 	PrettyPrint(ypr.ToRotMatrix(), "ypr.ToRotMatrix()");
-	PrettyPrint(ypr.ToRotMatrix().GetEulerYPR(), "ypr.ToRotMatrix().GetEulerYPR()");
+	PrettyPrint(ypr.ToRotMatrix().ToEulerYPR(), "ypr.ToRotMatrix().ToEulerYPR()");
 
 
 	///////////////////////////////

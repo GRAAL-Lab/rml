@@ -10,7 +10,7 @@
 
 #include <eigen3/Eigen/Dense>
 #include <rml/SVD.h>
-#include "Types.h"
+#include <rml/Types.h>
 
 
 namespace rml {
@@ -51,27 +51,6 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	return eigenPinv;
 }
 
-/*
-template<class MatT>
-Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
-		const MatT &mat, const double threshold, const double lambda, double *mu) // choose appropriately
-		{
-
-	int flag;
-	return RegularizedPseudoInverse(mat, threshold, lambda, mu, &flag);
-}
-
-template<class MatT>
-Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
-		const MatT &mat, const double threshold, const double lambda) // choose appropriately
-		{
-
-	double mu;
-	int flag;
-	return RegularizedPseudoInverse(mat, threshold, lambda, &mu, &flag);
-
-}
-*/
 } //namespace rml
 
 #endif /* INCLUDE_RML_PSEUDOINVERSE_H_ */

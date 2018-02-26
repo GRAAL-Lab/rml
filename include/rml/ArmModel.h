@@ -11,7 +11,9 @@
 #include <vector>
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
-#include "rml/RML.h"
+
+#include <rml/Types.h>
+#include <rml/RobotLink.h>
 
 namespace rml {
 
@@ -62,11 +64,11 @@ public:
 	 */
 	ArmModel& operator=(ArmModel other);
 
-	/**
-	 * @brief Pure virtual function implemented in the ArmModel_CRTP (Curiously Recurring Template Pattern),
-	 * @return a copy of the derived class
-	 */
-	virtual ArmModel *clone() const;
+//	/**
+//	 * @brief Pure virtual function implemented in the ArmModel_CRTP (Curiously Recurring Template Pattern),
+//	 * @return a copy of the derived class
+//	 */
+//	virtual ArmModel *clone() const;
 
 	/**
 	 * @brief Internal matrices initialization, hard coded in derived class
@@ -148,8 +150,12 @@ public:
 		return numberOfJoints_;
 	}
 
-	void SetwTb(const Eigen::TransfMatrix& wTb) {
-		baseTb0_ = wTb;
+	const Eigen::TransfMatrix& GetBaseTransf() {
+		return baseTb0_;// = baseTb0;
+	}
+
+	void SetBaseTransf(const Eigen::TransfMatrix& baseTb0) {
+		baseTb0_ = baseTb0;
 	}
 
 	const Eigen::MatrixXd& GetbJt() const {
@@ -174,16 +180,9 @@ public:
 		return dJdq_;
 	}
 
-	const double GetJointMinLimit(int jointIndex) throw (ArmModelException) {
+	const RobotLink& GetLink(int jointIndex) throw (ArmModelException) {
 		if(jointIndex < numberOfJoints_)
-			return jointLimitsMin_.at(jointIndex);
-		else
-			throw ArmModelException();
-	}
-
-	const double GetJointMaxLimit(int jointIndex){
-		if(jointIndex < numberOfJoints_)
-			return jointLimitsMAX_.at(jointIndex);
+			return links_.at(jointIndex);
 		else
 			throw ArmModelException();
 	}
@@ -211,6 +210,7 @@ protected:
 	void BackwardDirectGeometryToolFrame(int jointNumber);
 
 	bool hasBeenInitialized_;
+	std::vector<RobotLink> links_;
 	int numberOfJoints_;
 	Eigen::VectorXd q_;
 	std::vector<Eigen::TransfMatrix> baseTei_; 		///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
@@ -229,12 +229,11 @@ protected:
 	Eigen::MatrixXd Jpinv_;
 	Eigen::MatrixXd djdqJpinv_;
 
-	Eigen::TransfMatrix wTe_;
 	Eigen::MatrixXd bJt_;
 	Eigen::RotMatrix I3_;
 	Eigen::VectorXd ZeroQ_;
-	std::vector< double > jointLimitsMin_;
-	std::vector< double > jointLimitsMAX_;
+
+
 	bool modelReadFromFile_;
 
 };
