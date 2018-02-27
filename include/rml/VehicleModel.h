@@ -9,15 +9,14 @@
 #define __CTRL_VEHICLEMODEL_H__
 
 #include <vector>
-#include <algorithm>	// for std::copy
-
 #include <rml/Types.h>
 
 namespace rml {
 
 /**
  * @brief Vehicle Model base class
- * This class implements a base arm model class
+ *
+ * @details This class implements a base vehicle model class.
  * The derived class should re-implement the InitMatrix method, to set the geometry of the arm and the
  * EvaluatedJdq method to evaluate the derivative of the Jacobian w.r.t. q that is used in the manipulability Jacobian
  * computation.
@@ -80,7 +79,7 @@ public:
 	 * have the updated values 
 	 * @param[in] q the base position vector (must be an armJoints x 1 vector)
 	 */
-	void SetPosition(const CMAT::Matrix& q);
+	void SetPosition(const Eigen::MatrixXd& q);
 
 	/**
 	 * @brief Set the base position
@@ -88,33 +87,25 @@ public:
 	 * have the updated values
 	 * @param[in] qdot the base position vector (must be an armJoints x 1 vector)
 	 */
-	void SetVelocity(const CMAT::Matrix& qdot);
+	void SetVelocity(const Eigen::MatrixXd& qdot);
 
-	/**
-	 * @brief Evaluates the vehicle transformation matrix
-	 * This method returns vehicle transformation matrix
-	 *
-	 * @param[out] wTv the vehicle transformation matrix
-	 */
-	virtual void EvaluatewTv(CMAT::TransfMatrix& wTv);
+//    /**
+//     * @brief Get the complete 6D position, in the form of [y p r x y z],
+//     * independently from the DOF of the vehicle.
+//     *
+//     * @param[out] vehiclePos       The vehicle position
+//     */
+//    virtual void Get6DPosition(Eigen::Vector6d& vehiclePos);
+//
+//	/*
+//	 * @brief Get the complete 6D velocity, in the form of [wx wy wz x y z],
+//	 * independently from the Dof of the vehicle.
+//	 *
+//	 * @param[out] vehicleVel       The vehicle velocity
+//	 */
+//	virtual void Get6DVelocity(Eigen::Vector6d& vehicleVel);
 
-    /**
-     * @brief Get the complete 6D position, in the form of [y p r x y z],
-     * independently from the DOF of the vehicle.
-     *
-     * @param[out] vehiclePos       The vehicle position
-     */
-    virtual void Get6DPosition(CMAT::Vect6& vehiclePos);
-
-	/**
-	 * @brief Get the complete 6D velocity, in the form of [wx wy wz x y z],
-	 * independently from the Dof of the vehicle.
-	 *
-	 * @param[out] vehicleVel       The vehicle velocity
-	 */
-	virtual void Get6DVelocity(CMAT::Vect6& vehicleVel);
-
-	int getDoFs() const {
+	int GetDoFs() const {
 		return vehicleDOFs_;
 	}
 
@@ -122,48 +113,54 @@ public:
 	 * @brief Get the joint position
 	 * @return the joint position vector (a baseDOFs x 1 vector)
 	 */
-	const CMAT::Matrix& GetPosition() const {
+	const Eigen::MatrixXd& GetPosition() const {
 		return q_;
 	}
 
-	const CMAT::Matrix& GetVelocity() const {
+	const Eigen::MatrixXd& GetVelocity() const {
 		return qdot_;
 	}
 
-	const CMAT::TransfMatrix& GetvTb() const {
+	const Eigen::TransfMatrix& GetvTb() const {
 		return vTb_;
 	}
 
-	const CMAT::TransfMatrix& GetwTv() {
-		EvaluatewTv(wTv_);
+	const Eigen::TransfMatrix& GetwTv() {
+
 		return wTv_;
 	}
 
-	const CMAT::TransfMatrix& GetwTb() {
-		EvaluatewTv(wTv_);
+	const Eigen::TransfMatrix& GetwTb() {
 		wTb_ = wTv_ * vTb_;
 		return wTb_;
 	}
 
-	const CMAT::Matrix& GetvJv() const {
+	const Eigen::MatrixXd& GetvJv() const {
 		return vJv_;
 	}
 
 protected:
 
+	/**
+	 * @brief Evaluates the vehicle transformation matrix
+	 *
+	 * @param[out] wTv the vehicle transformation matrix
+	 */
+	virtual void EvaluatewTv();
+
 	int vehicleDOFs_;
-	CMAT::Matrix q_, qdot_;
+	Eigen::MatrixXd q_, qdot_;
 
-	CMAT::Matrix vJv_;
-	CMAT::TransfMatrix wTv_;
-	CMAT::TransfMatrix vTb_;
-	CMAT::TransfMatrix wTb_;
-	CMAT::TransfMatrix T_;
-	CMAT::Vect6* h_;
-	double* arrayQ_;
+	Eigen::MatrixXd vJv_;
+	Eigen::TransfMatrix wTv_;
+	Eigen::TransfMatrix vTb_;
+	Eigen::TransfMatrix wTb_;
+	Eigen::TransfMatrix T_;
+	std::vector<Eigen::Vector6d> h_;
+	//double* arrayQ_;
 
-	CMAT::Matrix I3_;
-	CMAT::Matrix Zeros_;
+	Eigen::RotMatrix I3_;
+	Eigen::MatrixXd Zeros_;
 
 };
 

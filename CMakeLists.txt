@@ -17,6 +17,7 @@ add_library(rml SHARED
     src/SVD.cc
     src/SVD_Internal.cc
     src/ArmModel.cc
+    src/VehicleModel.cc
     src/Types.cc
     src/RobotLink.cc
 )

@@ -117,7 +117,7 @@ void ArmModel::SetArmJoints(int armJoints) {
 	}
 
 	bJt_.resize(6, numberOfJoints_);
-	ZeroQ_ = Eigen::MatrixXd::Zero(numberOfJoints_, 1);
+	ZeroQ_ = Eigen::VectorXd::Zero(numberOfJoints_);
 	q_ = ZeroQ_;
 
 	hasBeenInitialized_ = true;

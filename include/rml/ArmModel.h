@@ -29,7 +29,8 @@ class ArmModelException: public std::exception
 
 /**
  * @brief Arm Model base class
- * This class implements a base arm model class
+ *
+ * @details This class implements a base arm model class.
  * The derived class should re-implement the InitMatrix method, to set the geometry of the arm and the
  * EvaluatedJdq method to evaluate the derivative of the Jacobian w.r.t. q that is used in the manipulability Jacobian
  * computation.
@@ -107,19 +108,7 @@ public:
 	 */
 	const Eigen::VectorXd& GetJointPosition() const;
 
-	/**
-	 * @brief Evaluates the Jacobian of the arm
-	 * This method returns the Jacobian matrix
-	 * @return wJt the Jacobian matrix
-	 */
-	void EvaluatebJt();
 
-	/**
-	 * @brief Evaluates the tool transformation matrix
-	 * This method returns tool transformation matrix
-	 * @return the tool transformation matrix
-	 */
-	void EvaluatebTt();
 
 	/**
 	 * @brief Evaluates the manipulability measure and its Jacobian
@@ -188,6 +177,21 @@ public:
 	}
 
 protected:
+
+	/**
+	 * @brief Evaluates the Jacobian of the arm
+	 * This method returns the Jacobian matrix
+	 * @return wJt the Jacobian matrix
+	 */
+	void EvaluatebJt();
+
+	/**
+	 * @brief Evaluates the tool transformation matrix
+	 * This method returns tool transformation matrix
+	 * @return the tool transformation matrix
+	 */
+	void EvaluatebTt();
+
 	/**
 	 * @brief Loads the model matrices from the files located in file_path
 	 * (file names: wTb0, eTt, biTri1, biTri2, biTri3, etc...)

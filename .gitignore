@@ -169,9 +169,12 @@ msg/_*.py
 # Ignore generated docs
 *.dox
 *.wikidoc
-html
-latex
+docs/html
+docs/latex
+docs/bootstrapped/html
+docs/bootstrapped/latex
 doxygen_sqlite3.db
+
 
 # eclipse stuff
 .project

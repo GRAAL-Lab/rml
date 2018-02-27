@@ -54,12 +54,10 @@ MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3
  * @return the Vect3 representing the axis around which r1 should rotate to reach r2, where its modulus is the angle
  *
  * @note the two rotation matrix should be w.r.t a common frame, i.e. r1 = cRa, r2 = cRb then the versor lemma gives the rotation vector
- *       that brings frame <a> over frame <b> projected on <c>
+ *       that brings frame \<a\> over frame \<b\> projected on \<c\>
  */
 Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2);
 
-
-//Eigen::RotMatrix Vect2RPY(const Eigen::Vector3d& vec);
 
 /**
  * @brief Compute the versor lemma between the two rotation matrices.
@@ -69,13 +67,13 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
  * R = Rz(yaw) * Ry(pitch) * Rx(roll)
  * The vector is the axis around which the first frame should rotate in order to become equal to the second (angle-axis representation).
  *
- * @param[in] r1 the RPY representation of the first rotation matrix
- * @param[in] r2 the RPY representation of the second rotation matrix
+ * @param[in] v1 the RPY representation of the first rotation matrix
+ * @param[in] v2 the RPY representation of the second rotation matrix
  *
  * @return the Vect3 representing the axis around which v1 should rotate to reach v2, where its modulus is the angle
  *
  * @note the two vector should represent rotation matrices computed w.r.t a common frame, i.e. r1 = cRa, r2 = cRb then the versor lemma gives the rotation vector
- *       that brings frame <a> over frame <b> projected on <c>
+ *       that brings frame \<a\> over frame \<b\> projected on \<c\>
  */
 Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2);
 
@@ -91,7 +89,8 @@ Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2);
  *
  * @return the Vect6 representing the axis around which in2 should rotate to reach in1 and the linear distance
  *
- * @note the two transformation matrix should have a common base frame, i.e. CartError(wTg, wTt) brings the tool frame <t> towards a goal frame <g>, and returns the error projected on frame <w>
+ * @note the two transformation matrix should have a common base frame, i.e. CartError(wTg, wTt) brings the tool
+ * 		 frame \<t\> towards a goal frame \<g\>, and returns the error projected on frame \<w\>
  */
 Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::TransfMatrix&  in2);
 
@@ -105,13 +104,13 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::Tra
  * It uses the VersorLemma to compute the misalignment, and a simple difference to compute the linear distance
  * The result is the error that brings in1 towards in2
  *
- * @param[in] in1 the initial transformation matrix expressed as its 6 parameter representation
- * @param[in] in2 the goal transformation matrix expressed as its 6 parameter representation
+ * @param[in] v1 the initial transformation matrix expressed as its 6 parameter representation
+ * @param[in] v2 the goal transformation matrix expressed as its 6 parameter representation
  *
  * @return the Vect6 representing the axis around which in2 should rotate to reach in1 and the linear distance
  *
  * @note the two vector should represent transformation matrix computed w.r.t a common frame, i.e. v1 = wTt, v2 = wTg then CartError(v1, v2)
- *       brings the tool frame <t> towards a goal frame <g>, and returns the error projected on frame <w>
+ *       brings the tool frame \<t\> towards a goal frame \<g\>, and returns the error projected on frame \<w\>
  */
 Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2);
 
@@ -135,9 +134,10 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
 /**
  * @brief An increasing bell shaped (sigmoid) function.
  *
- * The output of this function has a smooth behavior, starting from the value (xmin, ymin) to (xmax, ymax)
- * For x < xmin,  y = ymin
- * For x > xmax, y = ymax
+ * @details The output of this function has a smooth behavior, starting from the value (xmin, ymin) to (xmax, ymax)\n
+ *     For \f$ x < x_{min},  y = y_{min}\f$ \n
+ *     For \f$ x > x_{max}, y = y_{max}\f$ \n
+ *
  *
  * @param[in] xmin the lower extreme value where the transition begins
  * @param[in] xmax the higher extreme value where the transition stops
@@ -159,17 +159,17 @@ void SaturateScalar(double sat, double& value);
 /**
  * @brief Saturate the vector to a given maximum value applying normalization for preserving the vector direction
  *
+ * @param[in] vecSize		size of vector, to avoid unnecessary size identifications
  * @param[in] sat 			the value of the saturation
- * @param[in] n				size of vector, to avoid unnecessary size identifications
  * @param[in,out] vector 	the vector which is saturated to the maximum value
  */
-void SaturateVector(const int vecSize, const double sat, Eigen::VectorXd& vect);
+void SaturateVector(const int vecSize, const double sat, Eigen::VectorXd& vector);
 
 /**
  * @brief Evaluates the norm of the shortest distance vector among a point and a given plane
  *
- * @param point[in] 		The point from where calculate the distance
- * @param planeParams[in]	The target plane
+ * @param[in]  point		The point from where calculate the distance
+ * @param[in] planeParams	The target plane
  * @return The distance norm
  */
 double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams);
