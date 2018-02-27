@@ -27,6 +27,6 @@
 #include <rml/Functions.h>
 #include <rml/SVD.h>
 #include <rml/PseudoInverse.h>
-#include <rml/ArmModel.h>
+#include <rml/RobotModel.h>
 
 #endif /* INCLUDE_RML_RML_H_ */

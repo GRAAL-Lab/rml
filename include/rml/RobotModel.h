@@ -8,6 +8,9 @@
 #ifndef INCLUDE_RML_ROBOTMODEL_H_
 #define INCLUDE_RML_ROBOTMODEL_H_
 
+#include <rml/VehicleModel.h>
+#include <rml/ArmModel.h>
+
 /**
  * \class RobotModel
  *
@@ -39,9 +42,21 @@
 namespace rml {
 
 class RobotModel {
+
+	VehicleModel vehicle_;
+	std::vector<ArmModel> arms_;
+
 public:
 	RobotModel();
 	virtual ~RobotModel();
+
+	const ArmModel& GetArm(int index) const {
+		return arms_.at(index);
+	}
+
+	const VehicleModel& GetVehicle() const {
+		return vehicle_;
+	}
 };
 
 } /* namespace rml */

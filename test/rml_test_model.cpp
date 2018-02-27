@@ -72,6 +72,11 @@ int main(int argc, char* argv[]){
 	}
 
 
+	////////////////////////////////////////////////////////////
+
+	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
+
+
 
 
 	return 0;

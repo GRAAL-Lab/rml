@@ -39,20 +39,16 @@ VehicleModel& VehicleModel::operator=(VehicleModel other) {
 	return *this;
 }
 
-VehicleModel* VehicleModel::clone() const {
-	return new VehicleModel(*this);
-}
-
 VehicleModel::~VehicleModel() {
 }
 
-void VehicleModel::SetPosition(const Eigen::MatrixXd& q) {
+void VehicleModel::SetPosition(const Eigen::Vector6d& q) {
 	q_ = q;
 
 	EvaluatewTv();
 }
 
-void VehicleModel::SetVelocity(const Eigen::MatrixXd& qdot) {
+void VehicleModel::SetVelocity(const Eigen::Vector6d& qdot) {
 	qdot_ = qdot;
 }
 

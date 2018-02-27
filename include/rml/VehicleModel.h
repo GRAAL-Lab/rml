@@ -51,12 +51,6 @@ public:
 	 */
 	VehicleModel& operator=(VehicleModel other);
 
-	/**
-	 * @brief Pure virtual function implemented in the BaseModel_CRTP (Curiously Recurring Template Pattern),
-	 * @return a copy of the derived class
-	 */
-	virtual VehicleModel *clone() const;
-
 
 	/**
 	 * @brief Internal matrices initialization, hard coded in derived class
@@ -77,49 +71,42 @@ public:
 	 * @brief Set the base position
 	 * The method updates the internal base position state. This method should be called before the evaluate methods in order to
 	 * have the updated values 
-	 * @param[in] q the base position vector (must be an armJoints x 1 vector)
+	 * @param[in] q the base position vector in the form of [y p r x y z]
 	 */
-	void SetPosition(const Eigen::MatrixXd& q);
+	void SetPosition(const Eigen::Vector6d& q);
 
 	/**
 	 * @brief Set the base position
 	 * The method updates the internal base position state. This method should be called before the evaluate methods in order to
 	 * have the updated values
-	 * @param[in] qdot the base position vector (must be an armJoints x 1 vector)
+	 * @param[in] qdot the base position vector in the form of [wx wy wz x y z]
 	 */
-	void SetVelocity(const Eigen::MatrixXd& qdot);
+	void SetVelocity(const Eigen::Vector6d& qdot);
 
-//    /**
-//     * @brief Get the complete 6D position, in the form of [y p r x y z],
-//     * independently from the DOF of the vehicle.
-//     *
-//     * @param[out] vehiclePos       The vehicle position
-//     */
-//    virtual void Get6DPosition(Eigen::Vector6d& vehiclePos);
-//
-//	/*
-//	 * @brief Get the complete 6D velocity, in the form of [wx wy wz x y z],
-//	 * independently from the Dof of the vehicle.
-//	 *
-//	 * @param[out] vehicleVel       The vehicle velocity
-//	 */
-//	virtual void Get6DVelocity(Eigen::Vector6d& vehicleVel);
+    /**
+     * @brief Get the complete 6D position, in the form of [y p r x y z],
+     * independently from the DOF of the vehicle.
+     *
+     * @return      The vehicle position
+     */
+	const Eigen::Vector6d& GetPosition(){
+		return q_;
+	}
+
+	/**
+	 * @brief Get the complete 6D velocity, in the form of [wx wy wz x y z],
+	 * independently from the Dof of the vehicle.
+	 *
+	 * @return       The vehicle velocity
+	 */
+	const Eigen::Vector6d& GetVelocity(){
+		return qdot_;
+	}
 
 	int GetDoFs() const {
 		return vehicleDOFs_;
 	}
 
-	/**
-	 * @brief Get the joint position
-	 * @return the joint position vector (a baseDOFs x 1 vector)
-	 */
-	const Eigen::MatrixXd& GetPosition() const {
-		return q_;
-	}
-
-	const Eigen::MatrixXd& GetVelocity() const {
-		return qdot_;
-	}
 
 	const Eigen::TransfMatrix& GetvTb() const {
 		return vTb_;
@@ -143,13 +130,11 @@ protected:
 
 	/**
 	 * @brief Evaluates the vehicle transformation matrix
-	 *
-	 * @param[out] wTv the vehicle transformation matrix
 	 */
 	virtual void EvaluatewTv();
 
 	int vehicleDOFs_;
-	Eigen::MatrixXd q_, qdot_;
+	Eigen::Vector6d q_, qdot_;
 
 	Eigen::MatrixXd vJv_;
 	Eigen::TransfMatrix wTv_;
