@@ -16,7 +16,7 @@ Its major features are:
 ## Dependencies
 Before building the repository you will have to install the following dependencies:
 
-* Eigen 3 (sudo apt install libeigen3-dev)
+* Eigen 3 (`sudo apt install libeigen3-dev`)
 
 
 ## Building and installing
