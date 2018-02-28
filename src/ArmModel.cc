@@ -82,8 +82,8 @@ void ArmModel::AddLink(JointType type, Eigen::TransfMatrix& baseTransf) {
 	links_.push_back(RobotLink(type, baseTransf));
 	numberOfJoints_ = links_.size();
 
-//	cout << numberOfJoints_ << " - ";
-//	futils::PrettyPrint(links_.back().baseTransf_, "baseTransf");
+	//	cout << numberOfJoints_ << " - ";
+	//	futils::PrettyPrint(links_.back().baseTransf_, "baseTransf");
 
 	baseTei_.push_back(Eigen::TransfMatrix());
 	biTei_.push_back(Eigen::TransfMatrix());
@@ -342,15 +342,15 @@ void ArmModel::EvaluatedJdqNumeric() {
 }
 
 
-void ArmModel::EvaluateBase2JointTransf(Eigen::TransfMatrix& bTj, int jointIndex) {
+Eigen::TransfMatrix ArmModel::EvaluateBase2JointTransf(int jointIndex) {
 	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
 	}
-	bTj = baseTei_[jointIndex];
+	return baseTei_[jointIndex];
 }
 
 
-void ArmModel::EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex) {
+Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex) {
 
 	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
@@ -362,24 +362,32 @@ void ArmModel::EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex) 
 		h_[i].setZero();
 	}
 
-	bJj = (h_[0]);
+	Eigen::MatrixXd bJj = (h_[0]);
 	for (int i = 1; i < numberOfJoints_; i++) {
 		bJj = RightJuxtapose(bJj, h_[i]);
 	}
+	return bJj;
 }
 
 void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) {
 
-	std::pair<int, Eigen::TransfMatrix> myPair(jointIndex, TMat);
-	std::map<std::string, std::pair<int, Eigen::TransfMatrix> > myMap(ID, myPair);
+	IndexedTMat myMat(jointIndex, TMat);
+	attachedFrames_.insert(std::make_pair(ID, myMat));
+
 	//attachedBodies_.push_back(std::map<std::string, std::pair<int, Eigen::TransfMatrix>>(ID, myPair));
 }
 
-Eigen::TransfMatrix ArmModel::GetAttachedBodyTransfMatrix(std::string& ID) {
+Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID) {
 
+	int jointIndex = attachedFrames_.at(ID).first;
+	Eigen::TransfMatrix TMat = attachedFrames_.at(ID).second;
+	return EvaluateBase2JointTransf(jointIndex) * TMat;
 }
 
 Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID) {
+
+	int jointIndex = attachedFrames_.at(ID).first;
+	Eigen::TransfMatrix TMat = attachedFrames_.at(ID).second;
 
 }
 

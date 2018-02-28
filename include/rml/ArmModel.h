@@ -11,12 +11,14 @@
 #include <vector>
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
-#include <map>
+#include <unordered_map>
 
 #include <rml/Types.h>
 #include <rml/RobotLink.h>
 
 namespace rml {
+
+typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
 
 /**
  * @brief Exception to be thrown when the joint index out of bounds
@@ -100,22 +102,22 @@ public:
 	/**
 	 * @brief Evaluates the transformation matrix (w.r.t. robot base) of the specified joint
 	 *
-	 * @param[out] bTj        Joint transformation matrix
 	 * @param[in] jointIndex    Joint index
+	 * @return				   Joint transformation matrix
 	 */
-	void EvaluateBase2JointTransf(Eigen::TransfMatrix& bTj, int jointIndex);
+	Eigen::TransfMatrix EvaluateBase2JointTransf(int jointIndex);
 
 	/**
 	 * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
 	 *
-	 * @param[out] bJj          Joint jacobian matrix
 	 * @param[in] jointIndex    Joint index
+	 * @return				   Joint jacobian matrix
 	 */
-	void EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex);
+	Eigen::MatrixXd EvaluateBase2JointJacobian(int jointIndex);
 
 	void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
 
-	Eigen::TransfMatrix GetAttachedBodyTransfMatrix(std::string& ID);
+	Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
 
 	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
 
@@ -198,7 +200,7 @@ protected:
 	bool hasBeenInitialized_;
 	int numberOfJoints_;
 	std::vector<RobotLink> links_;
-	std::vector<std::map<std::string, std::pair<int, Eigen::TransfMatrix> > > attachedBodies_;
+	std::unordered_map<std::string, IndexedTMat > attachedFrames_;
 
 	Eigen::VectorXd q_;
 	std::vector<Eigen::TransfMatrix> baseTei_; 		///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
