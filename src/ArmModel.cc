@@ -83,26 +83,8 @@ ArmModel::~ArmModel() {
 
 }
 
-void ArmModel::SetJointPosition(const Eigen::VectorXd& q) {
 
-	if(!hasBeenInitialized_){
-		std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
-		exit(0);
-	}
-	q_ = q;
-
-	EvaluatebTt();
-	EvaluatebJt();
-	EvaluatedJdqNumeric();
-}
-
-
-const Eigen::VectorXd& ArmModel::GetJointPosition() const {
-	return q_;
-}
-
-
-void ArmModel::SetArmJoints(int armJoints) {
+/*void ArmModel::SetArmJoints(int armJoints) {
 	numberOfJoints_ = armJoints;
 
 	baseTei_.resize(numberOfJoints_);
@@ -126,19 +108,35 @@ void ArmModel::SetArmJoints(int armJoints) {
 
 void ArmModel::InitMatrix() {
 
-}
+}*/
 
 
-void ArmModel::InitMatrix(std::string init_matrices_path) {
+/*oid ArmModel::InitMatrix(std::string init_matrices_path) {
 
 	InitMatrix();
 
 	baseTb0_ = Eigen::Matrix4d::Identity();
 	eTt_ = Eigen::Matrix4d::Identity();
 	ReadModelMatricesFromFile(init_matrices_path);
+}*/
+
+void ArmModel::SetJointPosition(const Eigen::VectorXd& q) {
+
+	if(!hasBeenInitialized_){
+		std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
+		exit(0);
+	}
+	q_ = q;
+
+	EvaluatebTt();
+	EvaluatebJt();
+	EvaluatedJdqNumeric();
 }
 
 
+const Eigen::VectorXd& ArmModel::GetJointPosition() const {
+	return q_;
+}
 
 void ArmModel::EvaluatebJt() {
 	//std::cerr << "I'm in EvaluateJwt" << std::endl;

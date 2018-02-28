@@ -65,18 +65,14 @@ public:
 	 */
 	ArmModel& operator=(ArmModel other);
 
-//	/**
-//	 * @brief Pure virtual function implemented in the ArmModel_CRTP (Curiously Recurring Template Pattern),
-//	 * @return a copy of the derived class
-//	 */
-//	virtual ArmModel *clone() const;
+	void AddLink(Eigen::TransfMatrix, )
 
 	/**
 	 * @brief Internal matrices initialization, hard coded in derived class
 	 * This method *must* be called before any other, but after the SetArmJoints
 	 * It initializes all the matrices to be later used in the evaluation methods
 	 */
-	virtual void InitMatrix();
+	//virtual void InitMatrix();
 
 	/**
 	 * @brief Internal matrices initialization taken from external files
@@ -84,7 +80,7 @@ public:
 	 * It initializes all the matrices to be later used in the evaluation methods
 	 * @param[in] matrices_path folder where the n+2 model files are in (wTb0, eTt, biTri[0-numJoints])
 	 */
-	virtual void InitMatrix(std::string matrices_path);
+	//virtual void InitMatrix(std::string matrices_path);
 
 	/**
 	 * @brief Set the number of arm joints
@@ -92,7 +88,7 @@ public:
 	 * with the given dimensions
 	 * @param[in] armJoints the number of arm joints
 	 */
-	void SetArmJoints(int armJoints);
+	//void SetArmJoints(int armJoints);
 
 	/**
 	 * @brief Set the joint position

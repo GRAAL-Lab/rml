@@ -16,26 +16,20 @@
  *
  * \ingroup RML
  *
- * \brief Provide an example
+ * \brief This class provides a container for storing multi-arm mobile manipulators,
+ * including a series of model related functions.
  *
- * This class is meant as an example.  It is not useful by itself
- * rather its usefulness is only a function of how much it helps
- * the reader.  It is in a sense defined by the person who reads it
- * and otherwise does not exist in any real form.
+ * Detailed description TODO.
  *
- * \note Attempts at zen rarely work.
  *
- * \author (last to touch it) $Author: fw $
+ * \author (last to touch it) fw
  *
- * \version $Revision: 0.1 $
- *
- * \date $Date: 2005/04/14 14:16:20 $
+ * \date 2018/02/28 12:06:20
  *
  * Contact: francesco.wanderlingh@dibris.unige.it
  *
  * Created on: Tue Feb 27 10:22:30 2018
  *
- * $Id: doxygen-howto.html,v 1.5 2005/04/14 14:16:20 bv Exp $
  *
  */
 

@@ -46,7 +46,7 @@ double TimeDiff(timeval t1, timeval t2) {
 
 void PrintResult(const std::string type, const int iter, const PinvSpecs specs, const double time){
 	std::cout << type << "\t" << specs.nRows << "x" << specs.nCols << " \t " << tc::white << time/1000 << " us"
-			<< tc::none << "\t(" << iter << " iterations)" << std::endl;
+			<< tc::none << "\t(avg. on " << iter << " iterations)" << std::endl;
 }
 
 void PseudoInverseTest(const int iterations, Eigen::MatrixXd& A, PinvSpecs &specs, Eigen::MatrixXd& Apinv, TimeResults &results) {
