@@ -11,6 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
+#include <map>
 
 #include <rml/Types.h>
 #include <rml/RobotLink.h>
@@ -26,6 +27,7 @@ class ArmModelException: public std::exception
 		return "[ArmModel] Wrong joint index!";
 	}
 };
+
 
 /**
  * @brief Arm Model base class
@@ -65,46 +67,27 @@ public:
 	 */
 	ArmModel& operator=(ArmModel other);
 
-	void AddLink(Eigen::TransfMatrix, )
-
 	/**
-	 * @brief Internal matrices initialization, hard coded in derived class
-	 * This method *must* be called before any other, but after the SetArmJoints
-	 * It initializes all the matrices to be later used in the evaluation methods
+	 * @brief Adds a link to the kinematic chain
+	 *
+	 * @param baseTransf Transformation matrix from previous to current
+	 * @param type
 	 */
-	//virtual void InitMatrix();
-
-	/**
-	 * @brief Internal matrices initialization taken from external files
-	 * This method *must* be called before any other, but after the SetArmJoints
-	 * It initializes all the matrices to be later used in the evaluation methods
-	 * @param[in] matrices_path folder where the n+2 model files are in (wTb0, eTt, biTri[0-numJoints])
-	 */
-	//virtual void InitMatrix(std::string matrices_path);
-
-	/**
-	 * @brief Set the number of arm joints
-	 * This method sets the number of arm joints in the internal state of the class, and allocates all the matrices 
-	 * with the given dimensions
-	 * @param[in] armJoints the number of arm joints
-	 */
-	//void SetArmJoints(int armJoints);
+	void AddLink(JointType type, Eigen::TransfMatrix& baseTransf);
 
 	/**
 	 * @brief Set the joint position
 	 * The method updates the internal joint position state. This method should be called before the evaluate methods in order to 
 	 * have the updated values 
-	 * @param[in] q the joint position vector (must be an armJoints x 1 vector)
+	 * @param[in] q		the joint position vector (must be an numJoints x 1 vector)
 	 */
-	void SetJointPosition(const Eigen::VectorXd& q);
+	void SetJointsPosition(const Eigen::VectorXd& q);
 
 	/**
 	 * @brief Get the joint position
 	 * @return q the joint position vector (an armJoints x 1 vector)
 	 */
 	const Eigen::VectorXd& GetJointPosition() const;
-
-
 
 	/**
 	 * @brief Evaluates the manipulability measure and its Jacobian
@@ -130,9 +113,15 @@ public:
 	 */
 	void EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex);
 
+	void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
+
+	Eigen::TransfMatrix GetAttachedBodyTransfMatrix(std::string& ID);
+
+	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
+
 
 	int GetNumJoints() const {
-		return numberOfJoints_;
+		return links_.size();
 	}
 
 	const Eigen::TransfMatrix& GetBaseTransf() {
@@ -166,7 +155,7 @@ public:
 	}
 
 	const RobotLink& GetLink(int jointIndex) throw (ArmModelException) {
-		if(jointIndex < numberOfJoints_)
+		if(jointIndex < links_.size())
 			return links_.at(jointIndex);
 		else
 			throw ArmModelException();
@@ -207,11 +196,13 @@ protected:
 	void BackwardDirectGeometryToolFrame(int jointNumber);
 
 	bool hasBeenInitialized_;
-	std::vector<RobotLink> links_;
 	int numberOfJoints_;
+	std::vector<RobotLink> links_;
+	std::vector<std::map<std::string, std::pair<int, Eigen::TransfMatrix> > > attachedBodies_;
+
 	Eigen::VectorXd q_;
 	std::vector<Eigen::TransfMatrix> baseTei_; 		///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
-	std::vector<Eigen::TransfMatrix> biTri_;		///< Matrice di Trasformazione dalla base all'endeffector della BRU i-esima (costante)
+	//std::vector<Eigen::TransfMatrix> biTri_;		///< Matrice di Trasformazione dalla base all'endeffector della BRU i-esima (costante)
 	std::vector<Eigen::TransfMatrix> biTei_;		///< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
 	Eigen::TransfMatrix baseTb0_;						///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
 	Eigen::TransfMatrix baseTbi_;

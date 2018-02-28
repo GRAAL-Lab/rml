@@ -12,6 +12,8 @@
 
 namespace rml {
 
+enum class JointType : uint8_t { Fixed, Revolute, Prismatic };
+
 class RobotLink
 {
     double mass_;
@@ -21,11 +23,7 @@ class RobotLink
 	double jointLimitsMin_;
 	double jointLimitsMAX_;
 
-    /// For debugging purposes
-    int linkIndex_;
-    //static int globalLinkIndex;
-
-    void Initialize(const double mass, const Eigen::Vector3d& dims, const Eigen::Vector3d& CoM, const Eigen::MatrixXd& Inertia);
+    void SetPhysicalProperties(const double mass, const Eigen::Vector3d& sizes, const Eigen::Vector3d& CoM, const Eigen::MatrixXd& Inertia);
     void InitVectors();
 
 public:
@@ -36,25 +34,11 @@ public:
     Eigen::Vector3d self_f, self_n;
     Eigen::Vector3d inter_f, inter_n;
 
+	JointType type_;
+	Eigen::TransfMatrix baseTransf_;
     RobotLink();
-	/**
-	 * @brief Copy constructor
-	 */
-    RobotLink(const RobotLink& other);
 
-	/**
-	 * @brief Specialized swap() to implement the copy-assignment-operator by reusing the copy-constructor
-	 */
-	friend void swap(RobotLink& first, RobotLink& second);
-
-	/**
-	 * @brief Copy Assignment Operator
-	 */
-	RobotLink& operator=(RobotLink other);
-
-    RobotLink(const double mass, const Eigen::Vector3d& dims, const Eigen::Vector3d& CoM, const Eigen::MatrixXd& Inertia);
-
-    static RobotLink Generator(const double mass, const Eigen::Vector3d& dims, const Eigen::Vector3d& CoM, const Eigen::MatrixXd& Inertia);
+    RobotLink(const JointType type, const Eigen::TransfMatrix& baseTransf);
 
     const float Mass() 				const { return mass_; }
     const Eigen::Vector3d& LenghtVec() 	const { return lengthVec_; }
@@ -65,19 +49,19 @@ public:
 
     virtual ~RobotLink();
 
-	double getJointLimitsMax() const {
+	double GetJointLimitsMax() const {
 		return jointLimitsMAX_;
 	}
 
-	void setJointLimitsMax(double jointLimitsMax) {
+	void SetJointLimitsMax(double jointLimitsMax) {
 		jointLimitsMAX_ = jointLimitsMax;
 	}
 
-	double getJointLimitsMin() const {
+	double GetJointLimitsMin() const {
 		return jointLimitsMin_;
 	}
 
-	void setJointLimitsMin(double jointLimitsMin) {
+	void SetJointLimitsMin(double jointLimitsMin) {
 		jointLimitsMin_ = jointLimitsMin;
 	}
 };

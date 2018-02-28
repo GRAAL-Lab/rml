@@ -18,7 +18,6 @@
 #include <climits>
 #include <stdlib.h>
 
-
 #include "rml/MatrixOperations.h"
 #include "rml/PseudoInverse.h"
 #include "rml/Types.h"
@@ -26,6 +25,7 @@
 #include "rml/ArmModel.h"
 #include "rml/RobotLink.h"
 
+#include "rml_internal/Futils.h"
 
 using std::cout;
 using std::endl;
@@ -54,7 +54,6 @@ ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenIni
 	 */
 	else {
 		baseTei_.resize(numberOfJoints_);
-		biTri_.resize(numberOfJoints_);
 		biTei_.resize(numberOfJoints_);
 		h_.resize(numberOfJoints_);
 		dJdq_.resize(numberOfJoints_);
@@ -62,7 +61,6 @@ ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenIni
 		for (int i = 0; i < numberOfJoints_; i++) {
 			links_.at(i) = other.links_.at(i);
 			baseTei_.at(i) = other.baseTei_.at(i);
-			biTri_.at(i) = other.biTri_.at(i);
 			biTei_.at(i) = other.biTei_.at(i);
 			h_.at(i) = other.h_.at(i);
 			dJdq_.at(i) = other.dJdq_.at(i);
@@ -75,14 +73,30 @@ ArmModel& ArmModel::operator=(ArmModel other) {
 	return *this;
 }
 
-//ArmModel* ArmModel::clone() const {
-//	return new ArmModel(*this);
-//}
-
 ArmModel::~ArmModel() {
 
 }
 
+void ArmModel::AddLink(JointType type, Eigen::TransfMatrix& baseTransf) {
+
+	links_.push_back(RobotLink(type, baseTransf));
+	numberOfJoints_ = links_.size();
+
+//	cout << numberOfJoints_ << " - ";
+//	futils::PrettyPrint(links_.back().baseTransf_, "baseTransf");
+
+	baseTei_.push_back(Eigen::TransfMatrix());
+	biTei_.push_back(Eigen::TransfMatrix());
+	h_.push_back(Eigen::Vector6d());
+	dJdq_.push_back(Eigen::MatrixXd());
+	for (auto&& i : dJdq_) // access by forwarding reference, the type of i is auto&
+		i.resize(6,numberOfJoints_);
+
+	bJt_.resize(6, numberOfJoints_);
+	ZeroQ_ = Eigen::VectorXd::Zero(numberOfJoints_);
+	q_ = ZeroQ_;
+
+}
 
 /*void ArmModel::SetArmJoints(int armJoints) {
 	numberOfJoints_ = armJoints;
@@ -120,7 +134,7 @@ void ArmModel::InitMatrix() {
 	ReadModelMatricesFromFile(init_matrices_path);
 }*/
 
-void ArmModel::SetJointPosition(const Eigen::VectorXd& q) {
+void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) {
 
 	if(!hasBeenInitialized_){
 		std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
@@ -180,18 +194,28 @@ void ArmModel::ForwardDirectGeometry(int jointNumber) {
 	// biTri is the constant transformation between the base of the joint <i> and its end-effector
 	// biTei also takes into account the actual rotation of the joint, so
 	// biTei = biTri * Tz(qi)
-	double cos_q, sin_q;
+	double cos_q = std::cos(q_(jointNumber));
+	double sin_q = std::sin(q_(jointNumber));
 
-	cos_q = std::cos(q_(jointNumber));
-	sin_q = std::sin(q_(jointNumber));
+	Eigen::TransfMatrix Tz_;
 
-	Tz_(0, 0) = cos_q;
-	Tz_(0, 1) = -sin_q;
-	Tz_(1, 0) = sin_q;
-	Tz_(1, 1) = cos_q;
+	if (links_.at(jointNumber).type_ == JointType::Revolute){
+
+		Tz_(0,0) = cos_q;	Tz_(0,1) = -sin_q;	Tz_(0,2) = 0; 	Tz_(0,3) = 0;
+		Tz_(1,0) = sin_q;	Tz_(1,1) =  cos_q;	Tz_(1,2) = 0; 	Tz_(1,3) = 0;
+		Tz_(2,0) = 0;		Tz_(2,1) = 0;		Tz_(2,2) = 1;   Tz_(2,3) = 0;
+		Tz_(3,0) = 0;		Tz_(3,1) = 0;		Tz_(3,2) = 0;   Tz_(3,3) = 1;
+
+	}else if(links_.at(jointNumber).type_ == JointType::Prismatic){
+
+		Tz_(0,0) = 1;      Tz_(0,1) = 0;         Tz_(0,2) = 0; Tz_(0,3) = 0;
+		Tz_(1,0) = 0;      Tz_(1,1) = 1;         Tz_(1,2) = 0; Tz_(1,3) = 0;
+		Tz_(2,0) = 0;      Tz_(2,1) = 0;         Tz_(2,2) = 1; Tz_(2,3) = q_(jointNumber);
+		Tz_(3,0) = 0;      Tz_(3,1) = 0;         Tz_(3,2) = 0; Tz_(3,3) = 1;
+	}
 
 	// biTei = biTri * Tz(qi)
-	biTei_[jointNumber] = biTri_[jointNumber] * Tz_;
+	biTei_[jointNumber] = links_.at(jointNumber).baseTransf_ * Tz_;
 
 	// wTei is the transformation between the end-effector of joint <i> and world frame <w>
 	// wTei = wTbi * biTei
@@ -314,6 +338,7 @@ void ArmModel::EvaluatedJdqNumeric() {
 
 	EvaluatebTt();
 	EvaluatebJt();
+
 }
 
 
@@ -341,26 +366,29 @@ void ArmModel::EvaluateBase2JointJacobian(Eigen::MatrixXd& bJj, int jointIndex) 
 	for (int i = 1; i < numberOfJoints_; i++) {
 		bJj = RightJuxtapose(bJj, h_[i]);
 	}
+}
+
+void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) {
+
+	std::pair<int, Eigen::TransfMatrix> myPair(jointIndex, TMat);
+	std::map<std::string, std::pair<int, Eigen::TransfMatrix> > myMap(ID, myPair);
+	//attachedBodies_.push_back(std::map<std::string, std::pair<int, Eigen::TransfMatrix>>(ID, myPair));
+}
+
+Eigen::TransfMatrix ArmModel::GetAttachedBodyTransfMatrix(std::string& ID) {
 
 }
+
+Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID) {
+
+}
+
 
 void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
 
 	modelReadFromFile_ = true;
 	hasBeenInitialized_ = true;
 	std::cout << "To be implemented" << std::endl;
-
-#ifdef DBG_PRINT
-	cout << endl;
-	baseTb0_.PrintToDebugConsole("wtb0");
-	char j_i[INTSTRSIZE];
-	for (int n = 0; n < numberOfJoints_; n++) {
-		sprintf(j_i, "%d", n);
-		std::string biTri_name = "biTri_" + std::string(j_i);
-		biTri_[n].PrintToDebugConsole(biTri_name.c_str());
-	}
-	eTt_.PrintToDebugConsole("eTt_");
-#endif
 
 }
 
@@ -372,7 +400,7 @@ void swap(rml::ArmModel& first, rml::ArmModel& second) {
 	swap(first.numberOfJoints_, second.numberOfJoints_);
 	swap(first.q_, second.q_);
 	swap(first.baseTei_, second.baseTei_);
-	swap(first.biTri_, second.biTri_);
+	//swap(first.biTri_, second.biTri_);
 	swap(first.biTei_, second.biTei_);
 	swap(first.baseTb0_, second.baseTb0_);
 	swap(first.baseTbi_, second.baseTbi_);
@@ -394,6 +422,4 @@ void swap(rml::ArmModel& first, rml::ArmModel& second) {
 }
 
 }
-
-
 

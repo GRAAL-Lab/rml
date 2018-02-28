@@ -9,7 +9,7 @@
 
 #include "test/rml_test_defines.h"
 #include "test/youbot_armmodel.h"
-#include "test/baxterLeft_armmodel.h"
+//#include "test/baxterLeft_armmodel.h"
 
 using std::cout;
 using std::endl;
@@ -28,14 +28,14 @@ int main(int argc, char* argv[]){
 	int numJoints(0);
 	double elapsed_OLD(0), elapsed_NEW(0);
 
-	std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
+	//std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
 	std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
 	std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>();
 
 	armModel = youbotAM;
 
 	numJoints = armModel->GetNumJoints();
-	armModel->InitMatrix();
+	//armModel->InitMatrix();
 
 	cout << tc::magL << "*dJdq Test*" << tc::none << std::endl;
 	cout << "numJoints=" << armModel->GetNumJoints() << endl;
@@ -59,10 +59,10 @@ int main(int argc, char* argv[]){
 	PrettyPrint(q_0.transpose(),"q_0");
 
 	gettimeofday(&t1, NULL);
-	armModel->SetJointPosition(q_0);
-
+	armModel->SetJointsPosition(q_0);
 	dJdq_NEW = armModel->GetdJdq();
 	gettimeofday(&t2, NULL);
+
 	elapsed_NEW += TimeDiff(t1, t2);
 
 	for (int i = 0; i < numJoints - 1; ++i) {
@@ -70,7 +70,6 @@ int main(int argc, char* argv[]){
 		PrettyPrint(dJdq_NEW.at(i),"dJdq:");
 		cout << "------------------------------------------------------------" << endl;
 	}
-
 
 	////////////////////////////////////////////////////////////
 

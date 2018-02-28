@@ -65,16 +65,19 @@ install(EXPORT rmlConfig DESTINATION share/rml/cmake)
 # This makes the project importable from the build directory
 export(TARGETS rml FILE rmlConfig.cmake)
 
-# Every library has unit tests, of course
-add_executable(rml_test test/rml_test.cpp)
 
-add_executable(rml_test_model test/rml_test_model.cpp
-    test/youbot_armmodel.cc
-    test/baxterLeft_armmodel.cc
-)
-
-target_link_libraries(rml_test rml)
-target_link_libraries(rml_test_model rml)
-
-add_test(rml_test rml_test)
-add_test(rml_test_model rml_test_model)
+if(BUILD_TEST)
+    # Every library has unit tests, of course
+    add_executable(rml_test test/rml_test.cpp)
+    
+    add_executable(rml_test_model test/rml_test_model.cpp
+        test/youbot_armmodel.cc
+#        test/baxterLeft_armmodel.cc
+    )
+    
+    target_link_libraries(rml_test rml)
+    target_link_libraries(rml_test_model rml)
+    
+    add_test(rml_test rml_test)
+    add_test(rml_test_model rml_test_model)
+endif(BUILD_TEST)

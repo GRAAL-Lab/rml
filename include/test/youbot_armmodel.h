@@ -23,14 +23,6 @@ class YouBotArmModel : public ArmModel
 public:
 	YouBotArmModel();
 	virtual ~YouBotArmModel();
-
-    virtual void InitMatrix();
-
-    /*virtual void EvaluatedJdq(CMAT::Matrix* dJdq);
-
-private:
-    virtual void EvaluatedJdq(double* q, double* out1, double* out2, double* out3, double* out4, double* out5);*/
-
 };
 
 }
