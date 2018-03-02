@@ -357,6 +357,8 @@ span.SRScope {
 }
 .page-header {
   margin: 20px 0px !important;
+  border-bottom: 0px !important;
+}
 }
 .page-header .title {
   display: inline-block;

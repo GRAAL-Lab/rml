@@ -19,6 +19,7 @@
 #include <stdlib.h>
 
 #include "rml/MatrixOperations.h"
+#include "rml/Functions.h"
 #include "rml/PseudoInverse.h"
 #include "rml/Types.h"
 #include "rml/SVD.h"
@@ -342,7 +343,7 @@ void ArmModel::EvaluatedJdqNumeric() {
 }
 
 
-Eigen::TransfMatrix ArmModel::EvaluateBase2JointTransf(int jointIndex) {
+Eigen::TransfMatrix ArmModel::GetBase2JointTransf(int jointIndex) {
 	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
 	}
@@ -350,7 +351,7 @@ Eigen::TransfMatrix ArmModel::EvaluateBase2JointTransf(int jointIndex) {
 }
 
 
-Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex) {
+Eigen::MatrixXd ArmModel::GetBase2JointJacobian(int jointIndex) {
 
 	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
@@ -372,22 +373,26 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex) {
 void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) {
 
 	IndexedTMat myMat(jointIndex, TMat);
-	attachedFrames_.insert(std::make_pair(ID, myMat));
+	attachedBodyFrames_.insert(std::make_pair(ID, myMat));
 
 	//attachedBodies_.push_back(std::map<std::string, std::pair<int, Eigen::TransfMatrix>>(ID, myPair));
 }
 
 Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID) {
 
-	int jointIndex = attachedFrames_.at(ID).first;
-	Eigen::TransfMatrix TMat = attachedFrames_.at(ID).second;
-	return EvaluateBase2JointTransf(jointIndex) * TMat;
+	int jointIndex = attachedBodyFrames_.at(ID).first;
+	Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
+	return GetBase2JointTransf(jointIndex) * TMat;
 }
 
 Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID) {
 
-	int jointIndex = attachedFrames_.at(ID).first;
-	Eigen::TransfMatrix TMat = attachedFrames_.at(ID).second;
+	int jointIndex = attachedBodyFrames_.at(ID).first;
+	Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
+
+	Eigen::MatrixXd bJrb;
+	bJrb = GetRigidBodyMatrix(TMat.GetTransl()) * GetBase2JointJacobian(jointIndex);
+	return bJrb;
 
 }
 

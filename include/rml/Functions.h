@@ -118,8 +118,8 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
  * @brief A decreasing bell shaped (sigmoid) function.
  *
  * The output of this function has a smooth behavior, starting from the value (xmin, ymax) to (xmax, ymin)
- * For x < xmin,  y = ymax
- * For x > xmax, y = ymin
+ * For \f$ x < x_{min}, y = y_{max}\f$ \n
+ * For \f$ x > x_{max}, y = y_{min}\f$ \n
  *
  * @param[in] xmin the lower extreme value where the transition begins
  * @param[in] xmax the higher extreme value where the transition stops
@@ -135,7 +135,7 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
  * @brief An increasing bell shaped (sigmoid) function.
  *
  * @details The output of this function has a smooth behavior, starting from the value (xmin, ymin) to (xmax, ymax)\n
- *     For \f$ x < x_{min},  y = y_{min}\f$ \n
+ *     For \f$ x < x_{min}, y = y_{min}\f$ \n
  *     For \f$ x > x_{max}, y = y_{max}\f$ \n
  *
  *
@@ -182,6 +182,49 @@ double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters&
  * @return	The 3d coordinates of the closest point laying on the plane
  */
 Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams);
+
+
+/**
+ * @brief Computes the skew symmetric matrix form for a vector
+ * The output is the following:\n
+ *      |  0  -z   y  |\n
+ * t^ = |  z   0  -x  |\n
+ *      | -y   x   0  |\n
+ *
+ * @param t input vector
+ * @return the skew symmetric matrix
+ */
+Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
+
+/**
+ * @brief Compute a rigid body matrix.
+ *
+ * This method assumes that the three values stored in the Vect3 correspond to a translation r between two frames
+ * Then it computes the rigid body transformation matrix defined as\n
+ * |w|   |  I   | 0 | |w|\n
+ * | | = |----------| | |\n
+ * |v|   |[-r^] | I | |v|\n
+ *
+ * @return the rigid body matrix
+ */
+Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl);
+
+
+
+/*
+Eigen::Matrix GetRigidBodyMatrix(const Eigen::TransfMatrix& toolTpoint){
+//
+//	 Calculates the Rigid Body Matrix between tool and point
+//
+	wTt_ = armModel_->GetwTt();
+
+	skew_ = -1.0 * CMAT::Vect3(wTt_.GetRotMatrix() * toolTpoint.GetTrasl()).CrossProdMatrix();
+
+	S_ = I3x3_.RightJuxtapose(Z3x3_).UnderJuxtapose(skew_.RightJuxtapose(I3x3_));
+
+	return S_;
+
+}*/
 
 }
 

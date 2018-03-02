@@ -155,25 +155,42 @@ void SaturateScalar(double sat, double& value)
 
 double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters &planeParams)
 {
-    double numerator = std::fabs(planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3) + planeParams.D);
-    double denominator = std::sqrt(planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C);
+	double numerator = std::fabs(planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3) + planeParams.D);
+	double denominator = std::sqrt(planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C);
 
-    //cout << "n d: " << numerator << " " << denominator << "\n";
-    return (numerator/denominator);
+	//cout << "n d: " << numerator << " " << denominator << "\n";
+	return (numerator/denominator);
 }
 
 Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlaneParameters &planeParams)
 {
 	Eigen::Vector3d resultingPoint = Eigen::Vector3d::Zero();
-    double alpha_num, alpha_den, alpha;
-    alpha_num = -(planeParams.D + planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3));
-    alpha_den = planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C;
-    alpha = alpha_num/alpha_den;
-    resultingPoint(1) = point(1) + alpha * planeParams.A;
-    resultingPoint(2) = point(2) + alpha * planeParams.B;
-    resultingPoint(3) = point(3) + alpha * planeParams.C;
+	double alpha_num, alpha_den, alpha;
+	alpha_num = -(planeParams.D + planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3));
+	alpha_den = planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C;
+	alpha = alpha_num/alpha_den;
+	resultingPoint(1) = point(1) + alpha * planeParams.A;
+	resultingPoint(2) = point(2) + alpha * planeParams.B;
+	resultingPoint(3) = point(3) + alpha * planeParams.C;
 
-    return resultingPoint;
+	return resultingPoint;
+}
+
+Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t){
+
+	Eigen::Matrix3d t_hat;
+	t_hat << 0, -t(2), t(1),
+			t(2), 0, -t(0),
+			-t(1), t(0), 0;
+	return t_hat;
+}
+
+Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl){
+	Eigen::Matrix6d S;
+	S.block(0,0,3,3) = S.block(3,3,3,3) = Eigen::Matrix3d::Identity();
+	S.block(0,3,3,3) = Eigen::Matrix3d::Zero();
+	S.block(3,0,3,3) = -1.0 * Vect3ToSkew(transl);
+	return S;
 }
 
 }

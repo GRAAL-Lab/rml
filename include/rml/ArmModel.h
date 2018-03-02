@@ -105,7 +105,7 @@ public:
 	 * @param[in] jointIndex    Joint index
 	 * @return				   Joint transformation matrix
 	 */
-	Eigen::TransfMatrix EvaluateBase2JointTransf(int jointIndex);
+	Eigen::TransfMatrix GetBase2JointTransf(int jointIndex);
 
 	/**
 	 * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
@@ -113,7 +113,7 @@ public:
 	 * @param[in] jointIndex    Joint index
 	 * @return				   Joint jacobian matrix
 	 */
-	Eigen::MatrixXd EvaluateBase2JointJacobian(int jointIndex);
+	Eigen::MatrixXd GetBase2JointJacobian(int jointIndex);
 
 	void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
 
@@ -200,7 +200,7 @@ protected:
 	bool hasBeenInitialized_;
 	int numberOfJoints_;
 	std::vector<RobotLink> links_;
-	std::unordered_map<std::string, IndexedTMat > attachedFrames_;
+	std::unordered_map<std::string, IndexedTMat > attachedBodyFrames_;
 
 	Eigen::VectorXd q_;
 	std::vector<Eigen::TransfMatrix> baseTei_; 		///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima

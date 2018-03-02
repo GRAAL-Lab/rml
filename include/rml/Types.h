@@ -55,6 +55,7 @@ private:
 namespace Eigen{
 
 typedef Eigen::Matrix<double, 6, 1> Vector6dBase;
+typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 //typedef Eigen::Matrix3d RotationMatrix;
 
 class Vector6d : public Eigen::Vector6dBase
@@ -117,6 +118,15 @@ public:
 	{
 		this->Eigen::Matrix3d::operator=(other);
 		return *this;
+	}
+
+	Eigen::Matrix6d GetCartesianRotationMatrix() const {
+		Eigen::Matrix6d crmat;
+		crmat.block(0,0,3,3) = crmat.block(3,3,3,3) = *this;
+		crmat.block(0,3,3,3) = crmat.block(3,0,3,3) = Eigen::Matrix3d::Zero();
+		return crmat;
+
+
 	}
 
 	rml::EulerYPR ToEulerYPR() const{

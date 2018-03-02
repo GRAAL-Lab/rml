@@ -33,6 +33,8 @@
  *
  */
 
+#include <vector>
+
 namespace rml {
 
 class RobotModel {
@@ -43,7 +45,44 @@ class RobotModel {
 public:
 	RobotModel();
 	virtual ~RobotModel();
+/*
+	void RobotModel::ArmOnVehicleJacobiansEE(CMAT::Matrix& Ja, CMAT::Matrix& Jv)
+	{
+		/// The robot model actually returns the transformation of the end-effector  w.r.t. the base of the robot
+		bTt_ = armModel_->GetbTt();
 
+		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
+		bJt_ = armModel_->GetbJt();
+
+		//vJv_ = vehicleModel_->GetvJv();
+
+		CMAT::RotMatrix vRb = vehicleModel_->GetvTb().GetRotMatrix();
+		CMAT::TransfMatrix vTt_ = vehicleModel_->GetvTb() * bTt_;
+
+		Ja = vRb.GetCartesianRotationMatrix() * bJt_;
+		Jv = vTt_.GetTrasl().GetRigidBodyMatrix() * vehicleModel_->GetvJv();
+		//Jv.PrintMtx("Jv");
+	}
+
+
+	void RobotModel::ArmOnVehicleJacobiansForJoint(CMAT::Matrix& Ja, CMAT::Matrix& Jv, int jointIndex)
+	{
+	    /// The robot model actually returns the transformation of the end-effector  w.r.t. the base of the robot
+	    armModel_->EvaluateBase2JointTransf(bTj_, jointIndex);
+
+	    /// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
+	    armModel_->EvaluateBase2JointJacobian(bJj_, jointIndex);
+
+	    //vJv_ = vehicleModel_->GetvJv();
+
+	    CMAT::RotMatrix vRb = vehicleModel_->GetvTb().GetRotMatrix();
+	    CMAT::TransfMatrix vTj_ = vehicleModel_->GetvTb() * bTj_;
+
+	    Ja = vRb.GetCartesianRotationMatrix() * bJj_;
+	    Jv = vTj_.GetTrasl().GetRigidBodyMatrix() * vehicleModel_->GetvJv();
+	    //Jv.PrintMtx("Jv");
+	}
+*/
 	const ArmModel& GetArm(int index) const {
 		return arms_.at(index);
 	}
