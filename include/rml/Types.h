@@ -158,8 +158,16 @@ public:
 		return this->block(0,0,3,3);
 	}
 
+	void SetRotMatrix(const RotMatrix& rot) {
+		this->block(0,0,3,3) = rot;
+	}
+
 	Vector3d GetTransl() const {
 		return this->block(0,3,3,1);
+	}
+
+	void SetTransl(const Vector3d& transl) {
+		this->block(0,3,3,1) = transl;
 	}
 
 	Vector6d GetYPRXYZ() const {

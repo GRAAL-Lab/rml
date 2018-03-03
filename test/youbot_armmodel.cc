@@ -55,7 +55,7 @@ YouBotArmModel::YouBotArmModel()
 
 	for (int i = 0; i < numJoints; ++i) {
 		//std::cout << "Adding link " << i << std::endl;
-		AddLink(JointType::Revolute, biTri.at(i));
+		AddLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), biTri.at(i));
 	}
 
 	hasBeenInitialized_ = true;

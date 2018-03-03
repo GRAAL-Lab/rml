@@ -176,16 +176,17 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 	return resultingPoint;
 }
 
-Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t){
-
+Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t)
+{
 	Eigen::Matrix3d t_hat;
-	t_hat << 0, -t(2), t(1),
-			t(2), 0, -t(0),
-			-t(1), t(0), 0;
+	t_hat << 0,    -t(2),  t(1),
+			 t(2),    0,  -t(0),
+			-t(1),  t(0),    0;
 	return t_hat;
 }
 
-Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl){
+Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl)
+{
 	Eigen::Matrix6d S;
 	S.block(0,0,3,3) = S.block(3,3,3,3) = Eigen::Matrix3d::Identity();
 	S.block(0,3,3,3) = Eigen::Matrix3d::Zero();

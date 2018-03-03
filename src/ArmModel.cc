@@ -78,9 +78,9 @@ ArmModel::~ArmModel() {
 
 }
 
-void ArmModel::AddLink(JointType type, Eigen::TransfMatrix& baseTransf) {
+void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf) {
 
-	links_.push_back(RobotLink(type, baseTransf));
+	links_.push_back(RobotLink(type, axis, baseTransf));
 	numberOfJoints_ = links_.size();
 
 	//	cout << numberOfJoints_ << " - ";
@@ -183,6 +183,7 @@ void ArmModel::EvaluatebTt() {
 
 
 void ArmModel::ForwardDirectGeometry(int jointNumber) {
+
 	// wTbi is the transformation between the base of joint <jointNumber> and the world frame <w>
 	if (jointNumber == 0) {
 		baseTbi_ = baseTb0_;
@@ -195,24 +196,16 @@ void ArmModel::ForwardDirectGeometry(int jointNumber) {
 	// biTri is the constant transformation between the base of the joint <i> and its end-effector
 	// biTei also takes into account the actual rotation of the joint, so
 	// biTei = biTri * Tz(qi)
-	double cos_q = std::cos(q_(jointNumber));
-	double sin_q = std::sin(q_(jointNumber));
-
 	Eigen::TransfMatrix Tz_;
 
 	if (links_.at(jointNumber).type_ == JointType::Revolute){
-
-		Tz_(0,0) = cos_q;	Tz_(0,1) = -sin_q;	Tz_(0,2) = 0; 	Tz_(0,3) = 0;
-		Tz_(1,0) = sin_q;	Tz_(1,1) =  cos_q;	Tz_(1,2) = 0; 	Tz_(1,3) = 0;
-		Tz_(2,0) = 0;		Tz_(2,1) = 0;		Tz_(2,2) = 1;   Tz_(2,3) = 0;
-		Tz_(3,0) = 0;		Tz_(3,1) = 0;		Tz_(3,2) = 0;   Tz_(3,3) = 1;
+		Eigen::AngleAxisd rot = Eigen::AngleAxisd(q_(jointNumber), links_.at(jointNumber).axis_);
+		Tz_.SetRotMatrix(rot.toRotationMatrix());
 
 	}else if(links_.at(jointNumber).type_ == JointType::Prismatic){
 
-		Tz_(0,0) = 1;      Tz_(0,1) = 0;         Tz_(0,2) = 0; Tz_(0,3) = 0;
-		Tz_(1,0) = 0;      Tz_(1,1) = 1;         Tz_(1,2) = 0; Tz_(1,3) = 0;
-		Tz_(2,0) = 0;      Tz_(2,1) = 0;         Tz_(2,2) = 1; Tz_(2,3) = q_(jointNumber);
-		Tz_(3,0) = 0;      Tz_(3,1) = 0;         Tz_(3,2) = 0; Tz_(3,3) = 1;
+		Eigen::Vector3d transl = q_(jointNumber) * links_.at(jointNumber).axis_;
+		Tz_.SetTransl(transl);
 	}
 
 	// biTei = biTri * Tz(qi)

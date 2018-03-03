@@ -75,7 +75,7 @@ public:
 	 * @param baseTransf Transformation matrix from previous to current
 	 * @param type
 	 */
-	void AddLink(JointType type, Eigen::TransfMatrix& baseTransf);
+	void AddLink(JointType type,  const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf);
 
 	/**
 	 * @brief Set the joint position

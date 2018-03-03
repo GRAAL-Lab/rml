@@ -35,10 +35,11 @@ public:
     Eigen::Vector3d inter_f, inter_n;
 
 	JointType type_;
+	Eigen::Vector3d axis_;
 	Eigen::TransfMatrix baseTransf_;
-    RobotLink();
 
-    RobotLink(const JointType type, const Eigen::TransfMatrix& baseTransf);
+    RobotLink();
+    RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf);
 
     const float Mass() 				const { return mass_; }
     const Eigen::Vector3d& LenghtVec() 	const { return lengthVec_; }
