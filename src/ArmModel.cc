@@ -33,11 +33,11 @@ using std::endl;
 
 namespace rml {
 
-ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), hasBeenInitialized_(false){
+ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), modelInitialized_(false){
 
 }
 
-ArmModel::ArmModel(const ArmModel& other) : hasBeenInitialized_(other.hasBeenInitialized_), numberOfJoints_(other.numberOfJoints_),
+ArmModel::ArmModel(const ArmModel& other) : modelInitialized_(other.modelInitialized_), numberOfJoints_(other.numberOfJoints_),
 		q_(other.q_), baseTb0_(other.baseTb0_), baseTbi_(other.baseTbi_), Tz_(other.Tz_), base_ki_(other.base_ki_), eTt_(other.eTt_),
 		Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
 		I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
@@ -97,6 +97,8 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
 	ZeroQ_ = Eigen::VectorXd::Zero(numberOfJoints_);
 	q_ = ZeroQ_;
 
+	modelInitialized_ = true;
+
 }
 
 /*void ArmModel::SetArmJoints(int armJoints) {
@@ -137,7 +139,7 @@ void ArmModel::InitMatrix() {
 
 void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) {
 
-	if(!hasBeenInitialized_){
+	if(!modelInitialized_){
 		std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
 		exit(0);
 	}
@@ -393,7 +395,7 @@ Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID) {
 void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
 
 	modelReadFromFile_ = true;
-	hasBeenInitialized_ = true;
+	modelInitialized_ = true;
 	std::cout << "To be implemented" << std::endl;
 
 }
@@ -402,7 +404,7 @@ void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
 void swap(rml::ArmModel& first, rml::ArmModel& second) {
 
 	using std::swap;
-	swap(first.hasBeenInitialized_, second.hasBeenInitialized_);
+	swap(first.modelInitialized_, second.modelInitialized_);
 	swap(first.numberOfJoints_, second.numberOfJoints_);
 	swap(first.q_, second.q_);
 	swap(first.baseTei_, second.baseTei_);

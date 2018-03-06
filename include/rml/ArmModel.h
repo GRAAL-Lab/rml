@@ -163,6 +163,10 @@ public:
 			throw ArmModelException();
 	}
 
+	bool IsModelInitialized() const {
+		return modelInitialized_;
+	}
+
 protected:
 
 	/**
@@ -197,7 +201,7 @@ protected:
 	void BackwardDirectGeometry(int jointNumber, int endEffectorIndex);
 	void BackwardDirectGeometryToolFrame(int jointNumber);
 
-	bool hasBeenInitialized_;
+	bool modelInitialized_;
 	int numberOfJoints_;
 	std::vector<RobotLink> links_;
 	std::unordered_map<std::string, IndexedTMat > attachedBodyFrames_;

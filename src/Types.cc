@@ -68,3 +68,15 @@ Eigen::RotMatrix EulerYPR::ToRotMatrix() const {
 }
 
 }
+
+namespace Eigen{
+
+Eigen::TransfMatrix Vector6d::ToTransfMatrix() const {
+		Eigen::TransfMatrix TMat;
+		TMat.SetRotMatrix(rml::EulerYPR(this->GetFirstVect3()).ToRotMatrix());
+		TMat.SetTransl(this->GetSecondVect3());
+		return TMat;
+}
+
+}
+

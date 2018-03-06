@@ -23,75 +23,53 @@ using std::endl;
 namespace rml {
 
 VehicleModel::VehicleModel() {
-	vehicleDOFs_ = 0;
+	modelInitialized_ = false;
 }
 
-VehicleModel::VehicleModel(const VehicleModel& other) :
-				vehicleDOFs_ (0), q_(other.q_), wTv_(other.wTv_), vTb_(other.vTb_), I3_(other.I3_), Zeros_(other.Zeros_) {
-
-	if(vehicleDOFs_ != 0){
-		h_ = other.h_;
-	}
-}
-
-VehicleModel& VehicleModel::operator=(VehicleModel other) {
-	swap(*this, other);
-	return *this;
-}
+//VehicleModel::VehicleModel(const VehicleModel& other) :
+//				modelInitialized_(other.modelInitialized_),
+//				fbkPosition_(other.fbkPosition_), wTv_(other.wTv_), vTb_(other.vTb_), I3_(other.I3_){
+//}
+//
+//VehicleModel& VehicleModel::operator=(VehicleModel other) {
+//	swap(*this, other);
+//	return *this;
+//}
 
 VehicleModel::~VehicleModel() {
 }
 
-void VehicleModel::SetPosition(const Eigen::Vector6d& q) {
-	q_ = q;
+void VehicleModel::SetFeedbackPosition(const Eigen::Vector6d& fbkPos) {
+	fbkPosition_ = fbkPos;
 
-	EvaluatewTv();
+	//EvaluatewTv();
 }
 
-void VehicleModel::SetVelocity(const Eigen::Vector6d& qdot) {
-	qdot_ = qdot;
+void VehicleModel::SetFeedbackVelocity(const Eigen::Vector6d& fbkVel) {
+	fbkVelocity_ = fbkVel;
 }
 
-void VehicleModel::SetBaseDOFs(int armJoints) {
-	vehicleDOFs_ = armJoints;
-
-	h_.resize(vehicleDOFs_);
-
-	q_ = Eigen::VectorXd::Zero(vehicleDOFs_);
-	qdot_ = Eigen::VectorXd::Zero(vehicleDOFs_);
+const Eigen::Vector6d& VehicleModel::GetCartesianVelocity() {
+		Eigen::TransfMatrix wTv;
+		wTv = fbkPosition_.ToTransfMatrix();
+	    cartVelocity_ = wTv.GetRotMatrix().Transpose().GetCartesianRotationMatrix() * fbkVelocity_;
+	    return cartVelocity_;
 }
 
-void VehicleModel::InitMatrix() {
+void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian) {
 
-	Zeros_ = Eigen::MatrixXd::Zero(3,3);
+	vJv_ = vehicleJacobian;
+	modelInitialized_ = true;
 }
-
-void VehicleModel::EvaluatewTv() {
-
-	std::cout << "VehicleModel::EvaluatewTv - " <<
-			"Using empty call EvaluatewTv(), missing specialization" << std::endl;
-}
-
-/*void VehicleModel::Get6DPosition(CMAT::Vect6& vehiclePos) {
-    ortos::DebugConsole::Write(ortos::LogLevel::error, "VehicleModel::Get6DPositionVector",
-            "Using empty call Get6DVelocityVector(), missing specialization");
-}
-
-void VehicleModel::Get6DVelocity(CMAT::Vect6& vehicleVel) {
-	ortos::DebugConsole::Write(ortos::LogLevel::error, "VehicleModel::Get6DVelocityVector",
-			"Using empty call Get6DVelocityVector(), missing specialization");
-}*/
 
 void swap(rml::VehicleModel& first, rml::VehicleModel& second) {
 
 	using std::swap;
-	swap(first.q_, second.q_);
-	swap(first.qdot_, second.qdot_);
+	swap(first.fbkPosition_, second.fbkPosition_);
+	swap(first.fbkVelocity_, second.fbkVelocity_);
+	swap(first.cartVelocity_, second.cartVelocity_);
 	swap(first.wTv_, second.wTv_);
-	swap(first.vTb_, second.vTb_);
-	swap(first.h_, second.h_);
 	swap(first.I3_, second.I3_);
-	swap(first.Zeros_, second.Zeros_);
 }
 
 }

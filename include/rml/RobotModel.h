@@ -34,60 +34,63 @@
  */
 
 #include <vector>
+#include <memory>
 
 namespace rml {
 
+/**
+ * @brief Exception to be thrown when the joint index out of bounds
+ */
+class RobotModelArmException: public std::exception
+{
+	virtual const char* what() const throw () {
+		return "[RobotModel] Error: Arm index out of bounds!!!";
+	}
+};
+
+/**
+ * @brief Exception to be thrown when vehicle is not present
+ */
+class RobotModelVehicleException: public std::exception
+{
+	virtual const char* what() const throw () {
+		return "[RobotModel] Error: No vehicle!!!";
+	}
+};
+
 class RobotModel {
 
-	VehicleModel vehicle_;
-	std::vector<ArmModel> arms_;
+	std::shared_ptr<VehicleModel> vehicle_;
+	std::vector<std::shared_ptr<ArmModel> > arms_;
+
+	Eigen::MatrixXd J_;
+	std::vector<Eigen::TransfMatrix> vehicleTbase_;
+	std::vector<Eigen::MatrixXd> JArm_;
+	std::vector<Eigen::Matrix6d> JVeh_;
+
+	Eigen::MatrixXd GetIsolatedArmJacobianTF(const int armIndex) const throw (std::exception);
+	Eigen::Matrix6d GetIsolatedVehicleJacobianEE(const int armIndex) const throw (std::exception);
+
+	Eigen::MatrixXd GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const throw (std::exception);
+	Eigen::Matrix6d GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const throw (std::exception);
 
 public:
 	RobotModel();
 	virtual ~RobotModel();
-/*
-	void RobotModel::ArmOnVehicleJacobiansEE(CMAT::Matrix& Ja, CMAT::Matrix& Jv)
-	{
-		/// The robot model actually returns the transformation of the end-effector  w.r.t. the base of the robot
-		bTt_ = armModel_->GetbTt();
 
-		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
-		bJt_ = armModel_->GetbJt();
+	bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle);
+	bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
+	bool CheckArm(int armIndex) const;
 
-		//vJv_ = vehicleModel_->GetvJv();
-
-		CMAT::RotMatrix vRb = vehicleModel_->GetvTb().GetRotMatrix();
-		CMAT::TransfMatrix vTt_ = vehicleModel_->GetvTb() * bTt_;
-
-		Ja = vRb.GetCartesianRotationMatrix() * bJt_;
-		Jv = vTt_.GetTrasl().GetRigidBodyMatrix() * vehicleModel_->GetvJv();
-		//Jv.PrintMtx("Jv");
-	}
+	Eigen::MatrixXd GetArmJacobianTF(int armIndex);
+	Eigen::MatrixXd GetVehicleJacobianTF(int armIndex);
 
 
-	void RobotModel::ArmOnVehicleJacobiansForJoint(CMAT::Matrix& Ja, CMAT::Matrix& Jv, int jointIndex)
-	{
-	    /// The robot model actually returns the transformation of the end-effector  w.r.t. the base of the robot
-	    armModel_->EvaluateBase2JointTransf(bTj_, jointIndex);
-
-	    /// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
-	    armModel_->EvaluateBase2JointJacobian(bJj_, jointIndex);
-
-	    //vJv_ = vehicleModel_->GetvJv();
-
-	    CMAT::RotMatrix vRb = vehicleModel_->GetvTb().GetRotMatrix();
-	    CMAT::TransfMatrix vTj_ = vehicleModel_->GetvTb() * bTj_;
-
-	    Ja = vRb.GetCartesianRotationMatrix() * bJj_;
-	    Jv = vTj_.GetTrasl().GetRigidBodyMatrix() * vehicleModel_->GetvJv();
-	    //Jv.PrintMtx("Jv");
-	}
-*/
-	const ArmModel& GetArm(int index) const {
+	const std::shared_ptr<ArmModel> GetArm(int index) const {
 		return arms_.at(index);
 	}
 
-	const VehicleModel& GetVehicle() const {
+	const std::shared_ptr<VehicleModel> GetVehicle() const {
 		return vehicle_;
 	}
 };

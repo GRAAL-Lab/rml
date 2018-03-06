@@ -14,6 +14,7 @@
 /// Forward declaration
 namespace Eigen{
 class RotMatrix;
+class TransfMatrix;
 }
 
 namespace rml{
@@ -58,6 +59,9 @@ typedef Eigen::Matrix<double, 6, 1> Vector6dBase;
 typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 //typedef Eigen::Matrix3d RotationMatrix;
 
+/**
+ * @brief A 6d vector that can contain a [y p r x y z] or an [wx wy wz x y z] vector
+ */
 class Vector6d : public Eigen::Vector6dBase
 {
 public:
@@ -99,6 +103,8 @@ public:
 	void SetSecondVect3(const Eigen::MatrixBase <OtherDerived>& vec3) {
 		this->block(3,0,3,1) = vec3;
 	}
+
+	TransfMatrix ToTransfMatrix() const;
 };
 
 class RotMatrix : public Eigen::Matrix3d
@@ -118,6 +124,10 @@ public:
 	{
 		this->Eigen::Matrix3d::operator=(other);
 		return *this;
+	}
+
+	RotMatrix Transpose() const {
+		return this->transpose();
 	}
 
 	Eigen::Matrix6d GetCartesianRotationMatrix() const {

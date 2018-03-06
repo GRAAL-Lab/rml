@@ -36,36 +36,34 @@ public:
 	 */
 	virtual ~VehicleModel();
 
-	/**
-	 * @brief Copy constructor
-	 */
-	VehicleModel(const VehicleModel& other);
+//	/**
+//	 * @brief Copy constructor
+//	 */
+//	VehicleModel(const VehicleModel& other);
 
 	/**
 	 * @brief Specialized swap() to implement the copy-assignment-operator by reusing the copy-constructor
 	 */
 	friend void swap(rml::VehicleModel& first, rml::VehicleModel& second);
 
-	/**
-	 * @brief Copy Assignment Operator
-	 */
-	VehicleModel& operator=(VehicleModel other);
+//	/**
+//	 * @brief Copy Assignment Operator
+//	 */
+//	VehicleModel& operator=(VehicleModel other);
 
 
 	/**
-	 * @brief Internal matrices initialization, hard coded in derived class
-	 * This method *must* be called before any other, but after the SetArmJoints
-	 * It initializes all the matrices to be later used in the evaluation methods
+	 * @brief Jacobian initialization
 	 */
-	virtual void InitMatrix();
+	void SetJacobian(Eigen::Matrix6d vehicleJacobian);
 
-	/**
-	 * @brief Set the number of base DOFs
-	 * This method sets the number of arm joints in the internal state of the class, and allocates all the matrices 
-	 * with the given dimensions
-	 * @param[in] baseDOFs the number of base degrees of freedom
-	 */
-	void SetBaseDOFs(int baseDOFs);
+//	/**
+//	 * @brief Set the number of base DOFs
+//	 * This method sets the number of arm joints in the internal state of the class, and allocates all the matrices
+//	 * with the given dimensions
+//	 * @param[in] baseDOFs the number of base degrees of freedom
+//	 */
+//	void SetBaseDOFs(int baseDOFs);
 
 	/**
 	 * @brief Set the base position
@@ -73,7 +71,7 @@ public:
 	 * have the updated values 
 	 * @param[in] q the base position vector in the form of [y p r x y z]
 	 */
-	void SetPosition(const Eigen::Vector6d& q);
+	void SetFeedbackPosition(const Eigen::Vector6d& fbkPos);
 
 	/**
 	 * @brief Set the base position
@@ -81,7 +79,7 @@ public:
 	 * have the updated values
 	 * @param[in] qdot the base position vector in the form of [wx wy wz x y z]
 	 */
-	void SetVelocity(const Eigen::Vector6d& qdot);
+	void SetFeedbackVelocity(const Eigen::Vector6d& fbkVel);
 
     /**
      * @brief Get the complete 6D position, in the form of [y p r x y z],
@@ -89,8 +87,8 @@ public:
      *
      * @return      The vehicle position
      */
-	const Eigen::Vector6d& GetPosition(){
-		return q_;
+	const Eigen::Vector6d& GetFeedbackPosition(){
+		return fbkPosition_;
 	}
 
 	/**
@@ -99,53 +97,51 @@ public:
 	 *
 	 * @return       The vehicle velocity
 	 */
-	const Eigen::Vector6d& GetVelocity(){
-		return qdot_;
+	const Eigen::Vector6d& GetFeedbackVelocity(){
+		return fbkVelocity_;
 	}
 
-	int GetDoFs() const {
-		return vehicleDOFs_;
-	}
+	const Eigen::Vector6d& GetCartesianVelocity();
 
 
-	const Eigen::TransfMatrix& GetvTb() const {
-		return vTb_;
-	}
+
+//	int GetDoFs() const {
+//		return vehicleDOFs_;
+//	}
+
+
+//	const Eigen::TransfMatrix& GetvTb() const {
+//		return vTb_;
+//	}
 
 	const Eigen::TransfMatrix& GetwTv() {
-
 		return wTv_;
 	}
 
-	const Eigen::TransfMatrix& GetwTb() {
-		wTb_ = wTv_ * vTb_;
-		return wTb_;
+//	const Eigen::TransfMatrix& GetwTb() {
+//		wTb_ = wTv_ * vTb_;
+//		return wTb_;
+//	}
+
+	const Eigen::Matrix6d& GetvJv() const {
+		return vJv_;
 	}
 
-	const Eigen::MatrixXd& GetvJv() const {
-		return vJv_;
+	bool IsModelInitialized() const {
+		return modelInitialized_;
 	}
 
 protected:
 
-	/**
-	 * @brief Evaluates the vehicle transformation matrix
-	 */
-	virtual void EvaluatewTv();
+	bool modelInitialized_;
+	Eigen::Vector6d fbkPosition_, fbkVelocity_, cartVelocity_;
 
-	int vehicleDOFs_;
-	Eigen::Vector6d q_, qdot_;
-
-	Eigen::MatrixXd vJv_;
+	Eigen::Matrix6d vJv_;
 	Eigen::TransfMatrix wTv_;
-	Eigen::TransfMatrix vTb_;
+	//Eigen::TransfMatrix vTb_;
 	Eigen::TransfMatrix wTb_;
-	Eigen::TransfMatrix T_;
-	std::vector<Eigen::Vector6d> h_;
-	//double* arrayQ_;
-
+	//Eigen::TransfMatrix T_;
 	Eigen::RotMatrix I3_;
-	Eigen::MatrixXd Zeros_;
 
 };
 
