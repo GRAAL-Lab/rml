@@ -32,18 +32,18 @@ bool RobotModel::LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) {
 	}
 }
 
-bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb)
+int RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb)
 {
 	if(arm->IsModelInitialized()){
 		arms_.push_back(arm);
 		//		JArm_.push_back(Eigen::MatrixXd(6, arm.GetNumJoints()));
 		//		JVeh_.push_back(Eigen::Matrix6d());
 		vehicleTbase_.push_back(vTb);
-		return true;
+		return (arms_.size() - 1);
 	}
 	else {
 		std::cout << tc::redL << "Error: Loaded a NOT initialised ArmModel" << tc::none << std::endl;
-		return false;
+		return -1;
 	}
 
 }

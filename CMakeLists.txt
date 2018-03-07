@@ -72,6 +72,7 @@ if(BUILD_TEST)
     
     add_executable(rml_test_model test/rml_test_model.cpp
         test/youbot_armmodel.cc
+        test/youbot_vehiclemodel.cc
 #        test/baxterLeft_armmodel.cc
     )
     

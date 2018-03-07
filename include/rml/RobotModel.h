@@ -79,7 +79,7 @@ public:
 	virtual ~RobotModel();
 
 	bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle);
-	bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
+	int LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
 	bool CheckArm(int armIndex) const;
 
 	Eigen::MatrixXd GetArmJacobianTF(int armIndex);

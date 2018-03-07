@@ -9,6 +9,7 @@
 
 #include "test/rml_test_defines.h"
 #include "test/youbot_armmodel.h"
+#include "test/youbot_vehiclemodel.h"
 //#include "test/baxterLeft_armmodel.h"
 
 using std::cout;
@@ -73,9 +74,16 @@ int main(int argc, char* argv[]){
 
 	////////////////////////////////////////////////////////////
 
+	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
+
 	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
+	int armIndex1 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+	int armIndex2 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+	robotModel->LoadVehicle(youbotVM);
 
-
+	PrettyPrint(robotModel->GetVehicleJacobianTF(armIndex1), "GetVehicleJacobianTF(1)");
+	PrettyPrint(robotModel->GetArmJacobianTF(armIndex1), "GetArmJacobianTF(1)");
+	PrettyPrint(robotModel->GetArmJacobianTF(armIndex2), "GetArmJacobianTF(2)");
 
 
 	return 0;

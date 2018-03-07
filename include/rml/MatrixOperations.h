@@ -39,9 +39,11 @@ inline void SetDiagonalFromDouble(Eigen::MatrixXd& MatT, double diag[]){
 
 //template<typename OtherDerived>
 inline Eigen::MatrixXd RightJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
-	Eigen::MatrixXd res;
-	eigen_assert(A.rows() == B.rows());
-    res = A;
+	Eigen::MatrixXd res = A;
+	if(res.rows() == 0 && res.cols() == 0){
+		res.resize(B.rows(), Eigen::NoChange);
+	}
+	eigen_assert(res.rows() == B.rows());
 	res.conservativeResize(Eigen::NoChange, A.cols() + B.cols());
 	res.block(0, A.cols(), B.rows(), B.cols()) = B;
 	return res;
@@ -53,9 +55,11 @@ inline Eigen::MatrixXd RightJuxtapose(const Eigen::MatrixXd& A, const Eigen::Mat
 */
 
 inline Eigen::MatrixXd UnderJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
-	Eigen::MatrixXd res;
-	eigen_assert(A.cols() == B.cols());
-    res = A;
+	Eigen::MatrixXd res = A;
+	if(res.rows() == 0 && res.cols() == 0){
+		res.resize(Eigen::NoChange, B.cols());
+	}
+	eigen_assert(res.cols() == B.cols());
 	res.conservativeResize(A.rows() + B.rows(), Eigen::NoChange);
 	res.block(A.rows(), 0, B.rows(), B.cols()) = B;
 	return res;
