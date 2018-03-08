@@ -25,7 +25,6 @@
 #include "rml/SVD.h"
 #include "rml/ArmModel.h"
 #include "rml/RobotLink.h"
-
 #include "rml_internal/Futils.h"
 
 using std::cout;
@@ -34,44 +33,6 @@ using std::endl;
 namespace rml {
 
 ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), modelInitialized_(false){
-
-}
-
-ArmModel::ArmModel(const ArmModel& other) : modelInitialized_(other.modelInitialized_), numberOfJoints_(other.numberOfJoints_),
-		q_(other.q_), baseTb0_(other.baseTb0_), baseTbi_(other.baseTbi_), Tz_(other.Tz_), base_ki_(other.base_ki_), eTt_(other.eTt_),
-		Jpinv_(other.Jpinv_), djdqJpinv_(other.djdqJpinv_),
-		I3_(other.I3_), ZeroQ_(other.ZeroQ_) {
-
-	/*
-	 * If the arm model we are copying is not initialised we have to initialise all the pointers to NULL since
-	 * we don't know yet the size of the containers.
-	 */
-	if (numberOfJoints_ == 0) {
-		modelReadFromFile_ = false;
-	}
-
-	/*
-	 * While if the arm has been already initialised we can copy all the necessary containers.
-	 */
-	else {
-		baseTei_.resize(numberOfJoints_);
-		biTei_.resize(numberOfJoints_);
-		h_.resize(numberOfJoints_);
-		dJdq_.resize(numberOfJoints_);
-		links_.resize(numberOfJoints_);
-		for (int i = 0; i < numberOfJoints_; i++) {
-			links_.at(i) = other.links_.at(i);
-			baseTei_.at(i) = other.baseTei_.at(i);
-			biTei_.at(i) = other.biTei_.at(i);
-			h_.at(i) = other.h_.at(i);
-			dJdq_.at(i) = other.dJdq_.at(i);
-		}
-	}
-}
-
-ArmModel& ArmModel::operator=(ArmModel other) {
-	swap(*this, other);
-	return *this;
 }
 
 ArmModel::~ArmModel() {
@@ -99,43 +60,9 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
 
 	modelInitialized_ = true;
 
+	SetJointsPosition(ZeroQ_);
+
 }
-
-/*void ArmModel::SetArmJoints(int armJoints) {
-	numberOfJoints_ = armJoints;
-
-	baseTei_.resize(numberOfJoints_);
-	biTri_.resize(numberOfJoints_);
-	biTei_.resize(numberOfJoints_);
-	h_.resize(numberOfJoints_);
-	dJdq_.resize(numberOfJoints_);
-	links_.resize(numberOfJoints_);
-
-	for (int i = 0; i < numberOfJoints_; ++i) {
-		dJdq_.at(i) = Eigen::MatrixXd::Zero(6, numberOfJoints_);
-	}
-
-	bJt_.resize(6, numberOfJoints_);
-	ZeroQ_ = Eigen::VectorXd::Zero(numberOfJoints_);
-	q_ = ZeroQ_;
-
-	hasBeenInitialized_ = true;
-}
-
-
-void ArmModel::InitMatrix() {
-
-}*/
-
-
-/*oid ArmModel::InitMatrix(std::string init_matrices_path) {
-
-	InitMatrix();
-
-	baseTb0_ = Eigen::Matrix4d::Identity();
-	eTt_ = Eigen::Matrix4d::Identity();
-	ReadModelMatricesFromFile(init_matrices_path);
-}*/
 
 void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) {
 
@@ -257,6 +184,8 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 	double myMu;
 	//EvaluatewJt(wJt_);
 	//EvaluatedJdqNumeric(dJdq_);
+	Jmu.resize(1, numberOfJoints_);
+	Jmu.setZero();
 
 	SVDParameters mySVD;
 
@@ -264,10 +193,9 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 		mySVD.lambda = 0.0001;
 		mySVD.threshold = 0.0001;
 		/// For defective manipulators
-		//std::cout << "nrow: " << dJdq_[0].GetNumRows() << " ncol:" << dJdq_[0].GetNumColumns() << std::endl;
-		rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), mySVD);
+		//std::cout << "nrow: " << dJdq_[0].rows() << " ncol:" << dJdq_[0].cols() << std::endl;
+		Jpinv_ = rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), mySVD);
 		//Jpinv_ = .RegPseudoInverse(, );
-
 		for(int k = 0; k < numberOfJoints_; k++)
 		{
 			Jmu(k) = 0;
@@ -278,6 +206,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 
 			Jmu(k) *= mySVD.mu;
 		}
+
 		//mu.PrintMtx("mu");
 	} else {
 		mySVD.lambda = 0.01;
@@ -369,8 +298,6 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
 
 	IndexedTMat myMat(jointIndex, TMat);
 	attachedBodyFrames_.insert(std::make_pair(ID, myMat));
-
-	//attachedBodies_.push_back(std::map<std::string, std::pair<int, Eigen::TransfMatrix>>(ID, myPair));
 }
 
 Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID) {
@@ -384,11 +311,8 @@ Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID) {
 
 	int jointIndex = attachedBodyFrames_.at(ID).first;
 	Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
-
-	Eigen::MatrixXd bJrb;
-	bJrb = GetRigidBodyMatrix(TMat.GetTransl()) * GetBase2JointJacobian(jointIndex);
-	return bJrb;
-
+	Eigen::Vector3d projectedTransl = GetBase2JointTransf(jointIndex).GetRotMatrix() * TMat.GetTransl();
+	return GetRigidBodyMatrix(projectedTransl) * GetBase2JointJacobian(jointIndex);
 }
 
 
@@ -398,35 +322,6 @@ void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
 	modelInitialized_ = true;
 	std::cout << "To be implemented" << std::endl;
 
-}
-
-
-void swap(rml::ArmModel& first, rml::ArmModel& second) {
-
-	using std::swap;
-	swap(first.modelInitialized_, second.modelInitialized_);
-	swap(first.numberOfJoints_, second.numberOfJoints_);
-	swap(first.q_, second.q_);
-	swap(first.baseTei_, second.baseTei_);
-	//swap(first.biTri_, second.biTri_);
-	swap(first.biTei_, second.biTei_);
-	swap(first.baseTb0_, second.baseTb0_);
-	swap(first.baseTbi_, second.baseTbi_);
-	swap(first.Tz_, second.Tz_);
-	swap(first.base_ki_, second.base_ki_);
-	swap(first.h_, second.h_);
-	swap(first.bTt_, second.bTt_);
-	swap(first.eTt_, second.eTt_);
-
-	swap(first.links_, second.links_);
-
-	swap(first.dJdq_, second.dJdq_);
-	swap(first.Jpinv_, second.Jpinv_);
-	swap(first.djdqJpinv_, second.djdqJpinv_);
-
-	swap(first.bJt_, second.bJt_);
-	swap(first.I3_, second.I3_);
-	swap(first.ZeroQ_, second.ZeroQ_);
 }
 
 }

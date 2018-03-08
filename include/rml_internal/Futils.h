@@ -111,7 +111,7 @@ const char* const white = "\033[1;37m";
 }
 #endif
 
-enum class LogEntities {
+/*enum class LogEntities {
     Controller, Driver, Logger, UDPReceiver, UDPSender, Generic
 };
 
@@ -142,7 +142,7 @@ inline std::string DebugMsg(const LogEntities entity, const std::string inputMsg
     }
     strstr << tc::none << inputMsg;
     return strstr.str();
-}
+}*/
 
 namespace futils {
 

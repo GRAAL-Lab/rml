@@ -55,25 +55,11 @@ public:
 	virtual ~ArmModel();
 
 	/**
-	 * @brief Copy constructor
-	 */
-	ArmModel(const ArmModel& other);
-
-	/**
-	 * @brief Specialized swap() to implement the copy-assignment-operator by reusing the copy-constructor
-	 */
-	friend void swap(ArmModel& first, ArmModel& second);
-
-	/**
-	 * @brief Copy Assignment Operator
-	 */
-	ArmModel& operator=(ArmModel other);
-
-	/**
 	 * @brief Adds a link to the kinematic chain
 	 *
-	 * @param baseTransf Transformation matrix from previous to current
-	 * @param type
+	 * @param type 			The JointType, whether: Fixed, Revolute, Prismatic
+	 * @param axis			The axis along which the joint rotates or translates
+	 * @param baseTransf 	Transformation matrix from previous to current
 	 */
 	void AddLink(JointType type,  const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf);
 

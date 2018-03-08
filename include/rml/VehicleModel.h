@@ -57,27 +57,19 @@ public:
 	 */
 	void SetJacobian(Eigen::Matrix6d vehicleJacobian);
 
-//	/**
-//	 * @brief Set the number of base DOFs
-//	 * This method sets the number of arm joints in the internal state of the class, and allocates all the matrices
-//	 * with the given dimensions
-//	 * @param[in] baseDOFs the number of base degrees of freedom
-//	 */
-//	void SetBaseDOFs(int baseDOFs);
-
 	/**
 	 * @brief Set the base position
 	 * The method updates the internal base position state. This method should be called before the evaluate methods in order to
 	 * have the updated values 
-	 * @param[in] q the base position vector in the form of [y p r x y z]
+	 * @param[in] fbkPos the base position vector in the form of [y p r x y z]
 	 */
 	void SetFeedbackPosition(const Eigen::Vector6d& fbkPos);
 
 	/**
 	 * @brief Set the base position
-	 * The method updates the internal base position state. This method should be called before the evaluate methods in order to
+	 * The method updates the internal base velocity state. This method should be called before the evaluate methods in order to
 	 * have the updated values
-	 * @param[in] qdot the base position vector in the form of [wx wy wz x y z]
+	 * @param[in] fbkVel the base position vector in the form of [wx wy wz x y z]
 	 */
 	void SetFeedbackVelocity(const Eigen::Vector6d& fbkVel);
 

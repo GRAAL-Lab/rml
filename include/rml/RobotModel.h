@@ -78,12 +78,16 @@ public:
 	RobotModel();
 	virtual ~RobotModel();
 
+	int GetTotalDOFs();
 	bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle);
 	int LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
 	bool CheckArm(int armIndex) const;
 
-	Eigen::MatrixXd GetArmJacobianTF(int armIndex);
-	Eigen::MatrixXd GetVehicleJacobianTF(int armIndex);
+	Eigen::MatrixXd GetArmJacobian_ToolFrame(int armIndex);
+	Eigen::MatrixXd GetVehicleJacobian_ToolFrame(int armIndex);
+	Eigen::MatrixXd GetArmJacobian_JointControl(int armIndex);
+	Eigen::MatrixXd GetArmJacobian_Manipulability(int armIndex, double& mu);
+	Eigen::MatrixXd GetVehicleJacobian();
 
 
 	const std::shared_ptr<ArmModel> GetArm(int index) const {

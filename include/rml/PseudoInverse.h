@@ -12,8 +12,8 @@
 #include <rml/SVD.h>
 #include <rml/Types.h>
 
-
-namespace rml {
+namespace rml
+{
 
 /**
  * @internal for internal use only
@@ -22,12 +22,10 @@ namespace rml {
  */
 void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, double lambda, double* prod, int* flag);
 
-
-
 template<class MatT>
 Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
 		const MatT& mat, SVDParameters& svdParams) // choose appropriately
-		{
+{
 
 	int m = mat.rows(), n = mat.cols();
 	double J[m * n];                // NULL pointer
@@ -49,6 +47,14 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	MatT eigenPinv = Eigen::Map<MatT>(JPInv, n, m);
 
 	return eigenPinv;
+}
+
+template<class MatT>
+Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
+		const MatT& mat) // choose appropriately
+{
+	SVDParameters svdParams;
+	RegularizedPseudoInverse(mat, svdParams);
 }
 
 } //namespace rml

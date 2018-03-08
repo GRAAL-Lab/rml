@@ -55,7 +55,7 @@ int main(int argc, char* argv[]){
 		exit(0);
 	}
 
-	Eigen::MatrixXd q_0 = Eigen::MatrixXd(numJoints, 1);//, q_0_doub);
+	Eigen::MatrixXd q_0 = Eigen::MatrixXd(numJoints, 1);
 	rml::Double2Matrix(q_0_doub, numJoints, 1, q_0);
 	PrettyPrint(q_0.transpose(),"q_0");
 
@@ -81,10 +81,14 @@ int main(int argc, char* argv[]){
 	int armIndex2 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
 	robotModel->LoadVehicle(youbotVM);
 
-	PrettyPrint(robotModel->GetVehicleJacobianTF(armIndex1), "GetVehicleJacobianTF(1)");
-	PrettyPrint(robotModel->GetArmJacobianTF(armIndex1), "GetArmJacobianTF(1)");
-	PrettyPrint(robotModel->GetArmJacobianTF(armIndex2), "GetArmJacobianTF(2)");
+	PrettyPrint(robotModel->GetVehicleJacobian_ToolFrame(armIndex1), "GetVehicleJacobianTF(1)");
+	PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex1), "GetArmJacobianTF(1)");
+	PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex2), "GetArmJacobianTF(2)");
 
+	double mu;
+	PrettyPrint(robotModel->GetArmJacobian_JointControl(armIndex1),"GetArmJacobian_JointControl()");
+	PrettyPrint(robotModel->GetArmJacobian_Manipulability(armIndex1, mu),"GetArmJacobian_Manipulability()");
+	PrettyPrint(robotModel->GetVehicleJacobian(),"GetVehicleJacobian()");
 
 	return 0;
 }
