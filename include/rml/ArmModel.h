@@ -35,11 +35,7 @@ class ArmModelException: public std::exception
  * @brief Arm Model base class
  *
  * @details This class implements a base arm model class.
- * The derived class should re-implement the InitMatrix method, to set the geometry of the arm and the
- * EvaluatedJdq method to evaluate the derivative of the Jacobian w.r.t. q that is used in the manipulability Jacobian
- * computation.
  */
-
 class ArmModel
 {
 public:
@@ -101,9 +97,11 @@ public:
 	 */
 	Eigen::MatrixXd GetBase2JointJacobian(int jointIndex);
 
+
 	void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
 
 	Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
+	Eigen::TransfMatrix GetCurrentAttachedBodyTransf(std::string& ID);
 
 	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
 

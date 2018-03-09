@@ -99,15 +99,10 @@ void ArmModel::EvaluatebJt() {
 
 
 void ArmModel::EvaluatebTt() {
-	/*Eigen::Matrix4d orig_wTb = baseTb0_;
-	baseTb0_ = Eigen::Matrix4d::Identity();*/
-
 	for (int jointNumber = 0; jointNumber < numberOfJoints_; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
 	}
 	bTt_ = baseTei_[numberOfJoints_ - 1] * eTt_;
-	//baseTb0_ = orig_wTb;
-
 }
 
 
@@ -301,6 +296,10 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
 }
 
 Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID) {
+	return attachedBodyFrames_.at(ID).second;
+}
+
+Eigen::TransfMatrix ArmModel::GetCurrentAttachedBodyTransf(std::string& ID) {
 
 	int jointIndex = attachedBodyFrames_.at(ID).first;
 	Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;

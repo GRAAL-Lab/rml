@@ -37,7 +37,6 @@ inline void SetDiagonalFromDouble(Eigen::MatrixXd& MatT, double diag[]){
 	MatT.diagonal() = wdiag;
 }
 
-//template<typename OtherDerived>
 inline Eigen::MatrixXd RightJuxtapose(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B){
 	Eigen::MatrixXd res = A;
 	if(res.rows() == 0 && res.cols() == 0){

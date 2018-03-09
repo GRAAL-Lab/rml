@@ -9,6 +9,10 @@
 #define __CTRL_VEHICLEMODEL_H__
 
 #include <vector>
+#include <algorithm>
+#include <eigen3/Eigen/Dense>
+#include <unordered_map>
+
 #include <rml/Types.h>
 
 namespace rml {
@@ -17,11 +21,7 @@ namespace rml {
  * @brief Vehicle Model base class
  *
  * @details This class implements a base vehicle model class.
- * The derived class should re-implement the InitMatrix method, to set the geometry of the arm and the
- * EvaluatedJdq method to evaluate the derivative of the Jacobian w.r.t. q that is used in the manipulability Jacobian
- * computation.
  */
-
 class VehicleModel
 {
 public:
@@ -35,22 +35,6 @@ public:
 	 * @brief Default destructor
 	 */
 	virtual ~VehicleModel();
-
-//	/**
-//	 * @brief Copy constructor
-//	 */
-//	VehicleModel(const VehicleModel& other);
-
-	/**
-	 * @brief Specialized swap() to implement the copy-assignment-operator by reusing the copy-constructor
-	 */
-	friend void swap(rml::VehicleModel& first, rml::VehicleModel& second);
-
-//	/**
-//	 * @brief Copy Assignment Operator
-//	 */
-//	VehicleModel& operator=(VehicleModel other);
-
 
 	/**
 	 * @brief Jacobian initialization
@@ -69,7 +53,7 @@ public:
 	 * @brief Set the base position
 	 * The method updates the internal base velocity state. This method should be called before the evaluate methods in order to
 	 * have the updated values
-	 * @param[in] fbkVel the base position vector in the form of [wx wy wz x y z]
+	 * @param[in] fbkVel the base velocity vector in the form of [wx wy wz x y z]
 	 */
 	void SetFeedbackVelocity(const Eigen::Vector6d& fbkVel);
 
@@ -95,25 +79,17 @@ public:
 
 	const Eigen::Vector6d& GetCartesianVelocity();
 
+	void AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat);
 
 
-//	int GetDoFs() const {
-//		return vehicleDOFs_;
-//	}
+	Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
+	Eigen::TransfMatrix GetCurrentAttachedBodyTransf(std::string& ID);
 
+	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
 
-//	const Eigen::TransfMatrix& GetvTb() const {
-//		return vTb_;
-//	}
-
-	const Eigen::TransfMatrix& GetwTv() {
-		return wTv_;
+	const Eigen::TransfMatrix GetwTv() {
+		return fbkPosition_.ToTransfMatrix();
 	}
-
-//	const Eigen::TransfMatrix& GetwTb() {
-//		wTb_ = wTv_ * vTb_;
-//		return wTb_;
-//	}
 
 	const Eigen::Matrix6d& GetvJv() const {
 		return vJv_;
@@ -126,13 +102,12 @@ public:
 protected:
 
 	bool modelInitialized_;
+	std::unordered_map< std::string, Eigen::TransfMatrix > attachedBodyFrames_;
 	Eigen::Vector6d fbkPosition_, fbkVelocity_, cartVelocity_;
 
 	Eigen::Matrix6d vJv_;
 	Eigen::TransfMatrix wTv_;
-	//Eigen::TransfMatrix vTb_;
 	Eigen::TransfMatrix wTb_;
-	//Eigen::TransfMatrix T_;
 	Eigen::RotMatrix I3_;
 
 };

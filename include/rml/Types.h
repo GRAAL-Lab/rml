@@ -9,6 +9,7 @@
 #define INCLUDE_RML_TYPES_H_
 
 #include <iostream>
+#define EIGEN_MATRIXBASE_PLUGIN <rml/MatrixBaseAddons.h>
 #include <eigen3/Eigen/Dense>
 
 /// Forward declaration
@@ -19,6 +20,11 @@ class TransfMatrix;
 
 namespace rml{
 
+/**
+ * @brief Euler angle representation.
+ *
+ * This class stores the orientation of a rigid body using the z-y-x (yaw, pitch, roll) rotation order
+ */
 class EulerYPR
 {
 public:
@@ -135,8 +141,6 @@ public:
 		crmat.block(0,0,3,3) = crmat.block(3,3,3,3) = *this;
 		crmat.block(0,3,3,3) = crmat.block(3,0,3,3) = Eigen::Matrix3d::Zero();
 		return crmat;
-
-
 	}
 
 	rml::EulerYPR ToEulerYPR() const{

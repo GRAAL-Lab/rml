@@ -18,10 +18,6 @@
 #ifndef INCLUDE_RML_RML_H_
 #define INCLUDE_RML_RML_H_
 
-#define EIGEN_MATRIXBASE_PLUGIN <rml/MatrixBaseAddons.h>
-
-
-
 #include <rml/Types.h>
 #include <rml/MatrixOperations.h>
 #include <rml/Functions.h>

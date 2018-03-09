@@ -6,10 +6,10 @@ This library is built on top of the *Eigen* library to provide all the necessary
 ## Features
 Its major features are:
 
-1. Definition of derived Eigen types such as **Rotation** and **Homogeneus Transformation** matrices, **Euler angles** (using the zyx convention, i.e. the yaw-pitch-roll order), and all the functions to convert from one type to another.
-2. Implementation of a very fast **SVD algorithm** (for robot-wise matrix dimensions) with optional regularization parameters.
-3. Implementation of a **Pseudo-Inversion** algorithm.
-4. Implementation of a slim **Robot Model** class able to manage multi arm mobile robotic platforms, including dJdq and manipulability measurements.
+1. Definition of derived Eigen types such as **Rotation** and **Homogeneus Transformation** matrices (Eigen::RotMatrix and Eigen::TransfMatrix), **Euler angles** (rml::EulerYPR, using the zyx convention, i.e. the yaw-pitch-roll order), and all the functions to convert from one type to another.
+2. Implementation of a very fast **SVD algorithm** (for robot-wise matrix dimensions) with optional regularization parameters (rml::SVD).
+3. Implementation of a **Pseudo-Inversion** algorithm (rml::RegularizedPseudoInverse).
+4. Implementation of a slim **RobotModel** class able to manage multi arm mobile robotic platforms, including dJdq and manipulability measurements.
 5. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more.
 
 

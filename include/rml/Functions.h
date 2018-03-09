@@ -187,9 +187,11 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 /**
  * @brief Computes the skew symmetric matrix form for a vector
  * The output is the following:\n
- *      |  0  -z   y  |\n
- * t^ = |  z   0  -x  |\n
- *      | -y   x   0  |\n
+ * \f$ t\wedge = \left| \begin{array}{ccc}
+				0 & -z  & y \\
+				z &  0  & -x \\
+			   -y &  x  & 0
+				\end{array} \right| \f$
  *
  * @param t input vector
  * @return the skew symmetric matrix
@@ -201,9 +203,25 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
  *
  * This method assumes that the three values stored in the Vect3 correspond to a translation r between two frames
  * Then it computes the rigid body transformation matrix defined as\n
- * |w|   |  I   | 0 | |w|\n
- * | | = |----------| | |\n
- * |v|   |[-r^] | I | |v|\n
+ *
+ * \f$
+
+\left| \begin{array}{c}
+		\omega  \\
+		   v
+		\end{array} \right|
+		=
+ \left| \begin{array}{cc}
+		 I_{3 \times 3} &  0_{3 \times 3}  \\
+	    -r\wedge        &  I_{3 \times 3}  \\
+		\end{array} \right|
+\left| \begin{array}{c}
+		\omega  \\
+		   v
+		\end{array} \right|
+		 \f$
+ *
+ *
  *
  * @return the rigid body matrix
  */

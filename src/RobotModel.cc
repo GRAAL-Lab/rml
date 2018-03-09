@@ -73,7 +73,7 @@ bool RobotModel::CheckArm(int armIndex) const
 }
 
 Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianTF(int armIndex) const throw (std::exception)
-								{
+{
 	if (CheckArm(armIndex)) {
 		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
 		Eigen::MatrixXd bJt = arms_.at(armIndex)->GetbJt();
@@ -86,10 +86,10 @@ Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianTF(int armIndex) const throw (
 	} else {
 		throw RobotModelArmException();
 	}
-								}
+}
 
 Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianEE(int armIndex) const throw (std::exception)
-								{
+{
 	if (vehicle_) {
 		if (CheckArm(armIndex)) {
 			Eigen::Matrix6d vJv = vehicle_->GetvJv();
@@ -102,10 +102,10 @@ Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianEE(int armIndex) const thr
 	} else {
 		throw RobotModelVehicleException();
 	}
-								}
+}
 
 Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const throw (std::exception)
-								{
+{
 	if (CheckArm(armIndex)) {
 		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
 		/// The robot model actually returns the transformation of the end-effector  w.r.t. the base of the robot
@@ -119,7 +119,7 @@ Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForJoint(int armIndex, int joi
 	} else {
 		throw RobotModelArmException();
 	}
-								}
+}
 
 Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const
 throw (std::exception)

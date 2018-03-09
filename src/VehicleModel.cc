@@ -10,12 +10,11 @@
 #endif
 
 #include <iostream>
-#include <cmath>
 #include <vector>
-#include <stdlib.h>
 #include <algorithm>
-#include "rml/VehicleModel.h"
 
+#include "rml/VehicleModel.h"
+#include "rml/Functions.h"
 
 using std::cout;
 using std::endl;
@@ -25,16 +24,6 @@ namespace rml {
 VehicleModel::VehicleModel() {
 	modelInitialized_ = false;
 }
-
-//VehicleModel::VehicleModel(const VehicleModel& other) :
-//				modelInitialized_(other.modelInitialized_),
-//				fbkPosition_(other.fbkPosition_), wTv_(other.wTv_), vTb_(other.vTb_), I3_(other.I3_){
-//}
-//
-//VehicleModel& VehicleModel::operator=(VehicleModel other) {
-//	swap(*this, other);
-//	return *this;
-//}
 
 VehicleModel::~VehicleModel() {
 }
@@ -62,14 +51,26 @@ void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian) {
 	modelInitialized_ = true;
 }
 
-void swap(rml::VehicleModel& first, rml::VehicleModel& second) {
+void VehicleModel::AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat)
+{
+	attachedBodyFrames_.insert(std::make_pair(ID, TMat));
+}
 
-	using std::swap;
-	swap(first.fbkPosition_, second.fbkPosition_);
-	swap(first.fbkVelocity_, second.fbkVelocity_);
-	swap(first.cartVelocity_, second.cartVelocity_);
-	swap(first.wTv_, second.wTv_);
-	swap(first.I3_, second.I3_);
+Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(std::string& ID)
+{
+	return attachedBodyFrames_.at(ID);
+}
+
+Eigen::TransfMatrix VehicleModel::GetCurrentAttachedBodyTransf(std::string& ID)
+{
+	Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID);
+	return GetwTv() * TMat;
+}
+
+Eigen::MatrixXd VehicleModel::GetAttachedBodyJacobian(std::string& ID)
+{
+	Eigen::TransfMatrix RBMat = attachedBodyFrames_.at(ID);
+	return GetRigidBodyMatrix(RBMat.GetTransl()) * GetvJv();
 }
 
 }

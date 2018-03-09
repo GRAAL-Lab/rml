@@ -71,6 +71,9 @@ int main(int argc, char* argv[]){
 	PrettyPrint(ypr.ToRotMatrix(), "ypr.ToRotMatrix()");
 	PrettyPrint(ypr.ToRotMatrix().ToEulerYPR(), "ypr.ToRotMatrix().ToEulerYPR()");
 
+	Eigen::Vector3d transl(1.0,2.0,3.0);
+	PrettyPrint(rml::GetRigidBodyMatrix(transl), "rml::GetRigidBodyMatrix(transl)");
+	PrettyPrint(transl.GetRigidBodyMatrix(), "transl.GetRigidBodyMatrix()");
 
 	///////////////////////////////
 	//////     PINV TEST     //////

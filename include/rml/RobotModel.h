@@ -58,6 +58,16 @@ class RobotModelVehicleException: public std::exception
 	}
 };
 
+/**
+ * @brief Robot Model class, stores vehicle and arms models and evaluates total transformation
+ * matrices and Jacobians.
+ *
+ * @details This class implements a base vehicle model class.
+ * The derived class should re-implement the InitMatrix method, to set the geometry of the arm and the
+ * EvaluatedJdq method to evaluate the derivative of the Jacobian w.r.t. q that is used in the manipulability Jacobian
+ * computation.
+ */
+
 class RobotModel {
 
 	std::shared_ptr<VehicleModel> vehicle_;
@@ -78,9 +88,46 @@ public:
 	RobotModel();
 	virtual ~RobotModel();
 
+	/**
+	 * @brief Returns the number of total degrees of fredoom of the system composed of
+	 * a vehicle plus \p n arms.
+	 * @return	The total number of DOFs (vehicle + arms)
+	 */
 	int GetTotalDOFs();
+
+	/**
+	 * @brief Loads a vehicle in the robot model
+	 *
+	 * Loads a vehicle in the robot model, only one vehicle is allowed. The VehicleModel
+	 * must be initialized before loading, otherwise is not accepted.
+	 *
+	 * @param vehicle		The vehicle model
+	 * @return				true on success, false otherwise
+	 */
 	bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle);
+
+	/**
+	 * @brief Loads an arm in the robot model
+	 *
+	 * Loads a arm in the robot model, there is no limit to the number of arms that can
+	 * be loaded. The ArmModel must be initialized before loading, otherwise is not
+	 * accepted. A <vehicle-to-base> transformation must be specified, which tells the
+	 * position of the arm's base frame with respect to the vehicle frame. If no vehicle
+	 * is meant to be loaded, it can be the identity matrix. The returning value is an
+	 * ID which identifies the loaded arm within the RobotModel class.
+	 *
+	 * @param arm		The arm model
+	 * @param vTb		The vehicle-to-base trasnformation matrix
+	 * @return			The arm ID
+	 */
 	int LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
+
+	/**
+	 * Checks that the given armIndex is within the allowed range (i.e. less or equal than
+	 * the number of loaded arms).
+	 * @param armIndex
+	 * @return
+	 */
 	bool CheckArm(int armIndex) const;
 
 	Eigen::MatrixXd GetArmJacobian_ToolFrame(int armIndex);
