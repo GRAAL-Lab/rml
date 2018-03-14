@@ -19,6 +19,7 @@ using futils::PrettyPrint;
 int main(int argc, char* argv[]){
 
 	timeval t1, t2;
+	futils::Timer myTimer;
 
 	///////////////////////////////
 	//////  ARM MODEL TEST   //////
@@ -27,16 +28,14 @@ int main(int argc, char* argv[]){
 	std::cout << std::endl << tc::yel << "### Arm Model Test ###" << tc::none << std::endl;
 
 	int numJoints(0);
-	double elapsed_OLD(0), elapsed_NEW(0);
+	double elapsed_Timer(0);
 
 	//std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
 	std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
 	std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>();
 
 	armModel = youbotAM;
-
 	numJoints = armModel->GetNumJoints();
-	//armModel->InitMatrix();
 
 	cout << tc::magL << "*dJdq Test*" << tc::none << std::endl;
 	cout << "numJoints=" << armModel->GetNumJoints() << endl;
@@ -59,12 +58,12 @@ int main(int argc, char* argv[]){
 	rml::Double2Matrix(q_0_doub, numJoints, 1, q_0);
 	PrettyPrint(q_0.transpose(),"q_0");
 
-	gettimeofday(&t1, NULL);
+	myTimer.Start();
 	armModel->SetJointsPosition(q_0);
 	dJdq_NEW = armModel->GetdJdq();
-	gettimeofday(&t2, NULL);
+	elapsed_Timer = myTimer.Lap()*1000;
 
-	elapsed_NEW += TimeDiff(t1, t2);
+	std::cout << "elapsed_Timer=" << elapsed_Timer << "ms" << std::endl;
 
 	for (int i = 0; i < numJoints - 1; ++i) {
 		cout << i << "_NEW_";
@@ -75,8 +74,8 @@ int main(int argc, char* argv[]){
 	////////////////////////////////////////////////////////////
 
 	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
-
 	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
+
 	int armIndex1 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
 	int armIndex2 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
 	robotModel->LoadVehicle(youbotVM);

@@ -57,7 +57,7 @@ public:
 	 * @param axis			The axis along which the joint rotates or translates
 	 * @param baseTransf 	Transformation matrix from previous to current
 	 */
-	void AddLink(JointType type,  const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf);
+	void AddLink(JointType type,  const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax);
 
 	/**
 	 * @brief Set the joint position

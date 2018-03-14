@@ -39,7 +39,7 @@ ArmModel::~ArmModel() {
 
 }
 
-void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf) {
+void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax) {
 
 	links_.push_back(RobotLink(type, axis, baseTransf));
 	numberOfJoints_ = links_.size();
