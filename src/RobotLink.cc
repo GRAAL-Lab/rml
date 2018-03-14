@@ -20,8 +20,8 @@ RobotLink::RobotLink() :
 	InitVectors();
 }
 
-RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf):
-		type_(type), axis_(axis), baseTransf_(baseTransf){
+RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax):
+		type_(type), axis_(axis), baseTransf_(baseTransf), jointLimitsMin_(jointLimMin), jointLimitsMAX_(joinLimMax){
 	InitVectors();
 }
 

@@ -39,7 +39,7 @@ public:
 	Eigen::TransfMatrix baseTransf_;
 
     RobotLink();
-    RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf);
+    RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax);
 
     const float Mass() 				const { return mass_; }
     const Eigen::Vector3d& LenghtVec() 	const { return lengthVec_; }
@@ -54,17 +54,17 @@ public:
 		return jointLimitsMAX_;
 	}
 
-	void SetJointLimitsMax(double jointLimitsMax) {
+	/*void SetJointLimitsMax(double jointLimitsMax) {
 		jointLimitsMAX_ = jointLimitsMax;
-	}
+	}*/
 
 	double GetJointLimitsMin() const {
 		return jointLimitsMin_;
 	}
 
-	void SetJointLimitsMin(double jointLimitsMin) {
+	/*void SetJointLimitsMin(double jointLimitsMin) {
 		jointLimitsMin_ = jointLimitsMin;
-	}
+	}*/
 };
 
 }

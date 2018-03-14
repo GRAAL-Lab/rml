@@ -10,10 +10,6 @@
 
 #include "test/youbot_armmodel.h"
 
-#define INTSTRSIZE ((CHAR_BIT * sizeof(int) - 1) / 3 + 2)
-
-//#define DBG_PRINT
-
 using std::cout;
 using std::endl;
 
@@ -24,8 +20,8 @@ YouBotArmModel::YouBotArmModel()
 	int numJoints = 5;
 	std::vector<Eigen::TransfMatrix> biTri(numJoints);
 
-	double min[] = { -2.94, -1.13, -2.616, -1.788, -2.68};
-	double max[] = { +2.94, +1.57, +2.54, +1.788, +2.923};
+	double min[] = { -2.94, -1.13, -2.616, -1.788, -2.68 };
+	double max[] = { +2.94, +1.57, +2.54, +1.788, +2.923 };
 
 	biTri.at(0)(0,0) = 1;      biTri.at(0)(0,1) = 0;      biTri.at(0)(0,2) = 0;  biTri.at(0)(0,3) = 0;
 	biTri.at(0)(1,0) = 0;      biTri.at(0)(1,1) = -1;     biTri.at(0)(1,2) = 0;  biTri.at(0)(1,3) = 0;

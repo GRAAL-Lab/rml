@@ -71,6 +71,11 @@ int main(int argc, char* argv[]){
 		cout << "------------------------------------------------------------" << endl;
 	}
 
+	for (int i = 0; i < youbotAM->GetNumJoints(); ++i) {
+		PrettyPrint(youbotAM->GetLink(i).GetJointLimitsMin(),"GetJointLimitsMin()");
+		PrettyPrint(youbotAM->GetLink(i).GetJointLimitsMax(),"GetJointLimitsMax()");
+	}
+
 	////////////////////////////////////////////////////////////
 
 	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
