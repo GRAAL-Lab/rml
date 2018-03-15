@@ -140,7 +140,7 @@ void SaturateVector(const int vecSize, const double sat, Eigen::VectorXd &vect)
 	}
 	if (curr_max > sat) {
 		for (int i = 0; i < vecSize; i++) {
-			vect(i + 1) = vect(i + 1) * (sat / curr_max);
+			vect(i) = vect(i) * (sat / curr_max);
 		}
 	}
 }
