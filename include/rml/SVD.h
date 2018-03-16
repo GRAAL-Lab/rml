@@ -14,6 +14,22 @@
 
 namespace rml{
 
+struct SVDParameters
+{
+	double threshold; 	//!< The value above which the raised cosine becomes 0
+	double lambda;    	//!< The maximum value of the raised cosine
+
+	SVDParameters(): threshold(0.0), lambda(0.0) {}
+};
+
+struct SVDResults
+{
+	double mu;			//!< Product of singular values
+	int flag;			//!< The number of time the regularization parameter was not zero
+
+	SVDResults(): mu(0.0), flag(0) {}
+};
+
 /**
  * The SVDparameters contain input and output values for the SVD decompostion.
  * In particular \p threshold and \p lambda are inputs, while \p mu and
@@ -29,15 +45,10 @@ namespace rml{
         \end{array} \right. \f$
  *
  */
-struct SVDParameters
+struct SVDData
 {
-	double threshold; 	//!< The value above which the raised cosine becomes 0
-	double lambda;    	//!< The maximum value of the raised cosine
-	double mu;			//!< Product of singular values
-	int flag;			//!< The number of time the regularization parameter was not zero
-
-	// Setting
-	SVDParameters(): threshold(0.0), lambda(0.0), mu(0.0), flag(0) {}
+	SVDParameters params;
+	SVDResults results;
 };
 
 /**

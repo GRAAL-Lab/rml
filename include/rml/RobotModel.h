@@ -78,11 +78,11 @@ class RobotModel {
 	std::vector<Eigen::MatrixXd> JArm_;
 	std::vector<Eigen::Matrix6d> JVeh_;
 
-	Eigen::MatrixXd GetIsolatedArmJacobianTF(const int armIndex) const throw (std::exception);
-	Eigen::Matrix6d GetIsolatedVehicleJacobianEE(const int armIndex) const throw (std::exception);
+	Eigen::MatrixXd GetIsolatedArmJacobianTF(const int armIndex) const;
+	Eigen::Matrix6d GetIsolatedVehicleJacobianEE(const int armIndex) const;
 
-	Eigen::MatrixXd GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const throw (std::exception);
-	Eigen::Matrix6d GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const throw (std::exception);
+	Eigen::MatrixXd GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const;
+	Eigen::Matrix6d GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const;
 
 public:
 	RobotModel();
@@ -128,11 +128,14 @@ public:
 	 * @param armIndex
 	 * @return
 	 */
-	bool CheckArm(int armIndex) const;
+	bool CheckArm(int armIndex) const throw (std::exception);
+	bool CheckVehicle() const throw (std::exception);
 
+	Eigen::MatrixXd GetArmJacobian_JointFrame(int armIndex, int jointIndex);
+	Eigen::MatrixXd GetVehicleJacobian_JointFrame(int armIndex, int jointIndex);
 	Eigen::MatrixXd GetArmJacobian_ToolFrame(int armIndex);
 	Eigen::MatrixXd GetVehicleJacobian_ToolFrame(int armIndex);
-	Eigen::MatrixXd GetArmJacobian_JointControl(int armIndex);
+	Eigen::MatrixXd GetArmJacobian_Identity(int armIndex);
 	Eigen::MatrixXd GetArmJacobian_Manipulability(int armIndex, double& mu);
 	Eigen::MatrixXd GetVehicleJacobian();
 

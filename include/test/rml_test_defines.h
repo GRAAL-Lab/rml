@@ -28,12 +28,12 @@ struct TimeResults {
 struct PinvSpecs {
 	int nRows;
 	int nCols;
-	rml::SVDParameters SVDparams;
+	rml::SVDData SVDdata;
 
 	PinvSpecs() :
 		nRows(0), nCols(0) {
-		SVDparams.threshold = 0.01;
-		SVDparams.lambda = 0.0001;
+		SVDdata.params.threshold = 0.01;
+		SVDdata.params.lambda = 0.0001;
 	}
 };
 
@@ -60,7 +60,7 @@ void PseudoInverseTest(const int iterations, Eigen::MatrixXd& A, PinvSpecs &spec
 
 	gettimeofday(&t1, NULL);
 	for (int i = 0; i < iterations; i++) {
-		Apinv = rml::RegularizedPseudoInverse(A, specs.SVDparams);
+		Apinv = rml::RegularizedPseudoInverse(A, specs.SVDdata);
 	}
 	gettimeofday(&t2, NULL);
 	d = TimeDiff(t1, t2);

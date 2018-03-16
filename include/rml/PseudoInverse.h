@@ -31,7 +31,7 @@ void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, d
  */
 template<class MatT>
 Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
-		const MatT& mat, SVDParameters& svdParams) // choose appropriately
+		const MatT& mat, SVDData& svdData) // choose appropriately
 {
 
 	int m = mat.rows(), n = mat.cols();
@@ -41,7 +41,7 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	//Here we convert the input type to a double array which is the type used by the GT_RegPinv
 	Eigen::Map<MatT>(J, m, n) = mat;
 
-	GT_RegPinv(J, m, n, JPInv, svdParams.threshold, svdParams.lambda, &(svdParams.mu), &(svdParams.flag));
+	GT_RegPinv(J, m, n, JPInv, svdData.params.threshold, svdData.params.lambda, &(svdData.results.mu), &(svdData.results.flag));
 
 	//Here the results of the GT_RegPinv algorithm are mapped back to the input type
 	MatT eigenPinv = Eigen::Map<MatT>(JPInv, n, m);
@@ -59,8 +59,8 @@ template<class MatT>
 Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
 		const MatT& mat)
 {
-	SVDParameters svdParams;
-	RegularizedPseudoInverse(mat, svdParams);
+	SVDData svdData;
+	RegularizedPseudoInverse(mat, svdData);
 }
 
 } //namespace rml

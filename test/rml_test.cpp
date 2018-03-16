@@ -89,8 +89,8 @@ int main(int argc, char* argv[]){
 
 	TimeResults timings;
 	PinvSpecs pinvSpecs;
-	pinvSpecs.SVDparams.threshold = 0.01;
-	pinvSpecs.SVDparams.lambda = 0.0001;
+	pinvSpecs.SVDdata.params.threshold = 0.01;
+	pinvSpecs.SVDdata.params.lambda = 0.0001;
 
 	for (int rows = rowMinSize; rows <= rowMaxSize; rows += step) {
 		for (int cols = colMinSize; cols <= colMaxSize; cols += step) {
@@ -101,7 +101,7 @@ int main(int argc, char* argv[]){
 		}
 	}
 
-	Apinv = rml::RegularizedPseudoInverse(A, pinvSpecs.SVDparams);
+	Apinv = rml::RegularizedPseudoInverse(A, pinvSpecs.SVDdata);
 	PrettyPrint((A * Apinv), "A * Apinv (4x4)");
 
 	///////////////////////////////

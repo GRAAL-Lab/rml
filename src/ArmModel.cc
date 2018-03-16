@@ -113,7 +113,6 @@ void ArmModel::ForwardDirectGeometry(int jointNumber) {
 		baseTbi_ = baseTb0_;
 	} else {
 		// in this case, the base of joint <jointNumber> is the position of the end-effector of the joint <jointNumber - 1>
-		// a further one is subtracted because arrays are indexed from 0
 		baseTbi_ = baseTei_[jointNumber - 1];
 	}
 
@@ -127,7 +126,6 @@ void ArmModel::ForwardDirectGeometry(int jointNumber) {
 		Tz_.SetRotMatrix(rot.toRotationMatrix());
 
 	}else if(links_.at(jointNumber).type_ == JointType::Prismatic){
-
 		Eigen::Vector3d transl = q_(jointNumber) * links_.at(jointNumber).axis_;
 		Tz_.SetTransl(transl);
 	}
@@ -182,11 +180,11 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 	Jmu.resize(1, numberOfJoints_);
 	Jmu.setZero();
 
-	SVDParameters mySVD;
+	SVDData mySVD;
 
 	if(numberOfJoints_ < 6){
-		mySVD.lambda = 0.0001;
-		mySVD.threshold = 0.0001;
+		mySVD.params.lambda = 0.0001;
+		mySVD.params.threshold = 0.0001;
 		/// For defective manipulators
 		//std::cout << "nrow: " << dJdq_[0].rows() << " ncol:" << dJdq_[0].cols() << std::endl;
 		Jpinv_ = rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), mySVD);
@@ -199,13 +197,13 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 			for(int i = 0; i < 5; i++) // now 5 is correct
 				Jmu(k) += djdqJpinv_(i,i);
 
-			Jmu(k) *= mySVD.mu;
+			Jmu(k) *= mySVD.results.mu;
 		}
 
 		//mu.PrintMtx("mu");
 	} else {
-		mySVD.lambda = 0.01;
-		mySVD.threshold = 0.01;
+		mySVD.params.lambda = 0.01;
+		mySVD.params.threshold = 0.01;
 		Jpinv_ = rml::RegularizedPseudoInverse(bJt_, mySVD);
 
 		for (int k = 0; k < numberOfJoints_; k++) {
@@ -213,11 +211,11 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 			djdqJpinv_ = dJdq_[k] * Jpinv_;
 			for (int i = 0; i < 6; i++)
 				Jmu(k) += djdqJpinv_(i, i);
-			Jmu(k) *= mySVD.mu;
+			Jmu(k) *= mySVD.results.mu;
 		}
 	}
 
-	mu = mySVD.mu;
+	mu = mySVD.results.mu;
 }
 
 
@@ -263,7 +261,7 @@ void ArmModel::EvaluatedJdqNumeric() {
 
 
 Eigen::TransfMatrix ArmModel::GetBase2JointTransf(int jointIndex) {
-	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
+	for (int jointNumber = 0; jointNumber <= jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
 	}
 	return baseTei_[jointIndex];
@@ -275,15 +273,18 @@ Eigen::MatrixXd ArmModel::GetBase2JointJacobian(int jointIndex) {
 	for (int jointNumber = 0; jointNumber < jointIndex; jointNumber++) {
 		ForwardDirectGeometry(jointNumber);
 	}
+
+	//Here we calculate the h columns involved in our joint's jacobian
 	for (int jointNumber = jointIndex; jointNumber >= 0; jointNumber--)
 		BackwardDirectGeometry(jointNumber, jointIndex);
 
-	for (int i = jointIndex; i < numberOfJoints_; i++) {
+	//Then we set all the remainings columns to zero
+	for (int i = jointIndex + 1; i < numberOfJoints_; i++) {
 		h_[i].setZero();
 	}
 
-	Eigen::MatrixXd bJj = (h_[0]);
-	for (int i = 1; i < numberOfJoints_; i++) {
+	Eigen::MatrixXd bJj;// = (h_[0]);
+	for (int i = 0; i < numberOfJoints_; i++) {
 		bJj = RightJuxtapose(bJj, h_[i]);
 	}
 	return bJj;

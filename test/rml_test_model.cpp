@@ -90,7 +90,7 @@ int main(int argc, char* argv[]){
 	PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex2), "GetArmJacobianTF(2)");
 
 	double mu;
-	PrettyPrint(robotModel->GetArmJacobian_JointControl(armIndex1),"GetArmJacobian_JointControl()");
+	PrettyPrint(robotModel->GetArmJacobian_Identity(armIndex1),"GetArmJacobian_Identity()");
 	PrettyPrint(robotModel->GetArmJacobian_Manipulability(armIndex1, mu),"GetArmJacobian_Manipulability()");
 	PrettyPrint(robotModel->GetVehicleJacobian(),"GetVehicleJacobian()");
 

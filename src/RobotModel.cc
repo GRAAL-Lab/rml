@@ -62,83 +62,112 @@ int RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::Transf
 
 }
 
-bool RobotModel::CheckArm(int armIndex) const
+bool RobotModel::CheckArm(int armIndex) const throw (std::exception)
 {
-	if (armIndex > arms_.size()) {
-		//std::cout << tc::redL << "Error: Arm index is out of range" << tc::none << std::endl;
-		return false;
-	} else {
+	if (armIndex < arms_.size()) {
 		return true;
-	}
-}
-
-Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianTF(int armIndex) const throw (std::exception)
-{
-	if (CheckArm(armIndex)) {
-		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
-		Eigen::MatrixXd bJt = arms_.at(armIndex)->GetbJt();
-		if (!vehicle_) {
-			return bJt;
-		} else {
-			Eigen::RotMatrix vRb = vehicleTbase_.at(armIndex).GetRotMatrix();
-			return vRb.GetCartesianRotationMatrix() * bJt;
-		}
 	} else {
 		throw RobotModelArmException();
 	}
 }
 
-Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianEE(int armIndex) const throw (std::exception)
+bool RobotModel::CheckVehicle() const throw (std::exception)
 {
 	if (vehicle_) {
-		if (CheckArm(armIndex)) {
-			Eigen::Matrix6d vJv = vehicle_->GetvJv();
-			Eigen::TransfMatrix bTt = arms_.at(armIndex)->GetbTt();
-			Eigen::TransfMatrix vTt = vehicleTbase_.at(armIndex) * bTt;
-			return GetRigidBodyMatrix(vTt.GetTransl()) * vJv;
-		} else {
-			throw RobotModelArmException();
-		}
+		return true;
 	} else {
+		//std::cout << tc::redL << "Error: Arm index is out of range" << tc::none << std::endl;
 		throw RobotModelVehicleException();
 	}
 }
 
-Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const throw (std::exception)
+Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianTF(int armIndex) const
 {
+	Eigen::MatrixXd bJt;
+	if (CheckArm(armIndex)) {
+		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
+		bJt = arms_.at(armIndex)->GetbJt();
+		if (vehicle_) {
+			Eigen::RotMatrix vRb = vehicleTbase_.at(armIndex).GetRotMatrix();
+			bJt = vRb.GetCartesianRotationMatrix() * bJt;
+		}
+	}
+	return bJt;
+}
+
+Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianEE(int armIndex) const
+{
+	Eigen::Matrix6d vJv;
+	if (CheckVehicle()) {
+		if (CheckArm(armIndex)) {
+			vJv = vehicle_->GetvJv();
+			Eigen::TransfMatrix bTt = arms_.at(armIndex)->GetbTt();
+			Eigen::TransfMatrix vTt = vehicleTbase_.at(armIndex) * bTt;
+			vJv = GetRigidBodyMatrix(vTt.GetTransl()) * vJv;
+		}
+	}
+	return vJv;
+}
+
+Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const
+{
+	Eigen::MatrixXd bJj;
 	if (CheckArm(armIndex)) {
 		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
 		/// The robot model actually returns the transformation of the end-effector  w.r.t. the base of the robot
-		Eigen::MatrixXd bJj = arms_.at(armIndex)->GetBase2JointJacobian(jointIndex);
-		if (!vehicle_) {
-			return bJj;
-		} else {
+		bJj = arms_.at(armIndex)->GetBase2JointJacobian(jointIndex);
+		if (vehicle_) {
 			Eigen::RotMatrix vRb = vehicleTbase_.at(armIndex).GetRotMatrix();
-			return vRb.GetCartesianRotationMatrix() * bJj;
+			bJj = vRb.GetCartesianRotationMatrix() * bJj;
 		}
-	} else {
-		throw RobotModelArmException();
 	}
+	return bJj;
 }
 
 Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const
-throw (std::exception)
 {
-	if (vehicle_) {
+	Eigen::Matrix6d vJv;
+	if (CheckVehicle()) {
 		if (CheckArm(armIndex)) {
-			Eigen::Matrix6d vJv = vehicle_->GetvJv();
+			vJv = vehicle_->GetvJv();
 			Eigen::TransfMatrix bTj = arms_.at(armIndex)->GetBase2JointTransf(jointIndex);
 			Eigen::TransfMatrix vTj = vehicleTbase_.at(armIndex) * bTj;
-			return GetRigidBodyMatrix(vTj.GetTransl()) * vJv;
-		} else {
-			throw RobotModelArmException();
+			vJv = GetRigidBodyMatrix(vTj.GetTransl()) * vJv;
 		}
-	} else {
-		throw RobotModelVehicleException();
 	}
+	return vJv;
 }
 
 // //////////////////       Public      ////////////////// //
+
+Eigen::MatrixXd RobotModel::GetArmJacobian_JointFrame(int armIndex, int jointIndex)
+{
+	Eigen::MatrixXd totJac, tempJ;
+	if (vehicle_) {
+		totJac = RightJuxtapose(totJac, Eigen::Matrix6d::Zero());
+	}
+	for (int i = 0; i < arms_.size(); ++i) {
+		if (i == armIndex)
+			tempJ = GetIsolatedArmJacobianForJoint(i, jointIndex);
+		else
+			tempJ = Eigen::MatrixXd::Zero(6, arms_.at(armIndex)->GetNumJoints());
+		totJac = RightJuxtapose(totJac, tempJ);
+	}
+	return totJac;
+}
+
+Eigen::MatrixXd RobotModel::GetVehicleJacobian_JointFrame(int armIndex, int jointIndex)
+{
+	Eigen::MatrixXd totJac, tempJ;
+	if (vehicle_) {
+		totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianForJoint(armIndex, jointIndex));
+	}
+	for (int i = 0; i < arms_.size(); ++i) {
+		tempJ = Eigen::MatrixXd::Zero(6, arms_.at(armIndex)->GetNumJoints());
+		totJac = RightJuxtapose(totJac, tempJ);
+	}
+	return totJac;
+}
 
 Eigen::MatrixXd RobotModel::GetArmJacobian_ToolFrame(int armIndex)
 {
@@ -147,9 +176,10 @@ Eigen::MatrixXd RobotModel::GetArmJacobian_ToolFrame(int armIndex)
 		totJac = RightJuxtapose(totJac, Eigen::Matrix6d::Zero());
 	}
 	for (int i = 0; i < arms_.size(); ++i) {
-		tempJ = GetIsolatedArmJacobianTF(i);
-		if (i != armIndex)
-			tempJ.setZero();
+		if (i == armIndex)
+			tempJ = GetIsolatedArmJacobianTF(i);
+		else
+			tempJ = Eigen::MatrixXd::Zero(6, arms_.at(armIndex)->GetNumJoints());
 		totJac = RightJuxtapose(totJac, tempJ);
 	}
 	return totJac;
@@ -158,18 +188,17 @@ Eigen::MatrixXd RobotModel::GetArmJacobian_ToolFrame(int armIndex)
 Eigen::MatrixXd RobotModel::GetVehicleJacobian_ToolFrame(int armIndex)
 {
 	Eigen::MatrixXd totJac, tempJ;
-	if (vehicle_) {
+	if (CheckVehicle()) {
 		totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianEE(armIndex));
 	}
 	for (int i = 0; i < arms_.size(); ++i) {
-		tempJ = GetIsolatedArmJacobianTF(i);
-		tempJ.setZero();
+		tempJ = Eigen::MatrixXd::Zero(6, arms_.at(armIndex)->GetNumJoints());
 		totJac = RightJuxtapose(totJac, tempJ);
 	}
 	return totJac;
 }
 
-Eigen::MatrixXd RobotModel::GetArmJacobian_JointControl(int armIndex)
+Eigen::MatrixXd RobotModel::GetArmJacobian_Identity(int armIndex)
 {
 	Eigen::MatrixXd totJac, tempJ;
 	if (CheckArm(armIndex)) {
@@ -209,7 +238,7 @@ Eigen::MatrixXd RobotModel::GetArmJacobian_Manipulability(int armIndex, double& 
 Eigen::MatrixXd RobotModel::GetVehicleJacobian()
 {
 	Eigen::MatrixXd totJac, tempJ;
-	if (vehicle_) {
+	if (CheckVehicle()) {
 		totJac = RightJuxtapose(totJac, vehicle_->GetvJv());
 	}
 	for (int i = 0; i < arms_.size(); ++i) {
