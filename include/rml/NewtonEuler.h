@@ -24,11 +24,9 @@ class NewtonEuler
 	};
 
 	int numJoints_;
-	Eigen::TransfMatrix wTb0_;
-	std::vector<Eigen::TransfMatrix> biTri_;
-	Eigen::TransfMatrix eTt_;
-	std::vector<RobotLink> links_;
-	std::vector<int> jointType_;
+
+	std::shared_ptr<ArmModel> armModel_;
+
 	std::vector<Eigen::TransfMatrix> biTei_;
 	std::vector<Eigen::RotMatrix> R_;
 	std::vector<Eigen::Vector3d> rhoVec_;		// Distance between joint "i" and "i+1"
@@ -49,6 +47,7 @@ class NewtonEuler
 
 public:
 	NewtonEuler();
+	NewtonEuler(std::shared_ptr<ArmModel>& model);
 	virtual ~NewtonEuler();
 
 	void NewtonEuler(const BaseLinkData& baseData, const Eigen::MatrixXd& q_dot, const Eigen::MatrixXd& q_ddot, const double gravity, Eigen::MatrixXd& torques);

@@ -7,6 +7,11 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 # locations on all platforms.
 include(GNUInstallDirs)
 
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+
 # Define library. Only source files here!
 project(RML_project VERSION 0.1 LANGUAGES CXX)
 

@@ -72,8 +72,8 @@ int main(int argc, char* argv[]){
 	}
 
 	for (int i = 0; i < youbotAM->GetNumJoints(); ++i) {
-		PrettyPrint(youbotAM->GetLink(i).GetJointLimitsMin(),"GetJointLimitsMin()");
-		PrettyPrint(youbotAM->GetLink(i).GetJointLimitsMax(),"GetJointLimitsMax()");
+		PrettyPrint(youbotAM->GetLink(i).JointLimitsMin(),"GetJointLimitsMin()");
+		PrettyPrint(youbotAM->GetLink(i).JointLimitsMax(),"GetJointLimitsMax()");
 	}
 
 	////////////////////////////////////////////////////////////

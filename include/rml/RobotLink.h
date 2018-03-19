@@ -16,14 +16,19 @@ enum class JointType : uint8_t { Fixed, Revolute, Prismatic };
 
 class RobotLink
 {
-    double mass_;
-    Eigen::Vector3d lengthVec_;
-    Eigen::Vector3d CoM_;
-    Eigen::MatrixXd Inertia_;
+	// Kinematic properties
+	JointType type_;
+	Eigen::Vector3d axis_;
+	Eigen::TransfMatrix baseTransf_;
 	double jointLimitsMin_;
 	double jointLimitsMAX_;
 
-    void SetPhysicalProperties(const double mass, const Eigen::Vector3d& sizes, const Eigen::Vector3d& CoM, const Eigen::MatrixXd& Inertia);
+	// Dynamic properties
+    double mass_;
+    Eigen::Vector3d sizeVect_;
+    Eigen::Vector3d CoM_;
+    Eigen::Matrix3d Inertia_;
+
     void InitVectors();
 
 public:
@@ -31,40 +36,25 @@ public:
      * The interaction forces and moments associated with the link "i" are relative to the one between
      * "i" and "i-1". While the "self" forces are the one relative to the acceleration of the CoM_i.
      */
-    Eigen::Vector3d self_f, self_n;
-    Eigen::Vector3d inter_f, inter_n;
-
-	JointType type_;
-	Eigen::Vector3d axis_;
-	Eigen::TransfMatrix baseTransf_;
+    Eigen::Vector3d self_f_, self_n_;
+    Eigen::Vector3d inter_f_, inter_n_;
 
     RobotLink();
     RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax);
-
-    const float Mass() 				const { return mass_; }
-    const Eigen::Vector3d& LenghtVec() 	const { return lengthVec_; }
-    const Eigen::Vector3d& CoM() 		const { return CoM_; }
-    const Eigen::MatrixXd& Inertia() 	const { return Inertia_; }
-
-    int GetIndex();
-
     virtual ~RobotLink();
 
-	double GetJointLimitsMax() const {
-		return jointLimitsMAX_;
-	}
+    void SetPhysicalProperties(double mass, const Eigen::Vector3d& sizes, const Eigen::Vector3d& CoM, const Eigen::Matrix3d& Inertia);
 
-	/*void SetJointLimitsMax(double jointLimitsMax) {
-		jointLimitsMAX_ = jointLimitsMax;
-	}*/
+    JointType Type()    					const {	return type_;}
+    const Eigen::Vector3d Axis()    		const {	return axis_;}
+    const Eigen::TransfMatrix BaseTransf() 	const {	return baseTransf_; }
+    double JointLimitsMax()    				const {	return jointLimitsMAX_; }
+	double JointLimitsMin() 				const {	return jointLimitsMin_;	}
 
-	double GetJointLimitsMin() const {
-		return jointLimitsMin_;
-	}
-
-	/*void SetJointLimitsMin(double jointLimitsMin) {
-		jointLimitsMin_ = jointLimitsMin;
-	}*/
+    float Mass() 				   			const { return mass_; }
+    const Eigen::Vector3d& Sizes() 			const { return sizeVect_; }
+    const Eigen::Vector3d& CoM() 			const { return CoM_; }
+    const Eigen::Matrix3d& Inertia()		const { return Inertia_; }
 };
 
 }

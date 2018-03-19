@@ -155,7 +155,7 @@ void SaturateScalar(double sat, double& value)
 
 double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters &planeParams)
 {
-	double numerator = std::fabs(planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3) + planeParams.D);
+	double numerator = std::fabs(planeParams.A * point(0) + planeParams.B * point(1) + planeParams.C * point(2) + planeParams.D);
 	double denominator = std::sqrt(planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C);
 
 	//cout << "n d: " << numerator << " " << denominator << "\n";
@@ -166,12 +166,12 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 {
 	Eigen::Vector3d resultingPoint = Eigen::Vector3d::Zero();
 	double alpha_num, alpha_den, alpha;
-	alpha_num = -(planeParams.D + planeParams.A * point(1) + planeParams.B * point(2) + planeParams.C * point(3));
+	alpha_num = -(planeParams.D + planeParams.A * point(0) + planeParams.B * point(1) + planeParams.C * point(2));
 	alpha_den = planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C;
 	alpha = alpha_num/alpha_den;
-	resultingPoint(1) = point(1) + alpha * planeParams.A;
-	resultingPoint(2) = point(2) + alpha * planeParams.B;
-	resultingPoint(3) = point(3) + alpha * planeParams.C;
+	resultingPoint(0) = point(0) + alpha * planeParams.A;
+	resultingPoint(1) = point(1) + alpha * planeParams.B;
+	resultingPoint(2) = point(2) + alpha * planeParams.C;
 
 	return resultingPoint;
 }

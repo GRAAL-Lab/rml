@@ -121,17 +121,17 @@ void ArmModel::ForwardDirectGeometry(int jointNumber) {
 	// biTei = biTri * Tz(qi)
 	Eigen::TransfMatrix Tz_;
 
-	if (links_.at(jointNumber).type_ == JointType::Revolute){
-		Eigen::AngleAxisd rot = Eigen::AngleAxisd(q_(jointNumber), links_.at(jointNumber).axis_);
+	if (links_.at(jointNumber).Type() == JointType::Revolute){
+		Eigen::AngleAxisd rot = Eigen::AngleAxisd(q_(jointNumber), links_.at(jointNumber).Axis());
 		Tz_.SetRotMatrix(rot.toRotationMatrix());
 
-	}else if(links_.at(jointNumber).type_ == JointType::Prismatic){
-		Eigen::Vector3d transl = q_(jointNumber) * links_.at(jointNumber).axis_;
+	}else if(links_.at(jointNumber).Type() == JointType::Prismatic){
+		Eigen::Vector3d transl = q_(jointNumber) * links_.at(jointNumber).Axis();
 		Tz_.SetTransl(transl);
 	}
 
 	// biTei = biTri * Tz(qi)
-	biTei_[jointNumber] = links_.at(jointNumber).baseTransf_ * Tz_;
+	biTei_[jointNumber] = links_.at(jointNumber).BaseTransf() * Tz_;
 
 	// wTei is the transformation between the end-effector of joint <i> and world frame <w>
 	// wTei = wTbi * biTei

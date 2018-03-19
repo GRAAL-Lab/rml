@@ -21,7 +21,8 @@ RobotLink::RobotLink() :
 }
 
 RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax):
-		type_(type), axis_(axis), baseTransf_(baseTransf), jointLimitsMin_(jointLimMin), jointLimitsMAX_(joinLimMax){
+		type_(type), axis_(axis), baseTransf_(baseTransf), jointLimitsMin_(jointLimMin), jointLimitsMAX_(joinLimMax)
+{
 	InitVectors();
 }
 
@@ -31,25 +32,27 @@ RobotLink::~RobotLink()
 }
 
 void RobotLink::InitVectors() {
-	lengthVec_.setZero();
+	axis_.setZero();
+	sizeVect_.setZero();
 	CoM_.setZero();
 	Inertia_.setZero();
-	self_f.setZero();
-	self_n.setZero();
-	inter_f.setZero();
-	inter_n.setZero();
+	self_f_.setZero();
+	self_n_.setZero();
+	inter_f_.setZero();
+	inter_n_.setZero();
+
 }
 
-void RobotLink::SetPhysicalProperties(const double mass, const Eigen::Vector3d& lengthVec, const Eigen::Vector3d& CoM, const Eigen::MatrixXd &Inertia)
+void RobotLink::SetPhysicalProperties(double mass, const Eigen::Vector3d& sizeVect, const Eigen::Vector3d& CoM, const Eigen::Matrix3d &Inertia)
 {
 	mass_ = mass;
-	lengthVec_ = lengthVec;
+	sizeVect_ = sizeVect;
 	CoM_ = CoM;
 	Inertia_ = Inertia;
 
 	//InitVectors();
-
 }
+
 }
 
 

@@ -140,7 +140,7 @@ public:
 		return dJdq_;
 	}
 
-	const RobotLink& GetLink(int jointIndex) throw (ArmModelException) {
+	RobotLink& GetLink(int jointIndex) throw (ArmModelException) {
 		if(jointIndex < links_.size())
 			return links_.at(jointIndex);
 		else
