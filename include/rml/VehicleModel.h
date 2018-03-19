@@ -77,7 +77,15 @@ public:
 		return fbkVelocity_;
 	}
 
+	void SetFeedbackAcceleration(const Eigen::Vector6d& fbkAcc);
+
+	const Eigen::Vector6d& GetFeedbackAcceleration(){
+			return fbkAcceleration_;
+		}
+
 	const Eigen::Vector6d& GetCartesianVelocity();
+
+	const Eigen::Vector6d& GetCartesianAcceleration();
 
 	void AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat);
 
@@ -103,7 +111,8 @@ protected:
 
 	bool modelInitialized_;
 	std::unordered_map< std::string, Eigen::TransfMatrix > attachedBodyFrames_;
-	Eigen::Vector6d fbkPosition_, fbkVelocity_, cartVelocity_;
+	Eigen::Vector6d fbkPosition_, fbkVelocity_, fbkAcceleration_;
+	Eigen::Vector6d cartVelocity_, cartAcceleration_;
 
 	Eigen::Matrix6d vJv_;
 	Eigen::TransfMatrix wTv_;

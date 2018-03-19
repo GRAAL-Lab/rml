@@ -16,22 +16,13 @@ using std::cout;
 using std::endl;
 using futils::PrettyPrint;
 
-
-
-
-const int NUM_JOINTS = 2;
-const int NUM_LINKS = 2;
-//const double LINK_THICKNESS = 0.085; // Supposed thickness in meters
-const double pi = 3.1415926535897932384626433832795;
-
 Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& dims);
-void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::MatrixXd>& q_h, int numJoints);
+void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q_h, int numJoints);
 std::string get_selfpath();
 std::string getCurrentDateFormatted();
 
-
-
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[])
+{
 
 	timeval t1, t2;
 	futils::Timer myTimer;
@@ -41,39 +32,39 @@ int main(int argc, char* argv[]){
 	int numJoints(0);
 	double elapsed_Timer(0);
 
-	//std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
 	std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
-	std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>();
+	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
+	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
 
-	armModel = youbotAM;
-	numJoints = armModel->GetNumJoints();
+	numJoints = youbotAM->GetNumJoints();
 
 	vector<Eigen::Vector3d> linkDim(numJoints);
 	double linkMass;
-	Eigen::Vector3d CoM(numJoints);
-	Eigen::Matrix3d Inertia(numJoints);
+	Eigen::Vector3d CoM;
+	Eigen::Matrix3d Inertia;
 
 	/// Getting link length information from links transformations
-	for (int i = 0; i < numJoints-1; ++i) {
-		linkDim.at(i) = armModel->GetLink(i+1).BaseTransf().GetTransl();
+	for (int i = 0; i < numJoints - 1; ++i) {
+		linkDim.at(i) = youbotAM->GetLink(i + 1).BaseTransf().GetTransl();
 	}
-	linkDim.at(numJoints-1) = armModel->GeteTt().GetTransl();
+	linkDim.at(numJoints - 1) = youbotAM->GeteTt().GetTransl();
 
 	/// Populating Link Physical Properties
 	for (int i = 0; i < numJoints; ++i) {
 		linkMass = 1.0;
-		CoM = linkDim.at(i) / 2;
+		CoM = linkDim.at(i) / 2.0;
 		Inertia = CuboidInertiaAboutCOM(linkMass, linkDim.at(i));
 
-		armModel->GetLink(i).SetPhysicalProperties(linkMass, linkDim.at(i), CoM, Inertia);
+		youbotAM->GetLink(i).SetPhysicalProperties(linkMass, linkDim.at(i), CoM, Inertia);
 	}
 
-	rml::NewtonEuler myNE(youbotAM);
+	int armIndex = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+	robotModel->LoadVehicle(youbotVM);
 
-	rml::NewtonEuler::BaseLinkData baseData;
+	std::cout << " - Model variables have been loaded - " << std::endl;
 
+	rml::NewtonEuler myNE(robotModel, armIndex);
 
-	ArmDynamics myArmDyn(wTb0, biTri, eTt, links, jointTypes);
 
 	///--------------------------------------------------------///
 
@@ -90,32 +81,36 @@ int main(int argc, char* argv[]){
 	}
 
 	///*** INITIALIZATION ***///
-	CMAT::Matrix zeroVect3 = CMAT::Matrix::Zeros(3, 1);
-	CMAT::Matrix qZeroVec = CMAT::Matrix::Zeros(NUM_JOINTS, 1);
+	Eigen::Vector3d zeroVect3 = Eigen::Vector3d::Zero();
+	Eigen::VectorXd qZeroVec = Eigen::VectorXd::Zero(numJoints);
 
-	base.c = zeroVect3;
-	base.c_dot = zeroVect3;
-	base.omega = zeroVect3;
-	base.omega_dot = zeroVect3;
+//	base.c = zeroVect3;
+//	base.c_dot = zeroVect3;
+//	base.omega = zeroVect3;
+//	base.omega_dot = zeroVect3;
 
+	Eigen::VectorXd q, q_dot, q_ddot, m_tilde, m_bar;
+	Eigen::MatrixXd A;
 	q = qZeroVec;
 	q_dot = qZeroVec;
 	q_ddot = qZeroVec;
 
 	m_bar = qZeroVec;
-	A = CMAT::Matrix::Zeros(NUM_JOINTS);
+	A = Eigen::MatrixXd::Zero(numJoints, numJoints);
 
-
+	// TODO
 	//double q_0[NUM_JOINTS] = { 0, 0 };
-	double q_0[NUM_JOINTS] = { 0, 3.0 / 4.0 * pi };
-	double q_dot_0[NUM_JOINTS] = { 0, 0 };
+	double q_0[numJoints] = { 0, 3.0 / 4.0 * M_PI, 0, 0, 0 };
 
-	q.CopyFrom(q_0);
-	q_dot.CopyFrom(q_dot_0);
+	rml::Double2Vector(q_0, numJoints, q);
+	q_dot.setZero();
 
-	vector<CMAT::Matrix> q_h(t_steps), q_dot_h(t_steps);
+	vector<Eigen::VectorXd> q_h(t_steps), q_dot_h(t_steps);
 
-	FUTILS::Dotter myDotter(2);
+	futils::Dotter myDotter(2);
+
+
+	std::cout << " - Simulation variables have been set... Starting SIM! - " << std::endl << std::endl;
 
 	/********************************************************
 	 *                      MAIN LOOP                       *
@@ -136,61 +131,61 @@ int main(int argc, char* argv[]){
 
 		q_h.at(i) = q;
 
-		myArmDyn.SetJointPosition(q);
+		myNE.GetMBar(q_dot, m_bar);
 
-		myArmDyn.GetMBar( baseData, q_dot, m_bar );
-
-		myArmDyn.GetA( baseData, A );
+		myNE.GetA(A);
 
 		//A.PrintMtx("A");
 		//exit(0);
 
 		/// Evaluating q_ddot by inverting the dynamic equation of motion for manipulators
-		q_ddot = -1.0 * A.RegPseudoInverse(0.0,0.0) * m_bar;
+		q_ddot = -1.0 * rml::RegularizedPseudoInverse(A) * m_bar;
 		//q_ddot.PrintMtx("q_ddot:");
 
 		/// Integrating q_ddot to find q
-		q_dot = q_dot + q_ddot*dt;
-		q = q + q_dot*dt;
+		q_dot = q_dot + q_ddot * dt;
+		q = q + q_dot * dt;
 
 		//q.Transpose().PrintMtx("q:");
 
 		myDotter();
 	}
 
-	saveSimToFile(t, t_steps, q_h, NUM_JOINTS);
+	saveSimToFile(t, t_steps, q_h, numJoints);
 
 	return 0;
 }
 
-Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& dims){
+Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& dims)
+{
 
 	Eigen::Matrix3d Inertia = Eigen::Matrix3d::Zero();
 
-	double l = dims(1), w = dims(2), h = dims(3);
+	double l = dims(0), w = dims(1), h = dims(2);
 
-	if(l == 0){
-	    l = 0.05;
+	if (l == 0) {
+		l = 0.05;
 	}
 
-	if(w == 0){
-	    w = 0.05;
+	if (w == 0) {
+		w = 0.05;
 	}
 
-	if(h == 0){
-	    h = 0.05;
+	if (h == 0) {
+		h = 0.05;
 	}
 
-	Inertia(0,0) = mass/12*(w*w + h*h);
-	Inertia(1,1) = mass/12*(l*l + h*h);
-	Inertia(2,2) = mass/12*(l*l + w*w);
+	Inertia(0, 0) = mass / 12 * (w * w + h * h);
+	Inertia(1, 1) = mass / 12 * (l * l + h * h);
+	Inertia(2, 2) = mass / 12 * (l * l + w * w);
 
 	//Inertia.PrintMtx("Inertia: ");
 
 	return Inertia;
 }
 
-void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::MatrixXd>& q_h, int numJoints){
+void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q_h, int numJoints)
+{
 
 	std::string save_path = get_selfpath();
 
@@ -201,33 +196,35 @@ void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::MatrixXd>& q
 	std::ofstream results_file;
 
 	try {
-		results_file.open ( save_path.c_str(), std::fstream::app );
+		results_file.open(save_path.c_str(), std::fstream::app);
 
-		if( results_file.is_open() ) {
+		if (results_file.is_open()) {
 
-			for(int i = 0; i < simNSteps; ++i){
+			for (int i = 0; i < simNSteps; ++i) {
 				results_file << time[i] << "\t";
-				for(int j = 0; j < numJoints; ++j) results_file <<  q_h.at(i)(j) << "\t";
+				for (int j = 0; j < numJoints; ++j)
+					results_file << q_h.at(i)(j) << "\t";
 				results_file << "\n";
 			}
 			results_file.close();
-		}else{
+		} else {
 			std::cerr << TC_RED << "Exception opening/reading file\n" << TC_NONE;
 		}
-	}catch ( std::ofstream::failure& e ) {
+	} catch (std::ofstream::failure& e) {
 		std::cerr << TC_RED << "Exception opening/reading file\n" << TC_NONE;
 	}
 
 }
 
-std::string get_selfpath() {
+std::string get_selfpath()
+{
 	char buff[2048];
-	ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff)-1);
+	ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
 	if (len != -1) {
 		buff[len] = '\0';
 		std::string path(buff);   ///Here the executable name is still in
 		std::string::size_type t = path.find_last_of("/");   // Here we find the last "/"
-		path = path.substr(0,t);                             // and remove the rest (exe name)
+		path = path.substr(0, t);                             // and remove the rest (exe name)
 		return path;
 	} else {
 		printf("Cannot determine file path!\n");
@@ -235,8 +232,8 @@ std::string get_selfpath() {
 	}
 }
 
-
-std::string getCurrentDateFormatted(){
+std::string getCurrentDateFormatted()
+{
 
 	std::time_t t = std::time(NULL);
 	char mbstr[20];
@@ -245,7 +242,4 @@ std::string getCurrentDateFormatted(){
 
 	return currentDate;
 }
-
-
-
 

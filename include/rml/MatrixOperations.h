@@ -24,12 +24,12 @@ inline void Matrix2Double(const Eigen::MatrixXd& MatT, int rows, int cols, doubl
 	Eigen::Map<Eigen::MatrixXd>(dmat, rows, cols) = MatT;
 }
 
-inline void Double2Vector(double dmat[], int rows, int cols, Eigen::VectorXd& MatT){
-	MatT = Eigen::Map<Eigen::VectorXd>(dmat, rows, cols);
+inline void Double2Vector(double dmat[], int rows, Eigen::VectorXd& MatT){
+	MatT = Eigen::Map<Eigen::VectorXd>(dmat, rows, 1);
 }
 
-inline void Vector2Double(const Eigen::VectorXd& MatT, int rows, int cols, double dmat[]){
-	Eigen::Map<Eigen::VectorXd>(dmat, rows, cols) = MatT;
+inline void Vector2Double(const Eigen::VectorXd& MatT, int rows, double dmat[]){
+	Eigen::Map<Eigen::VectorXd>(dmat, rows, 1) = MatT;
 }
 
 inline void SetDiagonalFromDouble(Eigen::MatrixXd& MatT, double diag[]){

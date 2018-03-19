@@ -8,6 +8,8 @@
 #ifndef INCLUDE_RML_ROBOTMODEL_H_
 #define INCLUDE_RML_ROBOTMODEL_H_
 
+#include <vector>
+#include <memory>
 #include <rml/VehicleModel.h>
 #include <rml/ArmModel.h>
 
@@ -33,8 +35,6 @@
  *
  */
 
-#include <vector>
-#include <memory>
 
 namespace rml {
 

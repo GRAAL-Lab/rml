@@ -26,6 +26,7 @@ add_library(rml SHARED
     src/RobotModel.cc
     src/Types.cc
     src/RobotLink.cc
+    src/NewtonEuler.cc
 )
 
 #add_library(youBotModel include/test/youbot_armmodel.cc
@@ -81,9 +82,17 @@ if(BUILD_TEST)
 #        test/baxterLeft_armmodel.cc
     )
     
+        add_executable(rml_test_newtoneuler test/rml_test_newtoneuler.cpp
+        test/youbot_armmodel.cc
+        test/youbot_vehiclemodel.cc
+#        test/baxterLeft_armmodel.cc
+    )
+    
     target_link_libraries(rml_test rml)
     target_link_libraries(rml_test_model rml)
+    target_link_libraries(rml_test_newtoneuler rml)
     
     add_test(rml_test rml_test)
     add_test(rml_test_model rml_test_model)
+    add_test(rml_test_newtoneuler rml_test_newtoneuler)
 endif(BUILD_TEST)

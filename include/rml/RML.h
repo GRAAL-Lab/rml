@@ -24,5 +24,6 @@
 #include <rml/SVD.h>
 #include <rml/PseudoInverse.h>
 #include <rml/RobotModel.h>
+#include <rml/NewtonEuler.h>
 
 #endif /* INCLUDE_RML_RML_H_ */

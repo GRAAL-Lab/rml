@@ -23,6 +23,10 @@ namespace rml {
 
 VehicleModel::VehicleModel() {
 	modelInitialized_ = false;
+	fbkPosition_.setZero();
+	fbkVelocity_.setZero();
+	fbkAcceleration_.setZero();
+	cartVelocity_.setZero();
 }
 
 VehicleModel::~VehicleModel() {
@@ -38,10 +42,21 @@ void VehicleModel::SetFeedbackVelocity(const Eigen::Vector6d& fbkVel) {
 	fbkVelocity_ = fbkVel;
 }
 
+void VehicleModel::SetFeedbackAcceleration(const Eigen::Vector6d& fbkAcc) {
+	fbkAcceleration_ = fbkAcc;
+}
+
 const Eigen::Vector6d& VehicleModel::GetCartesianVelocity() {
 		Eigen::TransfMatrix wTv;
 		wTv = fbkPosition_.ToTransfMatrix();
 	    cartVelocity_ = wTv.GetRotMatrix().Transpose().GetCartesianRotationMatrix() * fbkVelocity_;
+	    return cartVelocity_;
+}
+
+const Eigen::Vector6d& VehicleModel::GetCartesianAcceleration() {
+		Eigen::TransfMatrix wTv;
+		wTv = fbkPosition_.ToTransfMatrix();
+	    cartAcceleration_ = wTv.GetRotMatrix().Transpose().GetCartesianRotationMatrix() * fbkAcceleration_;
 	    return cartVelocity_;
 }
 

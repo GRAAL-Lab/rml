@@ -106,6 +106,7 @@ public:
 	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
 
 
+
 	int GetNumJoints() const {
 		return links_.size();
 	}
@@ -122,6 +123,9 @@ public:
 		return bJt_;
 	}
 
+	const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji) {
+		return biTei_.at(ji);
+	}
 
 	const Eigen::TransfMatrix& GetbTt() {
 		return bTt_;

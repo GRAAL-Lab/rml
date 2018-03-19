@@ -54,8 +54,8 @@ int main(int argc, char* argv[]){
 		exit(0);
 	}
 
-	Eigen::MatrixXd q_0 = Eigen::MatrixXd(numJoints, 1);
-	rml::Double2Matrix(q_0_doub, numJoints, 1, q_0);
+	Eigen::VectorXd q_0 = Eigen::VectorXd(numJoints, 1);
+	rml::Double2Vector(q_0_doub, numJoints, q_0);
 	PrettyPrint(q_0.transpose(),"q_0");
 
 	myTimer.Start();
@@ -72,8 +72,8 @@ int main(int argc, char* argv[]){
 	}
 
 	for (int i = 0; i < youbotAM->GetNumJoints(); ++i) {
-		PrettyPrint(youbotAM->GetLink(i).JointLimitsMin(),"GetJointLimitsMin()");
-		PrettyPrint(youbotAM->GetLink(i).JointLimitsMax(),"GetJointLimitsMax()");
+		PrettyPrint(youbotAM->GetLink(i).JointLimitMin(),"GetJointLimitsMin()");
+		PrettyPrint(youbotAM->GetLink(i).JointLimitMax(),"GetJointLimitsMax()");
 	}
 
 	////////////////////////////////////////////////////////////

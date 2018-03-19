@@ -15,13 +15,13 @@ using std::endl;
 namespace rml {
 
 RobotLink::RobotLink() :
-				type_(JointType::Fixed), mass_(0), jointLimitsMin_(0), jointLimitsMAX_(0)
+				type_(JointType::Fixed), mass_(0), jointLimitMin_(0), jointLimitMAX_(0)
 {
 	InitVectors();
 }
 
 RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax):
-		type_(type), axis_(axis), baseTransf_(baseTransf), jointLimitsMin_(jointLimMin), jointLimitsMAX_(joinLimMax)
+		type_(type), axis_(axis), baseTransf_(baseTransf), jointLimitMin_(jointLimMin), jointLimitMAX_(joinLimMax)
 {
 	InitVectors();
 }

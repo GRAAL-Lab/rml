@@ -20,8 +20,8 @@ class RobotLink
 	JointType type_;
 	Eigen::Vector3d axis_;
 	Eigen::TransfMatrix baseTransf_;
-	double jointLimitsMin_;
-	double jointLimitsMAX_;
+	double jointLimitMin_;
+	double jointLimitMAX_;
 
 	// Dynamic properties
     double mass_;
@@ -46,10 +46,10 @@ public:
     void SetPhysicalProperties(double mass, const Eigen::Vector3d& sizes, const Eigen::Vector3d& CoM, const Eigen::Matrix3d& Inertia);
 
     JointType Type()    					const {	return type_;}
-    const Eigen::Vector3d Axis()    		const {	return axis_;}
-    const Eigen::TransfMatrix BaseTransf() 	const {	return baseTransf_; }
-    double JointLimitsMax()    				const {	return jointLimitsMAX_; }
-	double JointLimitsMin() 				const {	return jointLimitsMin_;	}
+    const Eigen::Vector3d& Axis()    		const {	return axis_;}
+    const Eigen::TransfMatrix& BaseTransf()	const {	return baseTransf_; }
+    double JointLimitMax()    				const {	return jointLimitMAX_; }
+	double JointLimitMin() 					const {	return jointLimitMin_;	}
 
     float Mass() 				   			const { return mass_; }
     const Eigen::Vector3d& Sizes() 			const { return sizeVect_; }
