@@ -6,6 +6,7 @@
  */
 
 #include "rml/NewtonEuler.h"
+#include "rml_internal/Futils.h"
 
 namespace rml
 {
@@ -23,7 +24,7 @@ NewtonEuler::~NewtonEuler()
 
 NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex)
 {
-	model_ = model;
+	//model_ = model;
 	armModel_ = model->GetArm(armIndex);
 	vehicle_ = model->GetVehicle();
 
@@ -135,6 +136,7 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 
 
 	for (int i = 0; i < numJoints_; ++i) {
+		q_ = armModel_->GetJointsPosition();
 		q_dot_(i + 1) = qdot(i);
 		q_ddot_(i + 1) = qddot(i);
 
@@ -172,7 +174,17 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 			temp1_ = R_.at(i).Transpose() * omega_dot_.at(i - 1);
 			temp2_ = q_ddot_(i) * e_i;
 			temp3_ = q_dot_(i) * omega_.at(i).cross(e_i);
+
+//			futils::PrettyPrint(omega_dot_.at(i-1),"omega_dot_.at(i-1)");
+//			futils::PrettyPrint(temp1_,"temp1_ang_acc");
+//			futils::PrettyPrint(temp2_,"temp2_ang_acc");
+//			futils::PrettyPrint(temp3_,"temp3_ang_acc");
+
 			omega_dot_.at(i) = temp1_ + temp2_ + temp3_;
+
+//			futils::PrettyPrint(omega_dot_.at(i),"omega_dot_.at(i)");
+//			std::cout << "----" << std::endl;
+
 		} else if (links_.at(i).Type() == JointType::Prismatic) {
 			omega_dot_.at(i) = R_.at(i).Transpose() * omega_dot_.at(i - 1);
 		}
@@ -219,7 +231,13 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 	for (int i = 1; i <= numJoints_; ++i) {
 		//c_dot_.at(i) = c_dot_.at(i) + omega_.at(i).CrossProd(links_.at(i).CoM_);
 		temp1_ = c_ddot_.at(i) + omega_dot_.at(i).cross(links_.at(i).CoM());
+
+//		futils::PrettyPrint(links_.at(i).CoM(),"links_.at(i).CoM()");
+//		futils::PrettyPrint(temp1_,"temp1_lin_acc_proj");
+
 		temp2_ = omega_.at(i).cross(omega_.at(i).cross(links_.at(i).CoM()));
+
+		//futils::PrettyPrint(temp2_,"temp2");
 		c_ddot_.at(i) = temp1_ + temp2_;
 	}
 
@@ -268,7 +286,7 @@ void NewtonEuler::GetA(Eigen::MatrixXd& A)
 		q_ddot_Ai_ = qZeroVec_;
 
 		// Fixing the q_dot vector for the current joint
-		q_ddot_Ai_(i) = 1;
+		q_ddot_Ai_(i) = 1.0;
 
 		EvaluateStep(qZeroVec_, q_ddot_Ai_, 0.0, m_tilde_);
 
@@ -294,108 +312,87 @@ void NewtonEuler::GetMBar(const Eigen::VectorXd& q_dot, Eigen::VectorXd& m_bar)
 	EvaluateStep(q_dot, qZeroVec_, STD_GRAVITY, m_bar);
 }
 
-//void NewtonEuler::PrintVars() const
-//{
+void NewtonEuler::PrintVars() const
+{
 //	std::cout << tc::green << "links lenghtVec (b):\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": ";
-//		links_.at(i).LenghtVec().Transpose().PrintMtx();
+//		std::cout << i << ": " << links_.at(i).Sizes().transpose() << std::endl;
 //	}
 //
 //	std::cout << tc::green << "links CoM (r):\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": ";
-//		links_.at(i).CoM().Transpose().PrintMtx();
+//		std::cout << i << ": " << links_.at(i).CoM().transpose() << std::endl;
 //	}
 //
 //	std::cout << tc::green << "links Mass:\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": " << links_.at(i).Mass() << std::endl;
+//		std::cout << i << ": " << links_.at(i).Mass() << std::endl << std::endl;
 //	}
 //
 //	std::cout << tc::green << "links Inertia:\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": ";
-//		links_.at(i).Inertia().Transpose().PrintMtx();
+//		std::cout << i << ": " << links_.at(i).Inertia().transpose() << std::endl;
 //	}
 //
-//	std::cout << tc::green << "omega_dot (a):\n" << tc::none;
-//	for (uint i = 0; i < omega_dot_.size(); ++i) {
+//	for (uint i = 0; i < numJoints_; i++) {
 //		std::cout << i << ": ";
-//		omega_dot_.at(i).Transpose().PrintMtx();
+//		futils::PrettyPrint(armModel_->GetCurrentLinkTransf(i),"BiTei");
 //	}
 //
-//	for (uint i = 0; i < biTei_.size(); i++) {
-//		std::cout << i << ": ";
-//		biTei_[i].PrintMtx("BiTei");
-//	}
+//	std::cout << tc::green << "q:\n" << tc::none <<	q_.transpose() << std::endl;
 //
-//	std::cout << tc::green << "q:\n" << tc::none;
-//	q_.Transpose().PrintMtx("");
+//	std::cout << tc::green << "q_dot_:\n" << tc::none << q_dot_.transpose() << std::endl;
 //
-//	std::cout << tc::green << "q_dot_:\n" << tc::none;
-//	q_dot_.Transpose().PrintMtx("");
-//
-//	std::cout << tc::green << "q_ddot_:\n" << tc::none;
-//	q_ddot_.Transpose().PrintMtx("");
+//	std::cout << tc::green << "q_ddot_:\n" << tc::none << q_ddot_.transpose() << std::endl;
 //
 //	std::cout << tc::green << "omega:\n" << tc::none;
 //	for (uint i = 0; i < omega_.size(); ++i) {
-//		std::cout << i << ": ";
-//		omega_.at(i).Transpose().PrintMtx();
+//		std::cout << i << ": " << omega_.at(i).transpose() << std::endl;
 //	}
 //
 //	std::cout << tc::green << "omega_dot:\n" << tc::none;
 //	for (uint i = 0; i < omega_dot_.size(); ++i) {
-//		std::cout << i << ": ";
-//		omega_dot_.at(i).Transpose().PrintMtx();
+//		std::cout << i << ": " << omega_dot_.at(i).transpose() << std::endl;
 //	}
-//
-//	std::cout << tc::green << "c_ddot:\n" << tc::none;
-//	for (uint i = 0; i < c_ddot_.size(); ++i) {
-//		std::cout << i << ": ";
-//		c_ddot_.at(i).Transpose().PrintMtx();
-//	}
-//
+
+	std::cout << tc::green << "c_ddot:\n" << tc::none;
+	for (uint i = 0; i < c_ddot_.size(); ++i) {
+		std::cout << i << ": " << c_ddot_.at(i).transpose() << std::endl;
+	}
+
 //	std::cout << tc::green << "r_qpc:\n" << tc::none;
 //	for (uint i = 0; i < r_qpc_.size(); ++i) {
-//		std::cout << i << ": ";
-//		r_qpc_.at(i).Transpose().PrintMtx();
+//		std::cout << i << ": " << r_qpc_.at(i).transpose() << std::endl;
 //	}
 //
 //	std::cout << tc::green << "r_qmc_:\n" << tc::none;
 //	for (uint i = 0; i < r_qmc_.size(); ++i) {
-//		std::cout << i << ": ";
-//		r_qmc_.at(i).Transpose().PrintMtx();
+//		std::cout << i << ": " << r_qmc_.at(i).transpose() << std::endl;
 //	}
 //
 //	std::cout << tc::green << "self force:\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": ";
-//		links_.at(i).self_f.Transpose().PrintMtx();
+//		std::cout << i << ": " << links_.at(i).self_f_.transpose() << std::endl;
 //	}
 //	std::cout << std::endl;
 //
 //	std::cout << tc::green << "interaction force:\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": ";
-//		links_.at(i).inter_f.Transpose().PrintMtx();
+//		std::cout << i << ": " << links_.at(i).inter_f_.transpose() << std::endl;
 //	}
 //	std::cout << std::endl;
 //
 //	std::cout << tc::green << "self mom:\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": ";
-//		links_.at(i).self_n.Transpose().PrintMtx();
+//		std::cout << i << ": " << links_.at(i).self_n_.transpose() << std::endl;
 //	}
 //	std::cout << std::endl;
 //
 //	std::cout << tc::green << "interaction mom:\n" << tc::none;
 //	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": ";
-//		links_.at(i).inter_n.Transpose().PrintMtx();
+//		std::cout << i << ": " << links_.at(i).inter_n_.transpose() << std::endl;
 //	}
 //	std::cout << std::endl;
-//}
+}
 
 } /* namespace rml */

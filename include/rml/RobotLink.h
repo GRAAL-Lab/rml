@@ -8,11 +8,21 @@
 #ifndef SRC_ROBOTLINK_H_
 #define SRC_ROBOTLINK_H_
 
+#include <map>
+#include <string>
+
 #include <rml/Types.h>
+
 
 namespace rml {
 
 enum class JointType : uint8_t { Fixed, Revolute, Prismatic };
+
+const std::map<JointType, std::string> JointType2String = {
+		{JointType::Fixed, "Fixed"},
+		{JointType::Revolute, "Revolute"},
+		{JointType::Prismatic, "Prismatic"}
+};
 
 class RobotLink
 {

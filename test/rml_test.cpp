@@ -28,7 +28,7 @@ int main(int argc, char* argv[]){
 	///    MATRIX OPERATIONS    ///
 	///////////////////////////////
 
-	std::cout << std::endl << tc::yel << "### MATRIX OPERATIONS Test ###" << tc::none << std::endl;
+	std::cout << std::endl << tc::yellow << "### MATRIX OPERATIONS Test ###" << tc::none << std::endl;
 
 	S = rml::RightJuxtapose(A,U);
 	V = rml::UnderJuxtapose(A,U);
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 	//////     PINV TEST     //////
 	///////////////////////////////
 
-	std::cout << std::endl << tc::yel << "### PINV Test (with timings) ###" << tc::none << std::endl;
+	std::cout << std::endl << tc::yellow << "### PINV Test (with timings) ###" << tc::none << std::endl;
 
 	Eigen::MatrixXd Avar, Apinv;
 	int iterations = 1000;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]){
 	//////     SVD TEST      //////
 	///////////////////////////////
 
-	std::cout << std::endl << tc::yel << "### SVD Test ###" << tc::none << std::endl;
+	std::cout << std::endl << tc::yellow << "### SVD Test ###" << tc::none << std::endl;
 
 	for (int i = 0; i < A.rows(); i++){
 		for (int j = 0; j < A.cols(); j++){

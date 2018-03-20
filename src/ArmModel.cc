@@ -77,9 +77,22 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) {
 	EvaluatedJdqNumeric();
 }
 
+void ArmModel::SetJointsVelocity(const Eigen::VectorXd& qdot) {
 
-const Eigen::VectorXd& ArmModel::GetJointPosition() const {
+	if(!modelInitialized_){
+		std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
+		exit(0);
+	}
+	q_dot_ = qdot;
+
+}
+
+const Eigen::VectorXd& ArmModel::GetJointsPosition() const {
 	return q_;
+}
+
+const Eigen::VectorXd& ArmModel::GetJointsVelocity() const {
+	return q_dot_;
 }
 
 void ArmModel::EvaluatebJt() {

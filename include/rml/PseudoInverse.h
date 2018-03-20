@@ -49,20 +49,6 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
 	return eigenPinv;
 }
 
-/**
- * @brief Computes the SVD-based matrix pseudoinversion without regularization (A = U*S*V')
- *
- * @param mat			The matrix to be inverted
- * @return				The pseudo-inverse matrix of \p mat
- */
-template<class MatT>
-Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> PseudoInverse(
-		const MatT& mat)
-{
-	SVDData svdData;
-	RegularizedPseudoInverse(mat, svdData);
-}
-
 } //namespace rml
 
 #endif /* INCLUDE_RML_PSEUDOINVERSE_H_ */

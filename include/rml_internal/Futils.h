@@ -79,27 +79,17 @@
  */
 
 #if defined(__linux__) || defined(linux)
-#define TC_RED          "\033[5;31m"
-#define TC_CYAN         "\033[1;36m"
-#define TC_GREEN        "\033[1;32m"
-#define TC_BLUE         "\033[1;34m"
-#define TC_YELLOW       "\033[1;33m"
-#define TC_BLACK        "\033[0;30m"
-#define TC_BROWN        "\033[0;33m"
-#define TC_MAGENTA      "\033[1;35m"
-#define TC_GRAY         "\033[1;37m"
-#define TC_NONE         "\033[0m"
 
 namespace tc {
 const char* const none = "\033[0m";
-const char* const blck = "\033[0;30m";
+const char* const black = "\033[0;30m";
 const char* const grayD = "\033[1;30m";
 const char* const red = "\033[0;31m";
 const char* const redL = "\033[1;31m";
-const char* const grn = "\033[0;32m";
-const char* const grnL = "\033[1;32m";
-const char* const brwn = "\033[0;33m";
-const char* const yel = "\033[1;33m";
+const char* const green = "\033[0;32m";
+const char* const greenL = "\033[1;32m";
+const char* const brown = "\033[0;33m";
+const char* const yellow = "\033[1;33m";
 const char* const blu = "\033[0;34m";
 const char* const bluL = "\033[1;34m";
 const char* const mag = "\033[0;35m";

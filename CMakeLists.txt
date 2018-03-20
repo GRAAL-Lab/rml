@@ -85,7 +85,7 @@ if(BUILD_TEST)
         add_executable(rml_test_newtoneuler test/rml_test_newtoneuler.cpp
         test/youbot_armmodel.cc
         test/youbot_vehiclemodel.cc
-#        test/baxterLeft_armmodel.cc
+        test/twolinks_armmodel.cc
     )
     
     target_link_libraries(rml_test rml)

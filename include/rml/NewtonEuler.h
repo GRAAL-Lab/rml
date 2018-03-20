@@ -28,7 +28,7 @@ class NewtonEuler
 
 	int numJoints_;
 
-	std::shared_ptr<RobotModel> model_;
+	//std::shared_ptr<RobotModel> model_;
 	std::shared_ptr<ArmModel> armModel_;
 	std::shared_ptr<VehicleModel> vehicle_;
 
@@ -51,7 +51,6 @@ class NewtonEuler
 	void Init();
 	void AddDummyBaseAndEE();
 	void InterMom2Torque(Eigen::VectorXd& torques) const;
-	void PrintVars() const;
 
 public:
 	//NewtonEuler();
@@ -63,6 +62,8 @@ public:
 	//void GetB();
 	void GetC(Eigen::VectorXd& C);
 	void GetMBar(const Eigen::VectorXd& q_dot, Eigen::VectorXd& mbar);
+
+	void PrintVars() const;
 };
 
 } /* namespace rml */

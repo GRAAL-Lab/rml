@@ -71,7 +71,11 @@ public:
 	 * @brief Get the joint position
 	 * @return q the joint position vector (an armJoints x 1 vector)
 	 */
-	const Eigen::VectorXd& GetJointPosition() const;
+	const Eigen::VectorXd& GetJointsPosition() const;
+
+	void SetJointsVelocity(const Eigen::VectorXd& qdot);
+
+	const Eigen::VectorXd& GetJointsVelocity() const;
 
 	/**
 	 * @brief Evaluates the manipulability measure and its Jacobian
@@ -194,7 +198,7 @@ protected:
 	std::vector<RobotLink> links_;
 	std::unordered_map<std::string, IndexedTMat > attachedBodyFrames_;
 
-	Eigen::VectorXd q_;
+	Eigen::VectorXd q_, q_dot_, q_ddot_;
 	std::vector<Eigen::TransfMatrix> baseTei_; 		///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
 	//std::vector<Eigen::TransfMatrix> biTri_;		///< Matrice di Trasformazione dalla base all'endeffector della BRU i-esima (costante)
 	std::vector<Eigen::TransfMatrix> biTei_;		///< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto

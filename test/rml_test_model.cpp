@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
 	//////  ARM MODEL TEST   //////
 	///////////////////////////////
 
-	std::cout << std::endl << tc::yel << "### Arm Model Test ###" << tc::none << std::endl;
+	std::cout << std::endl << tc::yellow << "### Arm Model Test ###" << tc::none << std::endl;
 
 	int numJoints(0);
 	double elapsed_Timer(0);

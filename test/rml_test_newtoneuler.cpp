@@ -10,6 +10,7 @@
 #include "test/rml_test_defines.h"
 #include "test/youbot_armmodel.h"
 #include "test/youbot_vehiclemodel.h"
+#include "test/twolinks_armmodel.h"
 //#include "test/baxterLeft_armmodel.h"
 
 using std::cout;
@@ -24,19 +25,19 @@ std::string getCurrentDateFormatted();
 int main(int argc, char* argv[])
 {
 
-	timeval t1, t2;
-	futils::Timer myTimer;
+	//timeval t1, t2;
 
-	std::cout << std::endl << tc::yel << "### Newton Euler Test ###" << tc::none << std::endl;
+	std::cout << std::endl << tc::yellow << "### Newton Euler Test ###" << tc::none << std::endl;
 
 	int numJoints(0);
 	double elapsed_Timer(0);
 
-	std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
+	//std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
+	std::shared_ptr<rml::YouBotArmModel> armModel = std::make_shared<rml::YouBotArmModel>();
 	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
 	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
 
-	numJoints = youbotAM->GetNumJoints();
+	numJoints = armModel->GetNumJoints();
 
 	vector<Eigen::Vector3d> linkDim(numJoints);
 	double linkMass;
@@ -45,29 +46,29 @@ int main(int argc, char* argv[])
 
 	/// Getting link length information from links transformations
 	for (int i = 0; i < numJoints - 1; ++i) {
-		linkDim.at(i) = youbotAM->GetLink(i + 1).BaseTransf().GetTransl();
+		linkDim.at(i) = armModel->GetLink(i + 1).BaseTransf().GetTransl();
 	}
-	linkDim.at(numJoints - 1) = youbotAM->GeteTt().GetTransl();
+	linkDim.at(numJoints - 1) = armModel->GeteTt().GetTransl();
 
 	/// Populating Link Physical Properties
 	for (int i = 0; i < numJoints; ++i) {
-		linkMass = 1.0;
+		linkMass = 0.2;
 		CoM = linkDim.at(i) / 2.0;
 		Inertia = CuboidInertiaAboutCOM(linkMass, linkDim.at(i));
 
-		youbotAM->GetLink(i).SetPhysicalProperties(linkMass, linkDim.at(i), CoM, Inertia);
+		armModel->GetLink(i).SetPhysicalProperties(linkMass, linkDim.at(i), CoM, Inertia);
 	}
 
-	int armIndex = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+	int armIndex = robotModel->LoadArm(armModel, Eigen::TransfMatrix());
 	robotModel->LoadVehicle(youbotVM);
+
+	robotModel->
 
 	std::cout << " - Model variables have been loaded - " << std::endl;
 
 	rml::NewtonEuler myNE(robotModel, armIndex);
 
 	///--------------------------------------------------------///
-
-
 
 	///*** INITIALIZATION ***///
 	Eigen::Vector3d zeroVect3 = Eigen::Vector3d::Zero();
@@ -89,14 +90,14 @@ int main(int argc, char* argv[])
 
 	// TODO
 	//double q_0[NUM_JOINTS] = { 0, 0 };
-	double q_0[numJoints] = { 0, 3.0 / 4.0 * M_PI, 0, 0, 0 };
+	double q_0[numJoints] = { 0, 2.0 / 4.0 * M_PI, 0, 0, 0 };
 
 	rml::Double2Vector(q_0, numJoints, q);
 	q_dot.setZero();
 
 	// Simulation parameters
-	double duration = 5.0; ///Total seconds of simulation
-	double dt = 0.002; ///Time step
+	double duration = 3.0;	// Total seconds of simulation in SECONDS
+	double dt = 0.001; 		// Time step in SECONDS
 	int t_steps = duration / dt;
 
 	cout << "Simulation steps: " << t_steps << endl;
@@ -118,6 +119,10 @@ int main(int argc, char* argv[])
 	mySVD.params.lambda = 0.01;
 	mySVD.params.threshold = 0.0001;
 
+	futils::Timer myTimer;
+	myTimer.Start();
+	double printInterval = 0.05;
+
 	/********************************************************
 	 *                      MAIN LOOP                       *
 	 ********************************************************/
@@ -137,6 +142,8 @@ int main(int argc, char* argv[])
 
 		q_h.at(i) = q;
 
+		robotModel->GetArm(armIndex)->SetJointsPosition(q);
+
 		//std::cout << "------ Getting MBar ------" << std::endl;
 
 		myNE.GetMBar(q_dot, m_bar);
@@ -147,9 +154,6 @@ int main(int argc, char* argv[])
 
 		myNE.GetA(A);
 
-		//PrettyPrint(A, "A");
-		//PrettyPrint(rml::RegularizedPseudoInverse(A, mySVD), "RegularizedPseudoInverse(A)");
-		//PrettyPrint(rml::PseudoInverse(A), "PseudoInverse(A)");
 
 		//exit(0);
 
@@ -157,16 +161,30 @@ int main(int argc, char* argv[])
 
 		/// Evaluating q_ddot by inverting the dynamic equation of motion for manipulators
 		q_ddot = -1.0 * rml::RegularizedPseudoInverse(A, mySVD) * m_bar;
-		//q_ddot.PrintMtx("q_ddot:");
 
 		//std::cout << "------ Integrating ------" << std::endl;
 		/// Integrating q_ddot to find q
 		q_dot = q_dot + q_ddot * dt;
 		q = q + q_dot * dt;
 
-		//q.Transpose().PrintMtx("q:");
+
+		//robotModel->GetArm(armIndex)->SetJointsVelocity(q_dot);
+
 		myPerc();
+
+		//std::cout << "myTimer.Lap() " << myTimer.Lap() << std::endl;
+		/*if (myTimer.GetCurrentLapTime() > printInterval) {
+			myTimer.Lap();
+
+			std::cout << std::endl;
+			//futils::PrettyPrint(robotModel->GetArm(armIndex)->GetJointsPosition().transpose(), "q in model");
+			PrettyPrint(rml::RegularizedPseudoInverse(A, mySVD), "RegPinv(A)");
+
+			myNE.PrintVars();
+		}*/
 	}
+
+	rml::
 
 	std::cout << std::endl;
 
@@ -210,7 +228,7 @@ void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q
 
 	save_path = save_path + "/simData_" + getCurrentDateFormatted();
 
-	cout << TC_CYAN << "Saving sim data in: " << save_path << TC_NONE << endl;
+	cout << tc::cyanL << "Saving sim data in: " << save_path << tc::none << endl;
 
 	std::ofstream results_file;
 
@@ -227,10 +245,10 @@ void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q
 			}
 			results_file.close();
 		} else {
-			std::cerr << TC_RED << "Exception opening/reading file\n" << TC_NONE;
+			std::cerr << tc::red << "Exception opening/reading file\n" << tc::none;
 		}
 	} catch (std::ofstream::failure& e) {
-		std::cerr << TC_RED << "Exception opening/reading file\n" << TC_NONE;
+		std::cerr << tc::red << "Exception opening/reading file\n" << tc::none;
 	}
 
 }

@@ -18,6 +18,10 @@ RobotLink::RobotLink() :
 				type_(JointType::Fixed), mass_(0), jointLimitMin_(0), jointLimitMAX_(0)
 {
 	InitVectors();
+	axis_.setZero();
+	sizeVect_.setZero();
+	CoM_.setZero();
+	Inertia_.setZero();
 }
 
 RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax):
@@ -31,16 +35,12 @@ RobotLink::~RobotLink()
 	// TODO Auto-generated destructor stub
 }
 
-void RobotLink::InitVectors() {
-	axis_.setZero();
-	sizeVect_.setZero();
-	CoM_.setZero();
-	Inertia_.setZero();
+void RobotLink::InitVectors()
+{
 	self_f_.setZero();
 	self_n_.setZero();
 	inter_f_.setZero();
 	inter_n_.setZero();
-
 }
 
 void RobotLink::SetPhysicalProperties(double mass, const Eigen::Vector3d& sizeVect, const Eigen::Vector3d& CoM, const Eigen::Matrix3d &Inertia)
