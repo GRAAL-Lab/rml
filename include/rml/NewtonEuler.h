@@ -54,11 +54,11 @@ class NewtonEuler
 	void PrintVars() const;
 
 public:
-	NewtonEuler();
+	//NewtonEuler();
 	NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex);
 	virtual ~NewtonEuler();
 
-	void NEAlgorithm(const Eigen::VectorXd& q_dot, const Eigen::VectorXd& q_ddot, double gravity, Eigen::VectorXd& torques);
+	void EvaluateStep(const Eigen::VectorXd& q_dot, const Eigen::VectorXd& q_ddot, double gravity, Eigen::VectorXd& torques);
 	void GetA(Eigen::MatrixXd& A);
 	//void GetB();
 	void GetC(Eigen::VectorXd& C);

@@ -10,11 +10,11 @@
 namespace rml
 {
 
-NewtonEuler::NewtonEuler() :
+/*NewtonEuler::NewtonEuler() :
 		numJoints_(0)
 {
 	// TODO Auto-generated constructor stub
-}
+}*/
 
 NewtonEuler::~NewtonEuler()
 {
@@ -23,12 +23,14 @@ NewtonEuler::~NewtonEuler()
 
 NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex)
 {
-	numJoints_ = model->GetArm(armIndex)->GetNumJoints();
 	model_ = model;
 	armModel_ = model->GetArm(armIndex);
 	vehicle_ = model->GetVehicle();
 
+	numJoints_ = model->GetArm(armIndex)->GetNumJoints();
+
 	Init();
+
 }
 
 void NewtonEuler::Init()
@@ -69,6 +71,8 @@ void NewtonEuler::Init()
 	n_.resize(numJoints_ + 2, zeroVect3_);
 	f_.resize(numJoints_ + 2, zeroVect3_);
 
+	AddDummyBaseAndEE();
+
 	/*k_i = Eigen::Vector3d::UnitZ();
 	k_iT = k_i.transpose();*/
 }
@@ -107,13 +111,15 @@ void NewtonEuler::AddDummyBaseAndEE()
 	links_.at(numJoints_ + 1).SetPhysicalProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
 }
 
-void NewtonEuler::NEAlgorithm(const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, double gravity, Eigen::VectorXd& torques)
+void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, double gravity, Eigen::VectorXd& torques)
 {
+
+	//std::cout << "Check1" << std::endl;
+
 	gVect_ = Eigen::Vector3d::UnitZ() * -gravity;
 
 	omega_.at(0) = vehicle_->GetCartesianVelocity().GetFirstVect3();
 	omega_dot_.at(0) = vehicle_->GetCartesianAcceleration().GetFirstVect3();
-
 
 	rhoVec_.at(0).setZero();
 	for (int i = 1; i < numJoints_; ++i) {
@@ -144,6 +150,9 @@ void NewtonEuler::NEAlgorithm(const Eigen::VectorXd& qdot, const Eigen::VectorXd
 	 * Calculate links linear and angular acceleration
 	 */
 
+
+	//std::cout << "Check2" << std::endl;
+
 	/** Angular Velocity **/
 	for (int i = 1; i <= numJoints_; ++i) {
 		if (links_.at(i).Type() == JointType::Revolute) {
@@ -153,6 +162,8 @@ void NewtonEuler::NEAlgorithm(const Eigen::VectorXd& qdot, const Eigen::VectorXd
 			omega_.at(i) = R_.at(i).Transpose() * omega_.at(i - 1);
 		}
 	}
+
+	//std::cout << "Check3" << std::endl;
 
 	/** Angular Acceleration **/
 	for (int i = 1; i <= numJoints_; ++i) {
@@ -181,6 +192,8 @@ void NewtonEuler::NEAlgorithm(const Eigen::VectorXd& qdot, const Eigen::VectorXd
 	 }
 	 */
 
+	//std::cout << "Check4" << std::endl;
+
 	/** Linear Acceleration **/
 	for (int i = 1; i <= numJoints_; ++i) {
 		if (links_.at(i).Type() == JointType::Revolute) {
@@ -199,6 +212,8 @@ void NewtonEuler::NEAlgorithm(const Eigen::VectorXd& qdot, const Eigen::VectorXd
 			c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_) + temp3_ + temp4_ + e_i * q_ddot_(i);
 		}
 	}
+
+	//std::cout << "Check5" << std::endl;
 
 	/** Projection of the acceleration on the Center of Mass **/
 	for (int i = 1; i <= numJoints_; ++i) {
@@ -255,7 +270,7 @@ void NewtonEuler::GetA(Eigen::MatrixXd& A)
 		// Fixing the q_dot vector for the current joint
 		q_ddot_Ai_(i) = 1;
 
-		NEAlgorithm(qZeroVec_, q_ddot_Ai_, 0.0, m_tilde_);
+		EvaluateStep(qZeroVec_, q_ddot_Ai_, 0.0, m_tilde_);
 
 		// Filling current j column
 		for (int j = 0; j < numJoints_; ++j) {
@@ -271,12 +286,12 @@ void NewtonEuler::GetA(Eigen::MatrixXd& A)
 
 void NewtonEuler::GetC(Eigen::VectorXd& C)
 {
-	NEAlgorithm(qZeroVec_, qZeroVec_, STD_GRAVITY, C);
+	EvaluateStep(qZeroVec_, qZeroVec_, STD_GRAVITY, C);
 }
 
 void NewtonEuler::GetMBar(const Eigen::VectorXd& q_dot, Eigen::VectorXd& m_bar)
 {
-	NEAlgorithm(q_dot, qZeroVec_, STD_GRAVITY, m_bar);
+	EvaluateStep(q_dot, qZeroVec_, STD_GRAVITY, m_bar);
 }
 
 //void NewtonEuler::PrintVars() const

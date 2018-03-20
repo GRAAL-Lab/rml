@@ -65,20 +65,9 @@ int main(int argc, char* argv[])
 
 	rml::NewtonEuler myNE(robotModel, armIndex);
 
-
 	///--------------------------------------------------------///
 
-	double duration = 5.0; ///Total seconds of simulation
-	double dt = 0.0001; ///Time step
-	int t_steps = duration / dt;
 
-	//cout<< "t_steps: " << t_steps << endl;
-
-	double t[t_steps];
-	t[0] = 0;
-	for (int i = 1; i < t_steps; ++i) {
-		t[i] = t[i - 1] + dt;
-	}
 
 	///*** INITIALIZATION ***///
 	Eigen::Vector3d zeroVect3 = Eigen::Vector3d::Zero();
@@ -105,12 +94,29 @@ int main(int argc, char* argv[])
 	rml::Double2Vector(q_0, numJoints, q);
 	q_dot.setZero();
 
+	// Simulation parameters
+	double duration = 5.0; ///Total seconds of simulation
+	double dt = 0.002; ///Time step
+	int t_steps = duration / dt;
+
+	cout << "Simulation steps: " << t_steps << endl;
+
+	double t[t_steps];
+	t[0] = 0;
+	for (int i = 1; i < t_steps; ++i) {
+		t[i] = t[i - 1] + dt;
+	}
+
 	vector<Eigen::VectorXd> q_h(t_steps), q_dot_h(t_steps);
 
 	futils::Dotter myDotter(2);
-
+	futils::Percentage myPerc(t_steps);
 
 	std::cout << " - Simulation variables have been set... Starting SIM! - " << std::endl << std::endl;
+
+	rml::SVDData mySVD;
+	mySVD.params.lambda = 0.01;
+	mySVD.params.threshold = 0.0001;
 
 	/********************************************************
 	 *                      MAIN LOOP                       *
@@ -131,25 +137,38 @@ int main(int argc, char* argv[])
 
 		q_h.at(i) = q;
 
+		//std::cout << "------ Getting MBar ------" << std::endl;
+
 		myNE.GetMBar(q_dot, m_bar);
+
+		//PrettyPrint(m_bar, "m_bar");
+
+		//std::cout << "------ Getting A ------" << std::endl;
 
 		myNE.GetA(A);
 
-		//A.PrintMtx("A");
+		//PrettyPrint(A, "A");
+		//PrettyPrint(rml::RegularizedPseudoInverse(A, mySVD), "RegularizedPseudoInverse(A)");
+		//PrettyPrint(rml::PseudoInverse(A), "PseudoInverse(A)");
+
 		//exit(0);
 
+		//std::cout << "------ Getting qddot ------" << std::endl;
+
 		/// Evaluating q_ddot by inverting the dynamic equation of motion for manipulators
-		q_ddot = -1.0 * rml::RegularizedPseudoInverse(A) * m_bar;
+		q_ddot = -1.0 * rml::RegularizedPseudoInverse(A, mySVD) * m_bar;
 		//q_ddot.PrintMtx("q_ddot:");
 
+		//std::cout << "------ Integrating ------" << std::endl;
 		/// Integrating q_ddot to find q
 		q_dot = q_dot + q_ddot * dt;
 		q = q + q_dot * dt;
 
 		//q.Transpose().PrintMtx("q:");
-
-		myDotter();
+		myPerc();
 	}
+
+	std::cout << std::endl;
 
 	saveSimToFile(t, t_steps, q_h, numJoints);
 

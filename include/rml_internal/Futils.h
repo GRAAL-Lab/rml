@@ -329,6 +329,22 @@ private:
     double elapsedTime, lapTime;
 };
 
+struct Percentage {
+	Percentage(int iterations) :
+		numIterations(iterations), currentIteration(0), currentPerc(0.0) {}
+
+	 void operator()(void) {
+		 currentIteration++;
+		 currentPerc = ((double)currentIteration * 100.0 / (double)numIterations);
+		 std::cout << "\r" << std::setprecision(3) << "Progress: "  << currentPerc << "%    ";
+	 }
+
+private:
+	int numIterations;
+	int currentIteration;
+	double currentPerc;
+};
+
 template<typename T>
 inline std::string toStringPointDecimal(T val) {
     std::string s = std::to_string(val);
