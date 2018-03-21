@@ -17,6 +17,7 @@ using futils::PrettyPrint;
 Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& dims);
 void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q_h, int numJoints);
 
+
 int main(int argc, char* argv[])
 {
 	std::cout << std::endl << tc::yellow << "### Newton Euler Test ###" << tc::none << std::endl;
@@ -105,9 +106,9 @@ int main(int argc, char* argv[])
 	myTimer.Start();
 	double printInterval = 0.05;
 
-	/********************************************************
-	 *                      MAIN LOOP                       *
-	 ********************************************************/
+	/****************************************************************
+	 *                          MAIN LOOP                           *
+	 ****************************************************************/
 	/**
 	 * Given the following equation for the dynamic of robotic manipulators:
 	 *
@@ -126,17 +127,17 @@ int main(int argc, char* argv[])
 
 		robotModel->GetArm(armIndex)->SetJointsPosition(q);
 		robotModel->GetArm(armIndex)->SetJointsVelocity(q_dot);
+		robotModel->GetArm(armIndex)->SetJointsAcceleration(q_ddot);
 
-		//std::cout << "------ Getting MBar ------" << std::endl;
-		m_bar = myNE.GetMBar();
+		//std::cout << "------ Getting MTilde ------" << std::endl;
+		m_tilde = myNE.GetMTilde();
 
 		//std::cout << "------ Getting A ------" << std::endl;
 		A = myNE.GetA();
 
-
 		// std::cout << "------ Getting qddot ------" << std::endl;
 		// Evaluating q_ddot by inverting the dynamic equation of motion for manipulators
-		q_ddot = -1.0 * rml::RegularizedPseudoInverse(A, mySVD) * m_bar;
+		q_ddot = -1.0 * rml::RegularizedPseudoInverse(A, mySVD) * (m_tilde);
 
 		//std::cout << "------ Integrating ------" << std::endl;
 		// Integrating q_ddot to find q

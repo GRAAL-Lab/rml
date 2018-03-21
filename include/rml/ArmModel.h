@@ -80,6 +80,10 @@ public:
 
 	const Eigen::VectorXd& GetJointsVelocity() const;
 
+	void SetJointsAcceleration(const Eigen::VectorXd& qddot);
+
+	const Eigen::VectorXd& GetJointsAcceleration() const;
+
 	/**
 	 * @brief Evaluates the manipulability measure and its Jacobian
 	 * This method returns he manipulability measure and its Jacobian
@@ -134,7 +138,7 @@ public:
 		return biTei_.at(ji);
 	}
 
-	const Eigen::TransfMatrix& GetbTt() {
+	const Eigen::TransfMatrix& GetBase2ToolTransf() {
 		return bTt_;
 	}
 

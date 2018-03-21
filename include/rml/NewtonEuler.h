@@ -27,11 +27,11 @@ class NewtonEuler
 	std::vector<Eigen::RotMatrix> R_;
 	std::vector<Eigen::Vector3d> rhoVec_;		// Distance between joint "i" and "i+1"
 	Eigen::VectorXd q_, q_dot_, q_ddot_, q_ddot_Ai_, qZeroVec_;
-	Eigen::VectorXd m_tilde_;
+	Eigen::VectorXd a_column;
 	std::vector<Eigen::Vector3d> omega_, omega_dot_, c_dot_, c_ddot_;
+	Eigen::Vector3d temp1_, temp2_, temp3_, temp4_, omega_prev_;
 	Eigen::Vector3d gravity_, zeroVect3_;
 	std::vector<Eigen::Vector3d> n_, f_;
-	Eigen::Vector3d temp1_, temp2_, temp3_, temp4_, omega_prev_;
 	std::vector<Eigen::Vector3d> r_qmc_, r_qpc_;
 
 	std::vector<RobotLink> links_;
@@ -51,7 +51,7 @@ public:
 	Eigen::MatrixXd GetA();
 	//void GetB();
 	Eigen::VectorXd GetC();
-	Eigen::VectorXd GetMBar();
+	Eigen::VectorXd GetMTilde();
 
 	void PrintVars() const;
 };

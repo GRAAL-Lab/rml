@@ -21,9 +21,6 @@
  * \brief This class provides a container for storing multi-arm mobile manipulators,
  * including a series of model related functions.
  *
- * Detailed description TODO.
- *
- *
  * \author (last to touch it) fw
  *
  * \date 2018/02/28 12:06:20
@@ -31,7 +28,6 @@
  * Contact: francesco.wanderlingh@dibris.unige.it
  *
  * Created on: Tue Feb 27 10:22:30 2018
- *
  *
  */
 
@@ -139,6 +135,9 @@ public:
 	Eigen::MatrixXd GetArmJacobian_Manipulability(int armIndex, double& mu);
 	Eigen::MatrixXd GetVehicleJacobian();
 
+	Eigen::TransfMatrix GetTransfMatrix_VehicleToArmBase(int armIndex) const;
+	Eigen::TransfMatrix GetTransfMatrix_JointFrame(int armIndex, int jointIndex) const;
+	Eigen::TransfMatrix GetTransfMatrix_ToolFrame(int armIndex) const;
 
 	const std::shared_ptr<ArmModel> GetArm(int index) const {
 		return arms_.at(index);

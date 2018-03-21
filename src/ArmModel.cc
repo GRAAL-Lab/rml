@@ -57,6 +57,8 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
 	bJt_.resize(6, numberOfJoints_);
 	ZeroQ_ = Eigen::VectorXd::Zero(numberOfJoints_);
 	q_ = ZeroQ_;
+	q_dot_ = ZeroQ_;
+	q_ddot_ = ZeroQ_;
 
 	modelInitialized_ = true;
 
@@ -80,10 +82,20 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) {
 void ArmModel::SetJointsVelocity(const Eigen::VectorXd& qdot) {
 
 	if(!modelInitialized_){
-		std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
+		std::cout << "ERROR: Called SetJointsVelocity() on an unitialised ArmModel().\nExiting..." << std::endl;
 		exit(0);
 	}
 	q_dot_ = qdot;
+
+}
+
+void ArmModel::SetJointsAcceleration(const Eigen::VectorXd& qddot) {
+
+	if(!modelInitialized_){
+		std::cout << "ERROR: Called SetJointsAcceleration() on an unitialised ArmModel().\nExiting..." << std::endl;
+		exit(0);
+	}
+	q_ddot_ = qddot;
 
 }
 
@@ -94,6 +106,11 @@ const Eigen::VectorXd& ArmModel::GetJointsPosition() const {
 const Eigen::VectorXd& ArmModel::GetJointsVelocity() const {
 	return q_dot_;
 }
+
+const Eigen::VectorXd& ArmModel::GetJointsAcceleration() const {
+	return q_ddot_;
+}
+
 
 void ArmModel::EvaluatebJt() {
 	//std::cerr << "I'm in EvaluateJwt" << std::endl;

@@ -38,7 +38,7 @@ NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex)
 
 void NewtonEuler::Init()
 {
-	m_tilde_ = Eigen::VectorXd::Zero(numJoints_);
+	a_column = Eigen::VectorXd::Zero(numJoints_);
 
 	/*
 	 * The size of these internal variable is "numJoints+1" to take into account the
@@ -260,11 +260,11 @@ Eigen::MatrixXd NewtonEuler::GetA()
 		q_ddot_Ai_ = qZeroVec_;
 		q_ddot_Ai_(i) = 1.0;
 
-		EvaluateStep(armModel_->GetJointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), m_tilde_);
+		EvaluateStep(armModel_->GetJointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), a_column);
 
 		// Filling current j column
 		for (int j = 0; j < numJoints_; ++j) {
-			A(i, j) = m_tilde_(j);
+			A(i, j) = a_column(j);
 		}
 	}
 	return A;
@@ -282,7 +282,7 @@ Eigen::VectorXd NewtonEuler::GetC()
 	return C;
 }
 
-Eigen::VectorXd NewtonEuler::GetMBar()
+Eigen::VectorXd NewtonEuler::GetMTilde()
 {
 	Eigen::VectorXd m_bar = Eigen::VectorXd::Zero(numJoints_);
 	EvaluateStep(armModel_->GetJointsPosition(), armModel_->GetJointsVelocity(), qZeroVec_, gravity_, m_bar);

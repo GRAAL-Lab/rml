@@ -101,7 +101,7 @@ Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianEE(int armIndex) const
 	if (CheckVehicle()) {
 		if (CheckArm(armIndex)) {
 			vJv = vehicle_->GetvJv();
-			Eigen::TransfMatrix bTt = arms_.at(armIndex)->GetbTt();
+			Eigen::TransfMatrix bTt = arms_.at(armIndex)->GetBase2ToolTransf();
 			Eigen::TransfMatrix vTt = vehicleTbase_.at(armIndex) * bTt;
 			vJv = GetRigidBodyMatrix(vTt.GetTransl()) * vJv;
 		}
@@ -248,4 +248,39 @@ Eigen::MatrixXd RobotModel::GetVehicleJacobian()
 	return totJac;
 }
 
+Eigen::TransfMatrix RobotModel::GetTransfMatrix_VehicleToArmBase(int armIndex) const
+{
+	Eigen::TransfMatrix vTb;
+	if (CheckVehicle() && CheckArm(armIndex)) {
+		vTb = vehicleTbase_.at(armIndex);
+	}
+	return vTb;
+}
+
+Eigen::TransfMatrix RobotModel::GetTransfMatrix_JointFrame(int armIndex, int jointIndex) const
+{
+	Eigen::TransfMatrix wTj;
+	if(vehicle_){
+		wTj = vehicle_->GetwTv();
+	}
+	if (CheckArm(armIndex)) {
+		wTj = wTj * vehicleTbase_.at(armIndex) * arms_.at(armIndex)->GetBase2JointTransf(jointIndex);
+	}
+	return wTj;
+}
+
+Eigen::TransfMatrix RobotModel::GetTransfMatrix_ToolFrame(int armIndex) const
+{
+	Eigen::TransfMatrix wTt;
+	if(vehicle_){
+		wTt = vehicle_->GetwTv();
+	}
+	if (CheckArm(armIndex)) {
+		wTt = wTt * vehicleTbase_.at(armIndex) * arms_.at(armIndex)->GetBase2ToolTransf();
+	}
+	return wTt;
+}
+
 } /* namespace rml */
+
+
