@@ -32,6 +32,8 @@ NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex)
 
 	Init();
 
+	SetGravity(Eigen::Vector3d::UnitZ() * -STD_GRAVITY);
+
 }
 
 void NewtonEuler::Init()
@@ -109,10 +111,14 @@ void NewtonEuler::AddDummyBaseAndEE()
 	links_.at(numJoints_ + 1).SetPhysicalProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
 }
 
-void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, double gravity, Eigen::VectorXd& torques)
-{
-	gVect_ = Eigen::Vector3d::UnitZ() * -gravity;
+void NewtonEuler::SetGravity(const Eigen::Vector3d& gravity){
+	gravity_ = gravity;
+	//Eigen::Vector3d::UnitZ() *
+}
 
+void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, const Eigen::Vector3d& gravityVector, Eigen::VectorXd& torques)
+{
+	Eigen::Vector3d gravity = gravityVector;
 	omega_.at(0) = vehicle_->GetCartesianVelocity().GetFirstVect3();
 	omega_dot_.at(0) = vehicle_->GetCartesianAcceleration().GetFirstVect3();
 
@@ -220,7 +226,7 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 		links_.at(i).self_f_ = links_.at(i).Mass() * c_ddot_.at(i);
 		links_.at(i).self_n_ = links_.at(i).Inertia() * omega_dot_.at(i)
 				+ omega_.at(i).cross(links_.at(i).Inertia() * omega_.at(i));
-		gVect_ = R_.at(i).Transpose() * gVect_;
+		gravity = R_.at(i).Transpose() * gravity;
 	}
 
 	for (int i = numJoints_; i > 0; --i) {
@@ -234,32 +240,34 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 		//exit(0);
 
 		links_.at(i).inter_f_ = links_.at(i).self_f_ + R_.at(i + 1) * links_.at(i + 1).inter_f_
-				- links_.at(i).Mass() * gVect_;
+				- links_.at(i).Mass() * gravity;
 		links_.at(i).inter_n_ = links_.at(i).self_n_ + R_.at(i + 1) * links_.at(i + 1).inter_n_
 				- r_qmc_.at(i).cross(links_.at(i).inter_f_)
 				+ r_qpc_.at(i).cross(R_.at(i + 1) * links_.at(i + 1).inter_f_);
-		gVect_ = R_.at(i) * gVect_;
+		gravity = R_.at(i) * gravity;
 	}
 	InterMom2Torque(torques);
 }
 
-void NewtonEuler::GetA(Eigen::MatrixXd& A)
+Eigen::MatrixXd NewtonEuler::GetA()
 {
+	Eigen::MatrixXd A = Eigen::MatrixXd::Zero(numJoints_, numJoints_);
+
 	// Evaluating the columns of the A matrix (Inertia Matrix)
 	for (int i = 0; i < numJoints_; ++i) {
 
-		q_ddot_Ai_ = qZeroVec_;
-
 		// Fixing the q_dot vector for the current joint
+		q_ddot_Ai_ = qZeroVec_;
 		q_ddot_Ai_(i) = 1.0;
 
-		EvaluateStep(qZeroVec_, q_ddot_Ai_, 0.0, m_tilde_);
+		EvaluateStep(qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), m_tilde_);
 
 		// Filling current j column
 		for (int j = 0; j < numJoints_; ++j) {
 			A(i, j) = m_tilde_(j);
 		}
 	}
+	return A;
 }
 
 //void NewtonEuler::GetB()
@@ -267,14 +275,18 @@ void NewtonEuler::GetA(Eigen::MatrixXd& A)
 //
 //}
 
-void NewtonEuler::GetC(Eigen::VectorXd& C)
+Eigen::VectorXd NewtonEuler::GetC()
 {
-	EvaluateStep(qZeroVec_, qZeroVec_, STD_GRAVITY, C);
+	Eigen::VectorXd C = Eigen::VectorXd::Zero(numJoints_);
+	EvaluateStep(qZeroVec_, qZeroVec_, gravity_, C);
+	return C;
 }
 
-void NewtonEuler::GetMBar(const Eigen::VectorXd& q_dot, Eigen::VectorXd& m_bar)
+Eigen::VectorXd NewtonEuler::GetMBar()
 {
-	EvaluateStep(q_dot, qZeroVec_, STD_GRAVITY, m_bar);
+	Eigen::VectorXd m_bar = Eigen::VectorXd::Zero(numJoints_);
+	EvaluateStep(armModel_->GetJointsVelocity(), qZeroVec_, gravity_, m_bar);
+	return m_bar;
 }
 
 void NewtonEuler::PrintVars() const

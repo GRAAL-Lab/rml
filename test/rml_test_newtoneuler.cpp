@@ -12,8 +12,6 @@
 #include "test/youbot_vehiclemodel.h"
 #include "test/twolinks_armmodel.h"
 
-using std::cout;
-using std::endl;
 using futils::PrettyPrint;
 
 Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& dims);
@@ -55,8 +53,6 @@ int main(int argc, char* argv[])
 	int armIndex = robotModel->LoadArm(armModel, Eigen::TransfMatrix());
 	robotModel->LoadVehicle(youbotVM);
 
-	robotModel->
-
 	std::cout << " - Model variables have been loaded - " << std::endl;
 
 	rml::NewtonEuler myNE(robotModel, armIndex);
@@ -87,7 +83,7 @@ int main(int argc, char* argv[])
 	double dt = 0.001; 		// Time step in SECONDS
 	int t_steps = duration / dt;
 
-	cout << "Simulation steps: " << t_steps << endl;
+	std::cout << "Simulation steps: " << t_steps << std::endl;
 
 	double t[t_steps];
 	t[0] = 0;
@@ -130,12 +126,13 @@ int main(int argc, char* argv[])
 		q_h.at(i) = q;
 
 		robotModel->GetArm(armIndex)->SetJointsPosition(q);
+		robotModel->GetArm(armIndex)->SetJointsVelocity(q_dot);
 
 		//std::cout << "------ Getting MBar ------" << std::endl;
-		myNE.GetMBar(q_dot, m_bar);
+		m_bar = myNE.GetMBar();
 
 		//std::cout << "------ Getting A ------" << std::endl;
-		myNE.GetA(A);
+		A = myNE.GetA();
 
 
 		// std::cout << "------ Getting qddot ------" << std::endl;
@@ -198,7 +195,7 @@ void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q
 {
 	std::string save_path = futils::get_selfpath();
 	save_path = save_path + "/simData_" + futils::GetCurrentDateFormatted();
-	cout << tc::cyanL << "Saving sim data in: " << save_path << tc::none << endl;
+	std::cout << tc::cyanL << "Saving sim data in: " << save_path << tc::none << std::endl;
 	std::ofstream results_file;
 
 	try {

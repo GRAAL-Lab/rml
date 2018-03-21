@@ -26,7 +26,7 @@ void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, d
  * @brief Computes the SVD-based regularized matrix pseudoinversion (A = U*S*V')
  *
  * @param mat			The matrix to be inverted
- * @param svdParams		The SVD decomposition parameters
+ * @param svdData		The SVD decomposition parameters and results struct
  * @return				The pseudo-inverse matrix of \p mat
  */
 template<class MatT>
