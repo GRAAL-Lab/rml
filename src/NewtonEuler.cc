@@ -38,7 +38,7 @@ void NewtonEuler::Init()
 {
 	m_tilde_ = Eigen::VectorXd::Zero(numJoints_);
 
-	/**
+	/*
 	 * The size of these internal variable is "numJoints+1" to take into account the
 	 * base "dummy" joint.
 	 */
@@ -59,10 +59,10 @@ void NewtonEuler::Init()
 	r_qpc_.resize(numJoints_ + 1, zeroVect3_);
 
 
-	/** In R_ we put all the rotation matrices used for projecting the velocities, accelerations,
+	/* In R_ we put all the rotation matrices used for projecting the velocities, accelerations,
 	 *  forces and moments in the Newton-Euler algorithm (extracted from wTb, biTri and eTt).
 	 */
-	/**
+	/*
 	 * numjoints+2 = all links + dummybase + endeffector
 	 */
 	R_.resize(numJoints_ + 2);
@@ -73,14 +73,11 @@ void NewtonEuler::Init()
 	f_.resize(numJoints_ + 2, zeroVect3_);
 
 	AddDummyBaseAndEE();
-
-	/*k_i = Eigen::Vector3d::UnitZ();
-	k_iT = k_i.transpose();*/
 }
 
 void NewtonEuler::InterMom2Torque(Eigen::VectorXd& torques) const
 {
-	/** MOM2TORQUE Returns the actual couple from the moment vector
+	/* MOM2TORQUE Returns the actual couple from the moment vector
 	 *
 	 * Knowing the e_i vector of the joints, gets the torque component
 	 * from the moment vector (that has of course to be projected in the joint
@@ -114,9 +111,6 @@ void NewtonEuler::AddDummyBaseAndEE()
 
 void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, double gravity, Eigen::VectorXd& torques)
 {
-
-	//std::cout << "Check1" << std::endl;
-
 	gVect_ = Eigen::Vector3d::UnitZ() * -gravity;
 
 	omega_.at(0) = vehicle_->GetCartesianVelocity().GetFirstVect3();
@@ -147,15 +141,12 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 		c_ddot_.at(i + 1).setZero();
 	}
 
-	///*** FORWARD CALCULATION ***///
-	/**
+	// *** FORWARD CALCULATION ***///
+	/*
 	 * Calculate links linear and angular acceleration
 	 */
 
-
-	//std::cout << "Check2" << std::endl;
-
-	/** Angular Velocity **/
+	/* Angular Velocity **/
 	for (int i = 1; i <= numJoints_; ++i) {
 		if (links_.at(i).Type() == JointType::Revolute) {
 			Eigen::Vector3d e_i = links_.at(i).Axis();
@@ -165,8 +156,6 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 		}
 	}
 
-	//std::cout << "Check3" << std::endl;
-
 	/** Angular Acceleration **/
 	for (int i = 1; i <= numJoints_; ++i) {
 		if (links_.at(i).Type() == JointType::Revolute) {
@@ -174,23 +163,14 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 			temp1_ = R_.at(i).Transpose() * omega_dot_.at(i - 1);
 			temp2_ = q_ddot_(i) * e_i;
 			temp3_ = q_dot_(i) * omega_.at(i).cross(e_i);
-
-//			futils::PrettyPrint(omega_dot_.at(i-1),"omega_dot_.at(i-1)");
-//			futils::PrettyPrint(temp1_,"temp1_ang_acc");
-//			futils::PrettyPrint(temp2_,"temp2_ang_acc");
-//			futils::PrettyPrint(temp3_,"temp3_ang_acc");
-
 			omega_dot_.at(i) = temp1_ + temp2_ + temp3_;
-
-//			futils::PrettyPrint(omega_dot_.at(i),"omega_dot_.at(i)");
-//			std::cout << "----" << std::endl;
 
 		} else if (links_.at(i).Type() == JointType::Prismatic) {
 			omega_dot_.at(i) = R_.at(i).Transpose() * omega_dot_.at(i - 1);
 		}
 	}
 
-	/** Linear Velocity **/
+	/* Linear Velocity */
 	/*
 	 for(i = 1; i <= numJoints_; ++i){
 	 if(jointType_.at(i) == Rot){
@@ -204,9 +184,7 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 	 }
 	 */
 
-	//std::cout << "Check4" << std::endl;
-
-	/** Linear Acceleration **/
+	/* Linear Acceleration */
 	for (int i = 1; i <= numJoints_; ++i) {
 		if (links_.at(i).Type() == JointType::Revolute) {
 			temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
@@ -225,19 +203,10 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 		}
 	}
 
-	//std::cout << "Check5" << std::endl;
-
 	/** Projection of the acceleration on the Center of Mass **/
 	for (int i = 1; i <= numJoints_; ++i) {
-		//c_dot_.at(i) = c_dot_.at(i) + omega_.at(i).CrossProd(links_.at(i).CoM_);
 		temp1_ = c_ddot_.at(i) + omega_dot_.at(i).cross(links_.at(i).CoM());
-
-//		futils::PrettyPrint(links_.at(i).CoM(),"links_.at(i).CoM()");
-//		futils::PrettyPrint(temp1_,"temp1_lin_acc_proj");
-
 		temp2_ = omega_.at(i).cross(omega_.at(i).cross(links_.at(i).CoM()));
-
-		//futils::PrettyPrint(temp2_,"temp2");
 		c_ddot_.at(i) = temp1_ + temp2_;
 	}
 
@@ -271,10 +240,6 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& qdot, const Eigen::VectorX
 				+ r_qpc_.at(i).cross(R_.at(i + 1) * links_.at(i + 1).inter_f_);
 		gVect_ = R_.at(i) * gVect_;
 	}
-
-	//std::cout << TC_RED << "\n After Projection \n" << TC_NONE;
-	//PrintVars();
-
 	InterMom2Torque(torques);
 }
 

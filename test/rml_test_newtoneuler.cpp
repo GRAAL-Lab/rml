@@ -11,7 +11,6 @@
 #include "test/youbot_armmodel.h"
 #include "test/youbot_vehiclemodel.h"
 #include "test/twolinks_armmodel.h"
-//#include "test/baxterLeft_armmodel.h"
 
 using std::cout;
 using std::endl;
@@ -19,20 +18,14 @@ using futils::PrettyPrint;
 
 Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& dims);
 void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q_h, int numJoints);
-std::string get_selfpath();
-std::string getCurrentDateFormatted();
 
 int main(int argc, char* argv[])
 {
-
-	//timeval t1, t2;
-
 	std::cout << std::endl << tc::yellow << "### Newton Euler Test ###" << tc::none << std::endl;
 
 	int numJoints(0);
 	double elapsed_Timer(0);
 
-	//std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
 	std::shared_ptr<rml::YouBotArmModel> armModel = std::make_shared<rml::YouBotArmModel>();
 	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
 	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
@@ -74,11 +67,6 @@ int main(int argc, char* argv[])
 	Eigen::Vector3d zeroVect3 = Eigen::Vector3d::Zero();
 	Eigen::VectorXd qZeroVec = Eigen::VectorXd::Zero(numJoints);
 
-//	base.c = zeroVect3;
-//	base.c_dot = zeroVect3;
-//	base.omega = zeroVect3;
-//	base.omega_dot = zeroVect3;
-
 	Eigen::VectorXd q, q_dot, q_ddot, m_tilde, m_bar;
 	Eigen::MatrixXd A;
 	q = qZeroVec;
@@ -89,7 +77,6 @@ int main(int argc, char* argv[])
 	A = Eigen::MatrixXd::Zero(numJoints, numJoints);
 
 	// TODO
-	//double q_0[NUM_JOINTS] = { 0, 0 };
 	double q_0[numJoints] = { 0, 2.0 / 4.0 * M_PI, 0, 0, 0 };
 
 	rml::Double2Vector(q_0, numJoints, q);
@@ -145,34 +132,23 @@ int main(int argc, char* argv[])
 		robotModel->GetArm(armIndex)->SetJointsPosition(q);
 
 		//std::cout << "------ Getting MBar ------" << std::endl;
-
 		myNE.GetMBar(q_dot, m_bar);
 
-		//PrettyPrint(m_bar, "m_bar");
-
 		//std::cout << "------ Getting A ------" << std::endl;
-
 		myNE.GetA(A);
 
 
-		//exit(0);
-
-		//std::cout << "------ Getting qddot ------" << std::endl;
-
-		/// Evaluating q_ddot by inverting the dynamic equation of motion for manipulators
+		// std::cout << "------ Getting qddot ------" << std::endl;
+		// Evaluating q_ddot by inverting the dynamic equation of motion for manipulators
 		q_ddot = -1.0 * rml::RegularizedPseudoInverse(A, mySVD) * m_bar;
 
 		//std::cout << "------ Integrating ------" << std::endl;
-		/// Integrating q_ddot to find q
+		// Integrating q_ddot to find q
 		q_dot = q_dot + q_ddot * dt;
 		q = q + q_dot * dt;
 
-
-		//robotModel->GetArm(armIndex)->SetJointsVelocity(q_dot);
-
 		myPerc();
 
-		//std::cout << "myTimer.Lap() " << myTimer.Lap() << std::endl;
 		/*if (myTimer.GetCurrentLapTime() > printInterval) {
 			myTimer.Lap();
 
@@ -184,10 +160,7 @@ int main(int argc, char* argv[])
 		}*/
 	}
 
-	rml::
-
 	std::cout << std::endl;
-
 	saveSimToFile(t, t_steps, q_h, numJoints);
 
 	return 0;
@@ -223,13 +196,9 @@ Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& 
 
 void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q_h, int numJoints)
 {
-
-	std::string save_path = get_selfpath();
-
-	save_path = save_path + "/simData_" + getCurrentDateFormatted();
-
+	std::string save_path = futils::get_selfpath();
+	save_path = save_path + "/simData_" + futils::GetCurrentDateFormatted();
 	cout << tc::cyanL << "Saving sim data in: " << save_path << tc::none << endl;
-
 	std::ofstream results_file;
 
 	try {
@@ -250,33 +219,5 @@ void saveSimToFile(double time[], int simNSteps, std::vector<Eigen::VectorXd>& q
 	} catch (std::ofstream::failure& e) {
 		std::cerr << tc::red << "Exception opening/reading file\n" << tc::none;
 	}
-
-}
-
-std::string get_selfpath()
-{
-	char buff[2048];
-	ssize_t len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
-	if (len != -1) {
-		buff[len] = '\0';
-		std::string path(buff);   ///Here the executable name is still in
-		std::string::size_type t = path.find_last_of("/");   // Here we find the last "/"
-		path = path.substr(0, t);                             // and remove the rest (exe name)
-		return path;
-	} else {
-		printf("Cannot determine file path!\n");
-		return std::string('\0');
-	}
-}
-
-std::string getCurrentDateFormatted()
-{
-
-	std::time_t t = std::time(NULL);
-	char mbstr[20];
-	std::strftime(mbstr, sizeof(mbstr), "%Y-%m-%d_%H.%M.%S", std::localtime(&t));
-	std::string currentDate(mbstr);
-
-	return currentDate;
 }
 

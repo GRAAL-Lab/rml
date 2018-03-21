@@ -56,13 +56,16 @@ public:
 	 * @param type 			The JointType, whether: Fixed, Revolute, Prismatic
 	 * @param axis			The axis along which the joint rotates or translates
 	 * @param baseTransf 	Transformation matrix from previous to current
+	 * @param jointLimMin Minimum excursion for the joint
+	 * @param jointLimMax Maximum excursion for the joint
 	 */
-	void AddLink(JointType type,  const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax);
+	void AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax);
 
 	/**
 	 * @brief Set the joint position
 	 * The method updates the internal joint position state. This method should be called before the evaluate methods in order to 
 	 * have the updated values 
+	 *
 	 * @param[in] q		the joint position vector (must be an numJoints x 1 vector)
 	 */
 	void SetJointsPosition(const Eigen::VectorXd& q);
@@ -217,7 +220,6 @@ protected:
 	Eigen::MatrixXd bJt_;
 	Eigen::RotMatrix I3_;
 	Eigen::VectorXd ZeroQ_;
-
 
 	bool modelReadFromFile_;
 
