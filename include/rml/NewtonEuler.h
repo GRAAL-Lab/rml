@@ -47,7 +47,7 @@ public:
 	virtual ~NewtonEuler();
 
 	void SetGravity(const Eigen::Vector3d& gravity);
-	void EvaluateStep(const Eigen::VectorXd& q_dot, const Eigen::VectorXd& q_ddot, const Eigen::Vector3d& gravity, Eigen::VectorXd& torques);
+	void EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& q_dot, const Eigen::VectorXd& q_ddot, const Eigen::Vector3d& gravity, Eigen::VectorXd& torques);
 	Eigen::MatrixXd GetA();
 	//void GetB();
 	Eigen::VectorXd GetC();

@@ -72,8 +72,7 @@ int main(int argc, char* argv[])
 	m_bar = qZeroVec;
 	A = Eigen::MatrixXd::Zero(numJoints, numJoints);
 
-	// TODO
-	double q_0[numJoints] = { 0, 2.0 / 4.0 * M_PI, 0, 0, 0 };
+	double q_0[7] = { 0, 2.0 / 4.0 * M_PI, 0, 0, 0, 0, 0 };
 
 	rml::Double2Vector(q_0, numJoints, q);
 	q_dot.setZero();
@@ -165,7 +164,6 @@ int main(int argc, char* argv[])
 
 Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& dims)
 {
-
 	Eigen::Matrix3d Inertia = Eigen::Matrix3d::Zero();
 
 	double l = dims(0), w = dims(1), h = dims(2);
@@ -185,8 +183,6 @@ Eigen::Matrix3d CuboidInertiaAboutCOM(const double mass, const Eigen::Vector3d& 
 	Inertia(0, 0) = mass / 12 * (w * w + h * h);
 	Inertia(1, 1) = mass / 12 * (l * l + h * h);
 	Inertia(2, 2) = mass / 12 * (l * l + w * w);
-
-	//Inertia.PrintMtx("Inertia: ");
 
 	return Inertia;
 }
