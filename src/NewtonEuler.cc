@@ -12,10 +12,10 @@ namespace rml
 {
 
 /*NewtonEuler::NewtonEuler() :
-		numJoints_(0)
-{
-	// TODO Auto-generated constructor stub
-}*/
+ numJoints_(0)
+ {
+ // TODO Auto-generated constructor stub
+ }*/
 
 NewtonEuler::~NewtonEuler()
 {
@@ -60,7 +60,6 @@ void NewtonEuler::Init()
 	r_qmc_.resize(numJoints_ + 1, zeroVect3_);
 	r_qpc_.resize(numJoints_ + 1, zeroVect3_);
 
-
 	/* In R_ we put all the rotation matrices used for projecting the velocities, accelerations,
 	 *  forces and moments in the Newton-Euler algorithm (extracted from wTb, biTri and eTt).
 	 */
@@ -70,6 +69,11 @@ void NewtonEuler::Init()
 	R_.resize(numJoints_ + 2);
 
 	links_.resize(numJoints_ + 2);
+
+	self_f_.resize(numJoints_ + 2, zeroVect3_);
+	self_n_.resize(numJoints_ + 2, zeroVect3_);
+	interaction_f_.resize(numJoints_ + 2, zeroVect3_);
+	interaction_n_.resize(numJoints_ + 2, zeroVect3_);
 
 	n_.resize(numJoints_ + 2, zeroVect3_);
 	f_.resize(numJoints_ + 2, zeroVect3_);
@@ -88,9 +92,9 @@ void NewtonEuler::InterMom2Torque(Eigen::VectorXd& torques) const
 	for (int i = 0; i < numJoints_; ++i) {
 		Eigen::MatrixXd e_iT = links_.at(i + 1).Axis().transpose();
 		if (links_.at(i).Type() == JointType::Revolute) {
-			torques(i) = (e_iT * links_.at(i + 1).inter_n_)(0);
+			torques(i) = (e_iT * interaction_n_.at(i + 1))(0);
 		} else if (links_.at(i).Type() == JointType::Prismatic) {
-			torques(i) = (e_iT * links_.at(i + 1).inter_f_)(0);
+			torques(i) = (e_iT * interaction_f_.at(i + 1))(0);
 		}
 	}
 }
@@ -100,23 +104,26 @@ void NewtonEuler::AddDummyBaseAndEE()
 	// Adding dummy 0 link
 	links_.at(0) = RobotLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), Eigen::TransfMatrix(), 0.0, 0.0);
 	Eigen::Matrix3d zeroMat3 = Eigen::Matrix3d::Zero();
-	links_.at(0).SetPhysicalProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
+	links_.at(0).SetDynamicProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
 
 	for (int i = 0; i < numJoints_; ++i) {
 		links_.at(i + 1) = armModel_->GetLink(i);
 	}
 
 	// Adding dummy EE link
-	links_.at(numJoints_ + 1) = RobotLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), Eigen::TransfMatrix(), 0.0, 0.0);
-	links_.at(numJoints_ + 1).SetPhysicalProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
+	links_.at(numJoints_ + 1) = RobotLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), Eigen::TransfMatrix(), 0.0,
+			0.0);
+	links_.at(numJoints_ + 1).SetDynamicProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
 }
 
-void NewtonEuler::SetGravity(const Eigen::Vector3d& gravity){
+void NewtonEuler::SetGravity(const Eigen::Vector3d& gravity)
+{
 	gravity_ = gravity;
 	//Eigen::Vector3d::UnitZ() *
 }
 
-void NewtonEuler::EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, const Eigen::Vector3d& gravityVector, Eigen::VectorXd& torques)
+void NewtonEuler::EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot,
+		const Eigen::Vector3d& gravityVector, Eigen::VectorXd& torques)
 {
 	Eigen::Vector3d gravity = gravityVector;
 	omega_.at(0) = vehicle_->GetCartesianVelocity().GetFirstVect3();
@@ -133,7 +140,6 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& 
 		R_.at(i + 1) = armModel_->GetCurrentLinkTransf(i).GetRotMatrix(); // Base_i to Joint_i
 	}
 	R_.at(numJoints_ + 1) = armModel_->GeteTt().GetRotMatrix(); // Last joint to end effector
-
 
 	for (int i = 0; i < numJoints_; ++i) {
 		q_ = armModel_->GetJointsPosition();
@@ -203,8 +209,8 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& 
 			omega_prev_ = R_.at(i).Transpose() * omega_.at(i - 1);
 			temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
 			temp2_ = omega_.at(i - 1).cross(omega_.at(i - 1).cross(rhoVec_.at(i - 1)));
-			temp3_ = omega_prev_.cross((Eigen::Vector3d)(e_i * q_dot_(i)));
-			temp4_ = omega_prev_.cross((Eigen::Vector3d)(e_i * q_dot_(i)));
+			temp3_ = omega_prev_.cross((Eigen::Vector3d) (e_i * q_dot_(i)));
+			temp4_ = omega_prev_.cross((Eigen::Vector3d) (e_i * q_dot_(i)));
 			c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_) + temp3_ + temp4_ + e_i * q_ddot_(i);
 		}
 	}
@@ -223,8 +229,8 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& 
 	 */
 
 	for (int i = 0; i <= numJoints_; ++i) {
-		links_.at(i).self_f_ = links_.at(i).Mass() * c_ddot_.at(i);
-		links_.at(i).self_n_ = links_.at(i).Inertia() * omega_dot_.at(i)
+		self_f_.at(i) = links_.at(i).Mass() * c_ddot_.at(i);
+		self_n_.at(i) = links_.at(i).Inertia() * omega_dot_.at(i)
 				+ omega_.at(i).cross(links_.at(i).Inertia() * omega_.at(i));
 		gravity = R_.at(i).Transpose() * gravity;
 	}
@@ -239,11 +245,11 @@ void NewtonEuler::EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& 
 
 		//exit(0);
 
-		links_.at(i).inter_f_ = links_.at(i).self_f_ + R_.at(i + 1) * links_.at(i + 1).inter_f_
+		interaction_f_.at(i) = self_f_.at(i) + R_.at(i + 1) * interaction_f_.at(i + 1)
 				- links_.at(i).Mass() * gravity;
-		links_.at(i).inter_n_ = links_.at(i).self_n_ + R_.at(i + 1) * links_.at(i + 1).inter_n_
-				- r_qmc_.at(i).cross(links_.at(i).inter_f_)
-				+ r_qpc_.at(i).cross(R_.at(i + 1) * links_.at(i + 1).inter_f_);
+		interaction_n_.at(i) = self_n_.at(i) + R_.at(i + 1) * interaction_n_.at(i + 1)
+				- r_qmc_.at(i).cross(interaction_f_.at(i))
+				+ r_qpc_.at(i).cross(R_.at(i + 1) * interaction_f_.at(i + 1));
 		gravity = R_.at(i) * gravity;
 	}
 	InterMom2Torque(torques);

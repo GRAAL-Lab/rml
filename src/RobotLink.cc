@@ -8,26 +8,26 @@
 #include <iostream>
 #include "rml/RobotLink.h"
 
-
 using std::cout;
 using std::endl;
 
-namespace rml {
+namespace rml
+{
 
 RobotLink::RobotLink() :
-				type_(JointType::Fixed), mass_(0), jointLimitMin_(0), jointLimitMAX_(0)
+		type_(JointType::Fixed), mass_(0), jointLimitMin_(0), jointLimitMAX_(0)
 {
-	InitVectors();
 	axis_.setZero();
 	sizeVect_.setZero();
 	CoM_.setZero();
 	Inertia_.setZero();
 }
 
-RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax):
-		type_(type), axis_(axis), baseTransf_(baseTransf), jointLimitMin_(jointLimMin), jointLimitMAX_(joinLimMax)
+RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf,
+		double jointLimMin, double jointLimMax) :
+		type_(type), axis_(axis), baseTransf_(baseTransf), jointLimitMin_(jointLimMin), jointLimitMAX_(jointLimMax)
 {
-	InitVectors();
+	SetDynamicProperties(0.0, Eigen::Vector3d::Zero(), Eigen::Vector3d::Zero(), Eigen::Matrix3d::Zero());
 }
 
 RobotLink::~RobotLink()
@@ -35,24 +35,24 @@ RobotLink::~RobotLink()
 	// TODO Auto-generated destructor stub
 }
 
-void RobotLink::InitVectors()
+void RobotLink::SetKinematicProperties(const JointType type, const Eigen::Vector3d& axis,
+		const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax)
 {
-	self_f_.setZero();
-	self_n_.setZero();
-	inter_f_.setZero();
-	inter_n_.setZero();
+	type_ = type;
+	axis_ = axis;
+	baseTransf_ = baseTransf;
+	jointLimitMin_ = jointLimMin;
+	jointLimitMAX_ = jointLimMax;
 }
 
-void RobotLink::SetPhysicalProperties(double mass, const Eigen::Vector3d& sizeVect, const Eigen::Vector3d& CoM, const Eigen::Matrix3d &Inertia)
+void RobotLink::SetDynamicProperties(double mass, const Eigen::Vector3d& sizeVect, const Eigen::Vector3d& CoM,
+		const Eigen::Matrix3d &Inertia)
 {
 	mass_ = mass;
 	sizeVect_ = sizeVect;
 	CoM_ = CoM;
 	Inertia_ = Inertia;
-
-	//InitVectors();
 }
 
 }
-
 

@@ -38,21 +38,14 @@ class RobotLink
     Eigen::Vector3d CoM_;
     Eigen::Matrix3d Inertia_;
 
-    void InitVectors();
-
 public:
-    /**
-     * The interaction forces and moments associated with the link "i" are relative to the one between
-     * "i" and "i-1". While the "self" forces are the one relative to the acceleration of the CoM_i.
-     */
-    Eigen::Vector3d self_f_, self_n_;
-    Eigen::Vector3d inter_f_, inter_n_;
 
     RobotLink();
-    RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax);
+    RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax);
     virtual ~RobotLink();
 
-    void SetPhysicalProperties(double mass, const Eigen::Vector3d& sizes, const Eigen::Vector3d& CoM, const Eigen::Matrix3d& Inertia);
+    void SetKinematicProperties(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax);
+    void SetDynamicProperties(double mass, const Eigen::Vector3d& sizes, const Eigen::Vector3d& CoM, const Eigen::Matrix3d& Inertia);
 
     JointType Type()    					const {	return type_;}
     const Eigen::Vector3d& Axis()    		const {	return axis_;}

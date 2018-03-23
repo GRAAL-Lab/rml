@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 		CoM = linkDim.at(i) / 2.0;
 		Inertia = CuboidInertiaAboutCOM(linkMass, linkDim.at(i));
 
-		armModel->GetLink(i).SetPhysicalProperties(linkMass, linkDim.at(i), CoM, Inertia);
+		armModel->GetLink(i).SetDynamicProperties(linkMass, linkDim.at(i), CoM, Inertia);
 	}
 
 	int armIndex = robotModel->LoadArm(armModel, Eigen::TransfMatrix());

@@ -16,7 +16,6 @@ namespace rml
 RobotModel::RobotModel()
 {
 	// TODO Auto-generated constructor stub
-
 }
 
 RobotModel::~RobotModel()
@@ -67,6 +66,7 @@ bool RobotModel::CheckArm(int armIndex) const throw (std::exception)
 	if (armIndex < arms_.size()) {
 		return true;
 	} else {
+
 		throw RobotModelArmException();
 	}
 }
@@ -76,7 +76,6 @@ bool RobotModel::CheckVehicle() const throw (std::exception)
 	if (vehicle_) {
 		return true;
 	} else {
-		//std::cout << tc::redL << "Error: Arm index is out of range" << tc::none << std::endl;
 		throw RobotModelVehicleException();
 	}
 }

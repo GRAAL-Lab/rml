@@ -34,9 +34,15 @@ class NewtonEuler
 	std::vector<Eigen::Vector3d> n_, f_;
 	std::vector<Eigen::Vector3d> r_qmc_, r_qpc_;
 
+    /**
+     * The interaction forces and moments associated with the link "i" are relative to the one between
+     * "i" and "i-1". While the "self" forces are the one relative to the acceleration of the CoM_i.
+     */
+	std::vector<Eigen::Vector3d> self_f_, self_n_;
+	std::vector<Eigen::Vector3d> interaction_f_, interaction_n_;
+
 	std::vector<RobotLink> links_;
 
-	void UpdateInternalVars(const Eigen::MatrixXd& q);
 	void Init();
 	void AddDummyBaseAndEE();
 	void InterMom2Torque(Eigen::VectorXd& torques) const;
