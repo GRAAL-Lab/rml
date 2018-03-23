@@ -9,11 +9,13 @@
 #include "rml/Functions.h"
 #include "rml/MatrixOperations.h"
 
-namespace rml {
+namespace rml
+{
 
 const double VersorLemmaThreshold = 1E-9;
 
-Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2) {
+Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2)
+{
 
 	double costh = 0, sinth = 0, theta = 0;
 
@@ -46,7 +48,7 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 
 	Eigen::Vector3d out;
 
-	if (sinth > rml::VersorLemmaThreshold) {
+	if (sinth > VersorLemmaThreshold) {
 		// 0 < theta < 180 degrees
 		theta = atan2(sinth, costh);
 		out = (rosinth * (theta / sinth));
@@ -81,13 +83,14 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 }
 
 // Computes 3-components Cartesian error with 2 EulerYPR elements as imput
-Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2) {
+Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2)
+{
 	return VersorLemma(v1.ToRotMatrix(), v2.ToRotMatrix());
 }
 
-
 // Computes 6-components Cartesian error with 2 Transformation matrices as input
-Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2) {
+Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2)
+{
 
 	Eigen::Vector3d angular = VersorLemma(in1.GetRotMatrix(), in2.GetRotMatrix());
 	Eigen::Vector3d linear = in2.GetTransl() - in1.GetTransl();
@@ -96,15 +99,16 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::Tran
 }
 
 // Computes 6-components Cartesian error with 2 6-components vectors as input
-Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2) {
-	Eigen::Vector3d angular = VersorLemma(EulerYPR(v1.GetFirstVect3()),
-			EulerYPR(v2.GetFirstVect3()));
+Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2)
+{
+	Eigen::Vector3d angular = VersorLemma(EulerYPR(v1.GetFirstVect3()), EulerYPR(v2.GetFirstVect3()));
 	Eigen::Vector3d linear = v2.GetSecondVect3() - v1.GetSecondVect3();
 
 	return Eigen::Vector6d(angular, linear);
 }
 
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) {
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x)
+{
 	if (x <= xmin) {
 		return ymax;
 	}
@@ -117,7 +121,8 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
 	return (ymax - ymin) * (0.5 * cos(cosarg) + 0.5) + ymin;
 }
 
-double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) {
+double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x)
+{
 	if (x <= xmin) {
 		return ymin;
 	}
@@ -155,11 +160,13 @@ void SaturateScalar(double sat, double& value)
 
 double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters &planeParams)
 {
-	double numerator = std::fabs(planeParams.A * point(0) + planeParams.B * point(1) + planeParams.C * point(2) + planeParams.D);
-	double denominator = std::sqrt(planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C);
+	double numerator = std::fabs(
+			planeParams.A * point(0) + planeParams.B * point(1) + planeParams.C * point(2) + planeParams.D);
+	double denominator = std::sqrt(
+			planeParams.A * planeParams.A + planeParams.B * planeParams.B + planeParams.C * planeParams.C);
 
 	//cout << "n d: " << numerator << " " << denominator << "\n";
-	return (numerator/denominator);
+	return (numerator / denominator);
 }
 
 Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlaneParameters &planeParams)
@@ -167,8 +174,8 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 	Eigen::Vector3d resultingPoint = Eigen::Vector3d::Zero();
 	double alpha_num, alpha_den, alpha;
 	alpha_num = -(planeParams.D + planeParams.A * point(0) + planeParams.B * point(1) + planeParams.C * point(2));
-	alpha_den = planeParams.A*planeParams.A + planeParams.B*planeParams.B + planeParams.C*planeParams.C;
-	alpha = alpha_num/alpha_den;
+	alpha_den = planeParams.A * planeParams.A + planeParams.B * planeParams.B + planeParams.C * planeParams.C;
+	alpha = alpha_num / alpha_den;
 	resultingPoint(0) = point(0) + alpha * planeParams.A;
 	resultingPoint(1) = point(1) + alpha * planeParams.B;
 	resultingPoint(2) = point(2) + alpha * planeParams.C;
@@ -179,18 +186,16 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t)
 {
 	Eigen::Matrix3d t_hat;
-	t_hat << 0,    -t(2),  t(1),
-			 t(2),    0,  -t(0),
-			-t(1),  t(0),    0;
+	t_hat << 0, -t(2), t(1), t(2), 0, -t(0), -t(1), t(0), 0;
 	return t_hat;
 }
 
 Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl)
 {
 	Eigen::Matrix6d S;
-	S.block(0,0,3,3) = S.block(3,3,3,3) = Eigen::Matrix3d::Identity();
-	S.block(0,3,3,3) = Eigen::Matrix3d::Zero();
-	S.block(3,0,3,3) = -1.0 * Vect3ToSkew(transl);
+	S.block(0, 0, 3, 3) = S.block(3, 3, 3, 3) = Eigen::Matrix3d::Identity();
+	S.block(0, 3, 3, 3) = Eigen::Matrix3d::Zero();
+	S.block(3, 0, 3, 3) = -1.0 * Vect3ToSkew(transl);
 	return S;
 }
 

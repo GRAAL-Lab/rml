@@ -20,7 +20,7 @@
 namespace rml {
 
 /**
- * Using four parameters represention in the form:
+ * @brief Using four parameters represention in the form:
  * Ax + By + Cz + D = 0;
  */
 struct PlaneParameters
@@ -30,16 +30,31 @@ struct PlaneParameters
     PlaneParameters() : A(0), B(0), C(0), D(0) {}
 };
 
+/**
+ * @brief A norm comparing function (is "a < b" ?) to be binded to STL algorithms.
+ *
+ * @param a		lhs of less than comparison
+ * @param b		rhs of less than comparison
+ * @return		true if a is smaller than b, false otherwise
+ */
 template <class MatT>
-static bool norm_compare(MatT& a, MatT& b) {
+static bool eigen_norm_compare(MatT& a, MatT& b) {
 	return (a.norm() < b.norm());
 }
 
+/**
+ * @brief An utility to find the vector with the greatest norm among three.
+ *
+ * @param vect1
+ * @param vect2
+ * @param vect3
+ * @return The vector with the greatest norm among the three
+ */
 template<class MatT>
 MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3){
 
 	std::vector<MatT> vecs = {vect1,vect2,vect3};
-	return *std::max_element(vecs.begin(), vecs.end(), norm_compare<MatT>);
+	return *std::max_element(vecs.begin(), vecs.end(), eigen_norm_compare<MatT>);
 }
 
 /**

@@ -169,10 +169,8 @@ msg/_*.py
 # Ignore generated docs
 *.dox
 *.wikidoc
-docs/html
-docs/latex
-docs/bootstrapped/html
-docs/bootstrapped/latex
+**/html
+**/latex
 doxygen_sqlite3.db
 
 
