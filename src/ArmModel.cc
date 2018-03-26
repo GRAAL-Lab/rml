@@ -51,7 +51,7 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
 	biTei_.push_back(Eigen::TransfMatrix());
 	h_.push_back(Eigen::Vector6d());
 	dJdq_.push_back(Eigen::MatrixXd());
-	for (auto&& i : dJdq_) // access by forwarding reference, the type of i is auto&
+	for (auto&& i : dJdq_) 				// access by forwarding reference, the type of i is auto&
 		i.resize(6,numberOfJoints_);
 
 	bJt_.resize(6, numberOfJoints_);
