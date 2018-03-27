@@ -260,7 +260,7 @@ Eigen::TransfMatrix RobotModel::GetTransfMatrix_VehicleToArmBase(int armIndex) c
 Eigen::TransfMatrix RobotModel::GetTransfMatrix_JointFrame(int armIndex, int jointIndex) const
 {
 	Eigen::TransfMatrix wTj;
-	if(vehicle_){
+	if (vehicle_) {
 		wTj = vehicle_->GetwTv();
 	}
 	if (CheckArm(armIndex)) {
@@ -272,7 +272,7 @@ Eigen::TransfMatrix RobotModel::GetTransfMatrix_JointFrame(int armIndex, int joi
 Eigen::TransfMatrix RobotModel::GetTransfMatrix_ToolFrame(int armIndex) const
 {
 	Eigen::TransfMatrix wTt;
-	if(vehicle_){
+	if (vehicle_) {
 		wTt = vehicle_->GetwTv();
 	}
 	if (CheckArm(armIndex)) {
@@ -281,6 +281,29 @@ Eigen::TransfMatrix RobotModel::GetTransfMatrix_ToolFrame(int armIndex) const
 	return wTt;
 }
 
-} /* namespace rml */
+Eigen::VectorXd RobotModel::GetSystemPositionVector() const
+{
+	Eigen::VectorXd pos;
+	if (vehicle_) {
+		pos = UnderJuxtapose(pos, vehicle_->GetFeedbackOnInertial());
+	}
+	for (int i = 0; i < arms_.size(); ++i) {
+		pos = UnderJuxtapose(pos, arms_.at(i)->GetJointsPosition());
+	}
+	return pos;
+}
 
+Eigen::VectorXd RobotModel::GetSystemVelocityVector() const
+{
+	Eigen::VectorXd vel;
+	if (vehicle_) {
+		vel = UnderJuxtapose(vel, vehicle_->GetVelocityOnVehicle());
+	}
+	for (int i = 0; i < arms_.size(); ++i) {
+		vel = UnderJuxtapose(vel, arms_.at(i)->GetJointsVelocity());
+	}
+	return vel;
+}
+
+} /* namespace rml */
 

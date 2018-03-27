@@ -147,6 +147,10 @@ public:
 	const std::shared_ptr<VehicleModel> GetVehicle() const {
 		return vehicle_;
 	}
+
+	Eigen::VectorXd GetSystemPositionVector() const;
+	Eigen::VectorXd GetSystemVelocityVector() const;
+
 };
 
 } /* namespace rml */
