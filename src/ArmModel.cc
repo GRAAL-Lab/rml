@@ -18,13 +18,13 @@
 #include <climits>
 #include <stdlib.h>
 
-#include "rml/MatrixOperations.h"
-#include "rml/Functions.h"
-#include "rml/PseudoInverse.h"
-#include "rml/Types.h"
-#include "rml/SVD.h"
-#include "rml/ArmModel.h"
-#include "rml/RobotLink.h"
+#include "MatrixOperations.h"
+#include "Functions.h"
+#include "PseudoInverse.h"
+#include "Types.h"
+#include "SVD.h"
+#include "ArmModel.h"
+#include "RobotLink.h"
 #include "rml_internal/Futils.h"
 
 using std::cout;

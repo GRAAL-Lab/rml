@@ -5,60 +5,58 @@
  *      Author: fraw
  */
 
-#include "rml/Types.h"
-
+#include "Types.h"
 
 namespace rml{
 
-EulerYPR::EulerYPR() : yaw_(0.0), pitch_(0.0), roll_(0.0) {}
-EulerYPR::EulerYPR(double yaw, double pitch, double roll) :  yaw_(yaw), pitch_(pitch), roll_(roll) {}
-EulerYPR::EulerYPR(Eigen::Vector3d vec3) {
-	yaw_ = vec3(0);
+EulerRPY::EulerRPY() : roll_(0.0), pitch_(0.0), yaw_(0.0) {}
+EulerRPY::EulerRPY(double roll, double pitch, double yaw) : roll_(roll), pitch_(pitch), yaw_(yaw) {}
+EulerRPY::EulerRPY(Eigen::Vector3d vec3) {
+	roll_ = vec3(0);
 	pitch_= vec3(1);
-	roll_ = vec3(2);
+	yaw_ = vec3(2);
 }
 
-double EulerYPR::GetYaw() const {
-	return yaw_;
-}
-
-void EulerYPR::SetYaw(double yaw) {
-	this->yaw_ = yaw;
-}
-
-double EulerYPR::GetPitch() const {
-	return pitch_;
-}
-
-void EulerYPR::SetPitch(double pitch) {
-	this->pitch_ = pitch;
-}
-
-double EulerYPR::GetRoll() const {
+double EulerRPY::GetRoll() const {
 	return roll_;
 }
 
-void EulerYPR::SetRoll(double roll) {
+void EulerRPY::SetRoll(double roll) {
 	this->roll_ = roll;
 }
 
-void EulerYPR::SetYPR(double yaw, double pitch, double roll){
-	*this = EulerYPR(yaw, pitch, roll);
+double EulerRPY::GetPitch() const {
+	return pitch_;
 }
 
-void EulerYPR::SetYPR(Eigen::Vector3d& vec3){
-	*this = EulerYPR(vec3);
+void EulerRPY::SetPitch(double pitch) {
+	this->pitch_ = pitch;
 }
 
-Eigen::Vector3d EulerYPR::ToVect3() const{
+double EulerRPY::GetYaw() const {
+	return yaw_;
+}
+
+void EulerRPY::SetYaw(double yaw) {
+	this->yaw_ = yaw;
+}
+
+void EulerRPY::SetRPY(double roll, double pitch, double yaw){
+	*this = EulerRPY(roll, pitch, yaw);
+}
+
+void EulerRPY::SetRPY(Eigen::Vector3d& vec3){
+	*this = EulerRPY(vec3);
+}
+
+Eigen::Vector3d EulerRPY::ToVect3() const{
 	return Eigen::Vector3d(yaw_, pitch_, roll_);
 }
-
 
 /**
  * R = Rz(yaw)*Ry(pitch)*Rx(roll)
  */
-Eigen::RotMatrix EulerYPR::ToRotMatrix() const {
+Eigen::RotMatrix EulerRPY::ToRotMatrix() const {
 
 	Eigen::Matrix3d n =
 	n = Eigen::AngleAxisd(this->GetYaw(), Eigen::Vector3d::UnitZ())
@@ -67,16 +65,25 @@ Eigen::RotMatrix EulerYPR::ToRotMatrix() const {
 	return n;
 }
 
+Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const {
+	Eigen::Vector3d rpyDerivative;
+	Eigen::Matrix3d Sinv;
+	Sinv << 1, tan(pitch_)*sin(roll_), tan(pitch_)*cos(roll_),
+			0, cos(roll_)            , -sin(roll_)           ,
+			0, sin(roll_)/cos(pitch_), cos(roll_)/cos(pitch_);
+	return Sinv * omega;
 }
+
+} // namespace rml
 
 namespace Eigen{
 
 Eigen::TransfMatrix Vector6d::ToTransfMatrix() const {
 		Eigen::TransfMatrix TMat;
-		TMat.SetRotMatrix(rml::EulerYPR(this->GetFirstVect3()).ToRotMatrix());
+		TMat.SetRotMatrix(rml::EulerRPY(this->GetFirstVect3()).ToRotMatrix());
 		TMat.SetTransl(this->GetSecondVect3());
 		return TMat;
 }
 
-}
+} // namespace Eigen
 

@@ -25,18 +25,18 @@ namespace rml{
  *
  * This class stores the orientation of a rigid body using the z-y-x (yaw, pitch, roll) rotation order
  */
-class EulerYPR
+class EulerRPY
 {
 public:
-	EulerYPR();
-	EulerYPR(double yaw, double pitch, double roll);
-	EulerYPR(Eigen::Vector3d vec3);
+	EulerRPY();
+	EulerRPY(double yaw, double pitch, double roll);
+	EulerRPY(Eigen::Vector3d vec3);
 
-	virtual ~EulerYPR() {}
+	virtual ~EulerRPY() {}
 
-	friend std::ostream& operator <<(std::ostream& os, EulerYPR const& a)
+	friend std::ostream& operator <<(std::ostream& os, EulerRPY const& a)
 	{
-		return os << a.yaw_ << "\t" << a.pitch_ << "\t" << a.roll_ << "\t";
+		return os << a.roll_ <<"\t" << a.pitch_ << "\t" <<  a.yaw_ << "\t";
 	}
 
 	double GetYaw() const;
@@ -48,14 +48,15 @@ public:
 	double GetRoll() const;
 	void SetRoll(double roll);
 
-	void SetYPR(double yaw, double pitch, double roll);
-	void SetYPR(Eigen::Vector3d& vec3);
+	void SetRPY(double roll, double pitch, double yaw);
+	void SetRPY(Eigen::Vector3d& vec3);
 
 	Eigen::Vector3d ToVect3() const;
 	Eigen::RotMatrix ToRotMatrix() const;
+	Eigen::Vector3d GetDerivative(Eigen::Vector3d omega) const;
 
 private:
-	double yaw_, pitch_, roll_;
+	double roll_, pitch_, yaw_ ;
 };
 }
 
@@ -66,7 +67,7 @@ typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 //typedef Eigen::Matrix3d RotationMatrix;
 
 /**
- * @brief A 6d vector that can contain a [y p r x y z] or an [wx wy wz x y z] vector
+ * @brief A 6d vector that can contain a [r p y x y z] or an [wx wy wz x y z] vector
  */
 class Vector6d : public Eigen::Vector6dBase
 {
@@ -143,8 +144,8 @@ public:
 		return crmat;
 	}
 
-	rml::EulerYPR ToEulerYPR() const{
-		return this->eulerAngles(2, 1, 0);
+	rml::EulerRPY ToEulerRPY() const{
+		return this->eulerAngles(0, 1, 2);
 	}
 };
 
@@ -184,9 +185,9 @@ public:
 		this->block(0,3,3,1) = transl;
 	}
 
-	Vector6d GetYPRXYZ() const {
+	Vector6d GetRPYXYZ() const {
 		Vector6d a;
-		a.SetFirstVect3(this->GetRotMatrix().ToEulerYPR().ToVect3());
+		a.SetFirstVect3(this->GetRotMatrix().ToEulerRPY().ToVect3());
 		a.SetSecondVect3(this->GetTransl());
 		return a;
 	}

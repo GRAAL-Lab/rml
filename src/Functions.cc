@@ -6,8 +6,8 @@
  */
 
 #include <initializer_list>
-#include "rml/Functions.h"
-#include "rml/MatrixOperations.h"
+
+#include "Functions.h"
 
 namespace rml
 {
@@ -83,7 +83,7 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 }
 
 // Computes 3-components Cartesian error with 2 EulerYPR elements as imput
-Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2)
+Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2)
 {
 	return VersorLemma(v1.ToRotMatrix(), v2.ToRotMatrix());
 }
@@ -101,7 +101,7 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::Tran
 // Computes 6-components Cartesian error with 2 6-components vectors as input
 Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2)
 {
-	Eigen::Vector3d angular = VersorLemma(EulerYPR(v1.GetFirstVect3()), EulerYPR(v2.GetFirstVect3()));
+	Eigen::Vector3d angular = VersorLemma(EulerRPY(v1.GetFirstVect3()), EulerRPY(v2.GetFirstVect3()));
 	Eigen::Vector3d linear = v2.GetSecondVect3() - v1.GetSecondVect3();
 
 	return Eigen::Vector6d(angular, linear);
@@ -186,7 +186,9 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t)
 {
 	Eigen::Matrix3d t_hat;
-	t_hat << 0, -t(2), t(1), t(2), 0, -t(0), -t(1), t(0), 0;
+	t_hat << 0, -t(2), t(1),
+			t(2), 0, -t(0),
+			-t(1), t(0), 0;
 	return t_hat;
 }
 

@@ -6,7 +6,7 @@
  */
 
 #include <iostream>
-#include "rml/RobotLink.h"
+#include "RobotLink.h"
 
 using std::cout;
 using std::endl;

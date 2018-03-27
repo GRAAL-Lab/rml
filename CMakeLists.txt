@@ -39,6 +39,7 @@ set_target_properties(rml PROPERTIES LINKER_LANGUAGE CXX)
 # paths.
 target_include_directories(rml PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/rml>
     $<INSTALL_INTERFACE:include>
     PRIVATE src)
 

@@ -6,11 +6,11 @@
  */
 
 #include <iostream>
-#include "rml/PseudoInverse.h"
 
-#include "../include/rml/Types.h"
-#include "rml/MatrixOperations.h"
-#include "rml/SVD.h"
+#include "PseudoInverse.h"
+#include "Types.h"
+#include "MatrixOperations.h"
+#include "SVD.h"
 #include "rml_internal/SVD_Internal.h"
 #include "rml_internal/PseudoInverse_Internal.h"
 

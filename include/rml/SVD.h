@@ -10,7 +10,8 @@
 
 #include <eigen3/Eigen/Dense>
 #include <iostream>
-#include <rml/MatrixOperations.h>
+
+#include "MatrixOperations.h"
 
 namespace rml{
 

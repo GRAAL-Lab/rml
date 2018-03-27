@@ -5,7 +5,7 @@
  *      Author: fraw
  */
 
-#include "rml/NewtonEuler.h"
+#include "NewtonEuler.h"
 #include "rml_internal/Futils.h"
 
 namespace rml
@@ -122,12 +122,12 @@ void NewtonEuler::SetGravity(const Eigen::Vector3d& gravity)
 	//Eigen::Vector3d::UnitZ() *
 }
 
-void NewtonEuler::EvaluateStep(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot,
+void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot,
 		const Eigen::Vector3d& gravityVector, Eigen::VectorXd& torques)
 {
 	Eigen::Vector3d gravity = gravityVector;
-	omega_.at(0) = vehicle_->GetCartesianVelocity().GetFirstVect3();
-	omega_dot_.at(0) = vehicle_->GetCartesianAcceleration().GetFirstVect3();
+	omega_.at(0) = vehicle_->GetVelocityOnVehicle().GetFirstVect3();
+	omega_dot_.at(0) = vehicle_->GetAccelerationOnVehicle().GetFirstVect3();
 
 	rhoVec_.at(0).setZero();
 	for (int i = 1; i < numJoints_; ++i) {
@@ -266,7 +266,7 @@ Eigen::MatrixXd NewtonEuler::GetA()
 		q_ddot_Ai_ = qZeroVec_;
 		q_ddot_Ai_(i) = 1.0;
 
-		EvaluateStep(armModel_->GetJointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), a_column);
+		EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), a_column);
 
 		// Filling current j column
 		for (int j = 0; j < numJoints_; ++j) {
@@ -284,14 +284,14 @@ Eigen::MatrixXd NewtonEuler::GetA()
 Eigen::VectorXd NewtonEuler::GetC()
 {
 	Eigen::VectorXd C = Eigen::VectorXd::Zero(numJoints_);
-	EvaluateStep(armModel_->GetJointsPosition(), qZeroVec_, qZeroVec_, gravity_, C);
+	EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, qZeroVec_, gravity_, C);
 	return C;
 }
 
 Eigen::VectorXd NewtonEuler::GetMTilde()
 {
 	Eigen::VectorXd m_bar = Eigen::VectorXd::Zero(numJoints_);
-	EvaluateStep(armModel_->GetJointsPosition(), armModel_->GetJointsVelocity(), qZeroVec_, gravity_, m_bar);
+	EvaluateAlgorithmStep(armModel_->GetJointsPosition(), armModel_->GetJointsVelocity(), qZeroVec_, gravity_, m_bar);
 	return m_bar;
 }
 

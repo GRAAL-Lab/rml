@@ -5,10 +5,11 @@
  *      Author: fraw
  */
 
-#include "rml/RobotModel.h"
 #include "rml_internal/Futils.h"
-#include "rml/Functions.h"
-#include "rml/MatrixOperations.h"
+
+#include "Functions.h"
+#include "MatrixOperations.h"
+#include "RobotModel.h"
 
 namespace rml
 {

@@ -15,7 +15,7 @@
 #include <iostream>
 #include <vector>
 
-#include <rml/Types.h>
+#include "Types.h"
 
 namespace rml {
 
@@ -90,7 +90,7 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
  * @note the two vector should represent rotation matrices computed w.r.t a common frame, i.e. r1 = cRa, r2 = cRb then the versor lemma gives the rotation vector
  *       that brings frame \<a\> over frame \<b\> projected on \<c\>
  */
-Eigen::Vector3d VersorLemma(const EulerYPR& v1, const EulerYPR& v2);
+Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2);
 
 /**
  * @brief Compute the Cartesian error between two transformation matrices.
@@ -201,6 +201,7 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 
 /**
  * @brief Computes the skew symmetric matrix form for a vector
+ *
  * The output is the following:\n
  * \f$ t\wedge = \left| \begin{array}{ccc}
 				0 & -z  & y \\
@@ -241,7 +242,6 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
  * @return the rigid body matrix
  */
 Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl);
-
 
 
 /*

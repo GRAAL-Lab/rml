@@ -13,8 +13,8 @@
 #include <eigen3/Eigen/Dense>
 #include <unordered_map>
 
-#include <rml/Types.h>
-#include <rml/RobotLink.h>
+#include "Types.h"
+#include "RobotLink.h"
 
 namespace rml {
 

@@ -18,12 +18,12 @@
 #ifndef INCLUDE_RML_RML_H_
 #define INCLUDE_RML_RML_H_
 
-#include <rml/Types.h>
-#include <rml/MatrixOperations.h>
-#include <rml/Functions.h>
-#include <rml/SVD.h>
-#include <rml/PseudoInverse.h>
-#include <rml/RobotModel.h>
-#include <rml/NewtonEuler.h>
+#include "Types.h"
+#include "MatrixOperations.h"
+#include "Functions.h"
+#include "SVD.h"
+#include "PseudoInverse.h"
+#include "RobotModel.h"
+#include "NewtonEuler.h"
 
 #endif /* INCLUDE_RML_RML_H_ */

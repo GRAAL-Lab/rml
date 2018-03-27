@@ -5,7 +5,7 @@
  *      Author: fraw
  */
 
-#include "rml/SVD.h"
+#include "SVD.h"
 #include "rml_internal/SVD_Internal.h"
 
 namespace rml {

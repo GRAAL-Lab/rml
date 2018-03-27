@@ -10,8 +10,9 @@
 
 #include <vector>
 #include <memory>
-#include <rml/VehicleModel.h>
-#include <rml/ArmModel.h>
+
+#include "VehicleModel.h"
+#include "ArmModel.h"
 
 /**
  * \class RobotModel

@@ -65,11 +65,11 @@ int main(int argc, char* argv[]){
 	Eigen::Vector3d maxvect3 = rml::GreatestNormElement(vect3_1, vect3_2, vect3_3);
 	futils::PrettyPrint(maxvect3.transpose(), "maxvect3");
 
-	rml::EulerYPR ypr;
-	ypr.SetYPR(0.0,0.0,M_PI);
+	rml::EulerRPY ypr;
+	ypr.SetRPY(0.0,0.0,M_PI);
 	PrettyPrint(ypr, "ypr cout");
 	PrettyPrint(ypr.ToRotMatrix(), "ypr.ToRotMatrix()");
-	PrettyPrint(ypr.ToRotMatrix().ToEulerYPR(), "ypr.ToRotMatrix().ToEulerYPR()");
+	PrettyPrint(ypr.ToRotMatrix().ToEulerRPY(), "ypr.ToRotMatrix().ToEulerYPR()");
 
 	Eigen::Vector3d transl(1.0,2.0,3.0);
 	PrettyPrint(rml::GetRigidBodyMatrix(transl), "rml::GetRigidBodyMatrix(transl)");

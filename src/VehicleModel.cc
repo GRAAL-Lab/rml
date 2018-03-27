@@ -13,8 +13,8 @@
 #include <vector>
 #include <algorithm>
 
-#include "rml/VehicleModel.h"
-#include "rml/Functions.h"
+#include "VehicleModel.h"
+#include "Functions.h"
 
 using std::cout;
 using std::endl;
@@ -24,29 +24,29 @@ namespace rml {
 VehicleModel::VehicleModel() {
 	modelInitialized_ = false;
 	fbkPosition_.setZero();
-	fbkVelocity_.setZero();
-	fbkAcceleration_.setZero();
-	cartVelocity_.setZero();
+	velocityOnVehicle_.setZero();
+	accelerationOnVehicle_.setZero();
+	//cartVelocity_.setZero();
 }
 
 VehicleModel::~VehicleModel() {
 }
 
-void VehicleModel::SetFeedbackPosition(const Eigen::Vector6d& fbkPos) {
+void VehicleModel::SetFeedbackOnInertial(const Eigen::Vector6d& fbkPos) {
 	fbkPosition_ = fbkPos;
 
 	//EvaluatewTv();
 }
 
-void VehicleModel::SetFeedbackVelocity(const Eigen::Vector6d& fbkVel) {
-	fbkVelocity_ = fbkVel;
+void VehicleModel::SetVelocityOnVehicle(const Eigen::Vector6d& velocityOnVehicle) {
+	velocityOnVehicle_ = velocityOnVehicle;
 }
 
-void VehicleModel::SetFeedbackAcceleration(const Eigen::Vector6d& fbkAcc) {
-	fbkAcceleration_ = fbkAcc;
+void VehicleModel::SetAccelerationOnVehicle(const Eigen::Vector6d& accOnVehicle) {
+	accelerationOnVehicle_ = accOnVehicle;
 }
 
-const Eigen::Vector6d& VehicleModel::GetCartesianVelocity() {
+/*const Eigen::Vector6d& VehicleModel::GetCartesianVelocity() {
 		Eigen::TransfMatrix wTv;
 		wTv = fbkPosition_.ToTransfMatrix();
 	    cartVelocity_ = wTv.GetRotMatrix().Transpose().GetCartesianRotationMatrix() * fbkVelocity_;
@@ -58,7 +58,7 @@ const Eigen::Vector6d& VehicleModel::GetCartesianAcceleration() {
 		wTv = fbkPosition_.ToTransfMatrix();
 	    cartAcceleration_ = wTv.GetRotMatrix().Transpose().GetCartesianRotationMatrix() * fbkAcceleration_;
 	    return cartVelocity_;
-}
+}*/
 
 void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian) {
 
