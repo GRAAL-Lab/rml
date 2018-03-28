@@ -32,7 +32,7 @@ VehicleModel::VehicleModel() {
 VehicleModel::~VehicleModel() {
 }
 
-void VehicleModel::SetFeedbackOnInertial(const Eigen::Vector6d& fbkPos) {
+void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos) {
 	fbkPosition_ = fbkPos;
 
 	//EvaluatewTv();

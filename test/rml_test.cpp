@@ -73,7 +73,7 @@ int main(int argc, char* argv[]){
 
 	Eigen::Vector3d transl(1.0,2.0,3.0);
 	PrettyPrint(rml::GetRigidBodyMatrix(transl), "rml::GetRigidBodyMatrix(transl)");
-	PrettyPrint(transl.GetRigidBodyMatrix(), "transl.GetRigidBodyMatrix()");
+	//PrettyPrint(transl.GetRigidBodyMatrix(), "transl.GetRigidBodyMatrix()");
 
 	///////////////////////////////
 	//////     PINV TEST     //////

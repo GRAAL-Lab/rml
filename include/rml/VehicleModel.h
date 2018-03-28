@@ -48,7 +48,7 @@ public:
 	 * have the updated values 
 	 * @param[in] fbkPos the base position vector in the form of [r p y x y z]
 	 */
-	void SetFeedbackOnInertial(const Eigen::Vector6d& fbkPos);
+	void SetPositionOnInertial(const Eigen::Vector6d& fbkPos);
 
 	/**
 	 * @brief Set the base position
@@ -66,7 +66,7 @@ public:
 	 *
 	 * @return      The vehicle position
 	 */
-	const Eigen::Vector6d& GetFeedbackOnInertial()
+	const Eigen::Vector6d& GetPositionOnInertial()
 	{
 		return fbkPosition_;
 	}

@@ -11,9 +11,10 @@ if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
-
 # Define library. Only source files here!
 project(RML_project VERSION 0.1 LANGUAGES CXX)
+
+option(BUILD_TESTS "Compile tests" OFF)
 
 add_library(rml SHARED
     src/Functions.cc
@@ -28,9 +29,6 @@ add_library(rml SHARED
     src/RobotLink.cc
     src/NewtonEuler.cc
 )
-
-#add_library(youBotModel include/test/youbot_armmodel.cc
-#)
 
 set_target_properties(rml PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -49,8 +47,7 @@ target_compile_features(rml
     PUBLIC
         cxx_auto_type
         cxx_range_for
-        cxx_variadic_templates
-)
+        cxx_variadic_templates)
 
 # Depend on a library that we defined in the top-level file
 #target_link_libraries(lib
@@ -73,21 +70,19 @@ install(EXPORT rmlConfig DESTINATION share/rml/cmake)
 export(TARGETS rml FILE rmlConfig.cmake)
 
 
-if(BUILD_TEST)
+if(BUILD_TESTS)
     # Every library has unit tests, of course
     add_executable(rml_test test/rml_test.cpp)
     
     add_executable(rml_test_model test/rml_test_model.cpp
+#        test/baxterLeft_armmodel.cc       
         test/youbot_armmodel.cc
-        test/youbot_vehiclemodel.cc
-#        test/baxterLeft_armmodel.cc
-    )
+        test/youbot_vehiclemodel.cc)
     
-        add_executable(rml_test_newtoneuler test/rml_test_newtoneuler.cpp
+    add_executable(rml_test_newtoneuler test/rml_test_newtoneuler.cpp
         test/youbot_armmodel.cc
         test/youbot_vehiclemodel.cc
-        test/twolinks_armmodel.cc
-    )
+        test/twolinks_armmodel.cc)
     
     target_link_libraries(rml_test rml)
     target_link_libraries(rml_test_model rml)
@@ -96,4 +91,4 @@ if(BUILD_TEST)
     add_test(rml_test rml_test)
     add_test(rml_test_model rml_test_model)
     add_test(rml_test_newtoneuler rml_test_newtoneuler)
-endif(BUILD_TEST)
+endif(BUILD_TESTS)

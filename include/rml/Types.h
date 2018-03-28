@@ -21,6 +21,17 @@ class TransfMatrix;
 namespace rml{
 
 /**
+ * @brief Exception to be thrown when the joint index out of bounds
+ */
+class GimbalLockException: public std::exception
+{
+	virtual const char* what() const throw ()
+	{
+		return "[rml::EulerRPY::GetDerivative()] Division by zero due to gimbal lock (pitch=Pi/2)!";
+	}
+};
+
+/**
  * @brief Euler angle representation.
  *
  * This class stores the orientation of a rigid body using the z-y-x (yaw, pitch, roll) rotation order
@@ -53,7 +64,7 @@ public:
 
 	Eigen::Vector3d ToVect3() const;
 	Eigen::RotMatrix ToRotMatrix() const;
-	Eigen::Vector3d GetDerivative(Eigen::Vector3d omega) const;
+	Eigen::Vector3d GetDerivative(Eigen::Vector3d omega) const throw (std::exception);
 
 private:
 	double roll_, pitch_, yaw_ ;

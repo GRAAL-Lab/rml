@@ -285,7 +285,7 @@ Eigen::VectorXd RobotModel::GetSystemPositionVector() const
 {
 	Eigen::VectorXd pos;
 	if (vehicle_) {
-		pos = UnderJuxtapose(pos, vehicle_->GetFeedbackOnInertial());
+		pos = UnderJuxtapose(pos, vehicle_->GetPositionOnInertial());
 	}
 	for (int i = 0; i < arms_.size(); ++i) {
 		pos = UnderJuxtapose(pos, arms_.at(i)->GetJointsPosition());

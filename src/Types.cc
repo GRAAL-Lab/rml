@@ -65,12 +65,18 @@ Eigen::RotMatrix EulerRPY::ToRotMatrix() const {
 	return n;
 }
 
-Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const {
-	Eigen::Vector3d rpyDerivative;
+Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const throw (std::exception) {
 	Eigen::Matrix3d Sinv;
-	Sinv << 1, tan(pitch_)*sin(roll_), tan(pitch_)*cos(roll_),
-			0, cos(roll_)            , -sin(roll_)           ,
-			0, sin(roll_)/cos(pitch_), cos(roll_)/cos(pitch_);
+	if(pitch_ != M_PI)
+	{
+		Eigen::Vector3d rpyDerivative;
+		Sinv << 1, tan(pitch_)*sin(roll_), tan(pitch_)*cos(roll_),
+				0, cos(roll_)            , -sin(roll_)           ,
+				0, sin(roll_)/cos(pitch_), cos(roll_)/cos(pitch_);
+	} else {
+		throw GimbalLockException();
+	}
+
 	return Sinv * omega;
 }
 
