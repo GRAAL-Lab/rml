@@ -16,7 +16,8 @@
 #include "Types.h"
 #include "RobotLink.h"
 
-namespace rml {
+namespace rml
+{
 
 typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
 
@@ -25,11 +26,11 @@ typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
  */
 class ArmModelException: public std::exception
 {
-	virtual const char* what() const throw () {
-		return "[ArmModel] Wrong joint index!";
+	virtual const char* what() const throw ()
+	{
+		return "[ArmModel] Joint index out of bounds!";
 	}
 };
-
 
 /**
  * @brief Arm Model base class
@@ -59,7 +60,8 @@ public:
 	 * @param jointLimMin Minimum excursion for the joint
 	 * @param jointLimMax Maximum excursion for the joint
 	 */
-	void AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax);
+	void AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin,
+			double jointLimMax);
 
 	/**
 	 * @brief Set the joint position
@@ -108,7 +110,6 @@ public:
 	 */
 	Eigen::MatrixXd GetBase2JointJacobian(int jointIndex);
 
-
 	void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
 
 	Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
@@ -116,54 +117,76 @@ public:
 
 	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
 
-
-
-	int GetNumJoints() const {
+	int GetNumJoints() const
+	{
 		return links_.size();
 	}
 
-	const Eigen::TransfMatrix& GetBaseTransf() {
-		return baseTb0_;// = baseTb0;
+	const Eigen::TransfMatrix& GetBaseTransf()
+	{
+		return baseTb0_; // = baseTb0;
 	}
 
-	void SetBaseTransf(const Eigen::TransfMatrix& baseTb0) {
+	void SetBaseTransf(const Eigen::TransfMatrix& baseTb0)
+	{
 		baseTb0_ = baseTb0;
 	}
 
-	const Eigen::MatrixXd& GetbJt() const {
+	const Eigen::MatrixXd& GetbJt() const
+	{
 		return bJt_;
 	}
 
-	const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji) {
+	const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji)
+	{
 		return biTei_.at(ji);
 	}
 
-	const Eigen::TransfMatrix& GetBase2ToolTransf() {
+	const Eigen::TransfMatrix& GetBase2ToolTransf()
+	{
 		return bTt_;
 	}
 
-
-	const Eigen::TransfMatrix& GeteTt() const {
+	const Eigen::TransfMatrix& GeteTt() const
+	{
 		return eTt_;
 	}
 
-	void SeteTt(const Eigen::TransfMatrix& eTt) {
+	void SeteTt(const Eigen::TransfMatrix& eTt)
+	{
 		eTt_ = eTt;
 	}
 
-	const std::vector<Eigen::MatrixXd>& GetdJdq() const {
+	const std::vector<Eigen::MatrixXd>& GetdJdq() const
+	{
 		return dJdq_;
 	}
 
-	RobotLink& GetLink(int jointIndex) throw (ArmModelException) {
-		if(jointIndex < links_.size())
+	RobotLink& GetLink(int jointIndex) throw (ArmModelException)
+	{
+		if (jointIndex < links_.size())
 			return links_.at(jointIndex);
 		else
 			throw ArmModelException();
 	}
 
-	bool IsModelInitialized() const {
+	bool IsModelInitialized() const
+	{
 		return modelInitialized_;
+	}
+
+	const Eigen::VectorXd& GetControlVector() const
+	{
+		return controlRef_;
+	}
+
+	void SetControlVector(const Eigen::VectorXd& controlRef) throw (std::exception)
+	{
+		if (controlRef.rows() == numberOfJoints_) {
+			controlRef_ = controlRef;
+		} else {
+			throw ArmModelException();
+		}
 	}
 
 protected:
@@ -195,7 +218,6 @@ protected:
 	 */
 	void EvaluatedJdqNumeric();
 
-
 	void ForwardDirectGeometry(int jointNumber);
 	void BackwardDirectGeometry(int jointNumber, int endEffectorIndex);
 	void BackwardDirectGeometryToolFrame(int jointNumber);
@@ -203,13 +225,12 @@ protected:
 	bool modelInitialized_;
 	int numberOfJoints_;
 	std::vector<RobotLink> links_;
-	std::unordered_map<std::string, IndexedTMat > attachedBodyFrames_;
+	std::unordered_map<std::string, IndexedTMat> attachedBodyFrames_;
 
-	Eigen::VectorXd q_, q_dot_, q_ddot_;
-	std::vector<Eigen::TransfMatrix> baseTei_; 		///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
-	//std::vector<Eigen::TransfMatrix> biTri_;		///< Matrice di Trasformazione dalla base all'endeffector della BRU i-esima (costante)
-	std::vector<Eigen::TransfMatrix> biTei_;		///< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
-	Eigen::TransfMatrix baseTb0_;						///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
+	Eigen::VectorXd q_, q_dot_, q_ddot_, controlRef_;
+	std::vector<Eigen::TransfMatrix> baseTei_; ///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
+	std::vector<Eigen::TransfMatrix> biTei_;///< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
+	Eigen::TransfMatrix baseTb0_;				///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
 	Eigen::TransfMatrix baseTbi_;
 	Eigen::TransfMatrix Tz_;
 	Eigen::Vector3d base_ki_;

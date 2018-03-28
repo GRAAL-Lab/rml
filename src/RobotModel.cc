@@ -305,5 +305,49 @@ Eigen::VectorXd RobotModel::GetSystemVelocityVector() const
 	return vel;
 }
 
+Eigen::VectorXd RobotModel::ExtractVehicleSlice(const Eigen::VectorXd& y) const
+{
+	Eigen::VectorXd slice;
+	if (CheckVehicle()){
+		slice = y.block(0, 0, 6, 1);
+	}
+	return slice;
+}
+
+Eigen::VectorXd RobotModel::ExtractArmSlice(const Eigen::VectorXd& y, int armIndex) const
+{
+	int startIndex(0);
+	if (vehicle_)
+		startIndex = 6;
+	if (CheckArm(armIndex)) {
+		for (int i = 0; i < armIndex; ++i) {
+			startIndex = startIndex + arms_.at(i)->GetNumJoints();
+		}
+	}
+	return y.block(startIndex, 0, arms_.at(armIndex)->GetNumJoints(), 1);
+}
+
+void RobotModel::SetRobotControl(const Eigen::VectorXd& y) const
+{
+	if (vehicle_) {
+		vehicle_->SetControlVector(ExtractVehicleSlice(y));
+	}
+	for (int i = 0; i < arms_.size(); ++i) {
+		arms_.at(i)->SetControlVector(ExtractArmSlice(y, i));
+	}
+}
+
+Eigen::VectorXd RobotModel::GetRobotControl() const
+{
+	Eigen::VectorXd y;
+	if (vehicle_) {
+		y = UnderJuxtapose(y, vehicle_->GetControlVector());
+	}
+	for (int i = 0; i < arms_.size(); ++i) {
+		y = UnderJuxtapose(y, arms_.at(i)->GetControlVector());
+	}
+	return y;
+}
+
 } /* namespace rml */
 

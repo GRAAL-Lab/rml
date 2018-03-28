@@ -81,6 +81,9 @@ class RobotModel {
 	Eigen::MatrixXd GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const;
 	Eigen::Matrix6d GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const;
 
+	Eigen::VectorXd ExtractVehicleSlice(const Eigen::VectorXd& y) const;
+	Eigen::VectorXd ExtractArmSlice(const Eigen::VectorXd& y, int armIndex) const;
+
 public:
 	RobotModel();
 	virtual ~RobotModel();
@@ -150,6 +153,9 @@ public:
 
 	Eigen::VectorXd GetSystemPositionVector() const;
 	Eigen::VectorXd GetSystemVelocityVector() const;
+
+	void SetRobotControl(const Eigen::VectorXd& y) const;
+	Eigen::VectorXd GetRobotControl() const;
 
 };
 

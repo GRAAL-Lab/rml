@@ -112,11 +112,21 @@ public:
 		return modelInitialized_;
 	}
 
+	const Eigen::Vector6d& GetControlVector() const
+	{
+		return controlRef_;
+	}
+
+	void SetControlVector(const Eigen::Vector6d& controlRef)
+	{
+		controlRef_ = controlRef;
+	}
+
 protected:
 
 	bool modelInitialized_;
 	std::unordered_map<std::string, Eigen::TransfMatrix> attachedBodyFrames_;
-	Eigen::Vector6d fbkPosition_, velocityOnVehicle_, accelerationOnVehicle_;
+	Eigen::Vector6d fbkPosition_, velocityOnVehicle_, accelerationOnVehicle_, controlRef_;
 
 	Eigen::Matrix6d vJv_;
 	Eigen::TransfMatrix wTv_;
