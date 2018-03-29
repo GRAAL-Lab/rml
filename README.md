@@ -1,4 +1,4 @@
-[comment]: //!\mainpage "ReadMe"
+[comment]: //!\mainpage "Main Page"
 
 # RML: Robotic Mathematical Library
 This library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators.
