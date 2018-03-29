@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
 	std::cout << " - Simulation variables have been set... Starting SIM! - " << std::endl << std::endl;
 
-	rml::SVDData mySVD;
+	rml::RegularizationData mySVD;
 	mySVD.params.lambda = 0.01;
 	mySVD.params.threshold = 0.0001;
 

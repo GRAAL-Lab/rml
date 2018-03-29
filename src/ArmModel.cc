@@ -210,7 +210,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
 	Jmu.resize(1, numberOfJoints_);
 	Jmu.setZero();
 
-	SVDData mySVD;
+	RegularizationData mySVD;
 
 	if(numberOfJoints_ < 6){
 		mySVD.params.lambda = 0.0001;

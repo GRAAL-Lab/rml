@@ -6,6 +6,7 @@
  */
 
 #include "Types.h"
+#include "PseudoInverse.h"
 
 namespace rml{
 
@@ -66,18 +67,12 @@ Eigen::RotMatrix EulerRPY::ToRotMatrix() const {
 }
 
 Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const throw (std::exception) {
-	Eigen::Matrix3d Sinv;
-	if(pitch_ != M_PI)
-	{
-		Eigen::Vector3d rpyDerivative;
-		Sinv << 1, tan(pitch_)*sin(roll_), tan(pitch_)*cos(roll_),
-				0, cos(roll_)            , -sin(roll_)           ,
-				0, sin(roll_)/cos(pitch_), cos(roll_)/cos(pitch_);
-	} else {
-		throw GimbalLockException();
-	}
-
-	return Sinv * omega;
+	Eigen::Matrix3d S;
+	S << cos(yaw_)*cos(pitch_), -sin(yaw_),    0;
+		 sin(yaw_)*cos(pitch_),  cos(yaw_),    0;
+		 -sin(pitch_)		  ,  0 		  ,	   1;
+	RegularizationData mySvd;
+	return RegularizedPseudoInverse(S, mySvd) * this->ToRotMatrix() * omega;
 }
 
 } // namespace rml

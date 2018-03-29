@@ -8,9 +8,7 @@
 #include <iostream>
 
 #include "PseudoInverse.h"
-#include "Types.h"
-#include "MatrixOperations.h"
-#include "SVD.h"
+
 #include "rml_internal/SVD_Internal.h"
 #include "rml_internal/PseudoInverse_Internal.h"
 
@@ -46,7 +44,7 @@ void GT_RegPinv(const double* J, int m, int n, double* JPInv, double treshold, d
 		double singularValue = fabs(S[i]);
 		if (singularValue <= SVDEpsilon) {
 			if (singularValue < 0) {
-				std::cout << "WARNING: in GT_svdcmp - DAFUQ S[" << i << "] < 0 -> S =" << S[i] << std::endl;
+				std::cerr << "WARNING: in GT_svdcmp - DAFUQ S[" << i << "] < 0 -> S =" << S[i] << std::endl;
 			}
 			*prod = (*prod) * singularValue;
 			S[i] = 0;

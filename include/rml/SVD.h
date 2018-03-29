@@ -15,42 +15,7 @@
 
 namespace rml{
 
-struct SVDParameters
-{
-	double threshold; 	//!< The value above which the raised cosine becomes 0
-	double lambda;    	//!< The maximum value of the raised cosine
 
-	SVDParameters(): threshold(0.0), lambda(0.0) {}
-};
-
-struct SVDResults
-{
-	double mu;			//!< Product of singular values
-	int flag;			//!< The number of time the regularization parameter was not zero
-
-	SVDResults(): mu(0.0), flag(0) {}
-};
-
-/**
- * The SVDparameters contain input and output values for the SVD decompostion.
- * In particular \p threshold and \p lambda are inputs, while \p mu and
- * \p flag are outputs.
- * The regularization, being \f$ \sigma_i \f$ the i-th singular value,
- * is performed using following formula:\n
- *
- * \f$ \sigma_i = \sigma_i / ({\sigma_i}^2 + Reg) \f$, where, using the raised cosine\n
- *
- * \f$ Reg = \left\{ \begin{array}{ll}
-        lambda/2 * (1 + cos((\sigma_i / thresh) * \pi)) & \mbox{if $0 \leq \sigma_i \leq th$}\\
-        0 & \mbox{elsewhere}.
-        \end{array} \right. \f$
- *
- */
-struct SVDData
-{
-	SVDParameters params;
-	SVDResults results;
-};
 
 /**
  * @internal for internal use only
@@ -70,6 +35,7 @@ void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double 
  * The methods computes the singular value decomposition of the given matrix A, defined as
  * A = USV'
  * if A is of size m x n, then U is m x m, S is m x n and V is n x n
+ *
  *
  * @param[in] A the matrix to be decomposed
  * @param[out] U the m x m rotation matrix

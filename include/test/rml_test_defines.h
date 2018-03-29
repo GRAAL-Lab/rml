@@ -28,7 +28,7 @@ struct TimeResults {
 struct PinvSpecs {
 	int nRows;
 	int nCols;
-	rml::SVDData SVDdata;
+	rml::RegularizationData SVDdata;
 
 	PinvSpecs() :
 		nRows(0), nCols(0) {
