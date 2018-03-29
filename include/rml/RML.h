@@ -3,10 +3,11 @@
  *
  *  Created on: Feb 15, 2018
  *      Author: Francesco Wanderlingh
+ *
+ *      @defgroup RML RoboticMathLib
  */
 
-/** @defgroup RML RoboticMathLib
- *
+/**
  *  @brief Types and algorithms for robotic mobile manipulation
  *
  *  @details The "Robotic Mathematical Library" is a minimal and portable math lib for robotics that relies

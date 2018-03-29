@@ -3,6 +3,8 @@
  *
  *  Created on: Feb 27, 2018
  *      Author: fraw
+ *
+ *  \ingroup RML
  */
 
 #ifndef INCLUDE_RML_ROBOTMODEL_H_
@@ -17,7 +19,6 @@
 /**
  * \class RobotModel
  *
- * \ingroup RML
  *
  * \brief This class provides a container for storing multi-arm mobile manipulators,
  * including a series of model related functions.

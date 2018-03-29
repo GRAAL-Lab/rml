@@ -73,7 +73,7 @@ void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, d
  *
  *
  * @param mat			The matrix to be inverted
- * @param svdData		The SVD decomposition parameters and results struct
+ * @param regData		The regularization parameters and results struct
  * @return				The pseudo-inverse matrix of \p mat
  */
 template<class MatT>

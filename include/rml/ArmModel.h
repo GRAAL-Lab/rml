@@ -35,7 +35,7 @@ class ArmModelException: public std::exception
 /**
  * @brief Arm Model base class
  *
- * @details This class implements a base arm model class.
+ * @details This class implements a model serial kinematic chains.
  */
 class ArmModel
 {
