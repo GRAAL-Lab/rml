@@ -255,7 +255,7 @@ void ArmModel::EvaluatedJdqNumeric() {
 	Eigen::MatrixXd dQ, qVar, q_orig;
 	double delta_q = 1E-6;
 	q_orig = q_;
-	bJt_0 = GetbJt();
+	bJt_0 = GetBaseToToolJacobian();
 	//futils::PrettyPrint(wJt_0,"wJt_0");
 
 	/// Here we iterate till "numJoints - 1" since the last joint will not influence
@@ -271,7 +271,7 @@ void ArmModel::EvaluatedJdqNumeric() {
 
 		EvaluatebTt();
 		EvaluatebJt();
-		bJt_dQ = GetbJt();
+		bJt_dQ = GetBaseToToolJacobian();
 		//futils::PrettyPrint(wJt_dQ,"wJt_dQ");
 		for (int iJrow = 0; iJrow < 6; ++iJrow) {
 			for (int iJcol = 0; iJcol < numberOfJoints_; ++iJcol) {
@@ -326,11 +326,11 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
 	attachedBodyFrames_.insert(std::make_pair(ID, myMat));
 }
 
-Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID) {
+Eigen::TransfMatrix ArmModel::GetAttachedBodyFrame(std::string& ID) {
 	return attachedBodyFrames_.at(ID).second;
 }
 
-Eigen::TransfMatrix ArmModel::GetCurrentAttachedBodyTransf(std::string& ID) {
+Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID) {
 
 	int jointIndex = attachedBodyFrames_.at(ID).first;
 	Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;

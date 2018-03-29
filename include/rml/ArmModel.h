@@ -33,9 +33,36 @@ class ArmModelException: public std::exception
 };
 
 /**
- * @brief Arm Model base class
+ * @brief Arm Model class for serial kinematic chains (manipulators).
  *
- * @details This class implements a model serial kinematic chains.
+ * @details This class implements a model for serial kinematic chains. It contains a
+ * vector of RobotLink which can be added up using the AddLink() function, which attaches
+ * each new link to the previous one. Optionally we can also add rigid bodies to each
+ * link with the function AddRigidBodyFrame() which takes as input the \p linkIndex to be
+ * attached to and a \p IDstring to identify it.
+ *
+ * Once the model has been constructed, the class
+ * provides all the necessary functions to evaluate the transformation and jacobian matrices
+ * for every link and rigid body added.
+ *
+ * The standard Tool Control Point (TCP) assumed in the
+ * GetBase2ToolTransf(), GetBaseToToolJacobian() and GetdJdq() functions, here called the \p ToolFrame,
+ * is defined as the last link frame added (the EndEffector) plus the \p eTt = \f$ ^{ee}_{tool}T \f$
+ * (EndEffector to Tool) matrix:
+ *
+ * \f$ ^{base}_{tool}T = ^{base}_{ee}T \cdot ^{ee}_{tool}T \f$
+ *
+ * By default \p eTt is an identity, but can be set using the SeteTt() function.
+ *
+ * To evaluate transformation and jacobians matrices different from the tool frame related ones
+ * there are dedicated functions such as:
+ * GetBase2JointTransf(), GetAttachedBodyTransf() GetBase2JointJacobian() etc... which take as
+ * an input parameter the joint index or the attached body string identifier.
+ *
+ * <b>This class has been designed with two use cases in mind</b>:
+ *   -# Used by itself in can be exploited to control fixed base manipulators.
+ *   -# Loaded in a RobotModel, using RobotModel::LoadArm(), and used in conjuction with a VehicleModel,
+ *   it can be used to control mobile manipulators.
  */
 class ArmModel
 {
@@ -52,7 +79,7 @@ public:
 	virtual ~ArmModel();
 
 	/**
-	 * @brief Adds a link to the kinematic chain
+	 * @brief Adds a link to the kinematic chain of the model
 	 *
 	 * @param type 			The JointType, whether: Fixed, Revolute, Prismatic
 	 * @param axis			The axis along which the joint rotates or translates
@@ -112,8 +139,8 @@ public:
 
 	void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
 
+	Eigen::TransfMatrix GetAttachedBodyFrame(std::string& ID);
 	Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
-	Eigen::TransfMatrix GetCurrentAttachedBodyTransf(std::string& ID);
 
 	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
 
@@ -132,7 +159,7 @@ public:
 		baseTb0_ = baseTb0;
 	}
 
-	const Eigen::MatrixXd& GetbJt() const
+	const Eigen::MatrixXd& GetBaseToToolJacobian() const
 	{
 		return bJt_;
 	}
@@ -228,15 +255,15 @@ protected:
 	std::unordered_map<std::string, IndexedTMat> attachedBodyFrames_;
 
 	Eigen::VectorXd q_, q_dot_, q_ddot_, controlRef_;
-	std::vector<Eigen::TransfMatrix> baseTei_; ///< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
-	std::vector<Eigen::TransfMatrix> biTei_;///< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
-	Eigen::TransfMatrix baseTb0_;				///< Matrice di Trasformazione dal mondo alla base del Robot(costante)
+	std::vector<Eigen::TransfMatrix> baseTei_; 		//!< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
+	std::vector<Eigen::TransfMatrix> biTei_;		//!< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
+	Eigen::TransfMatrix baseTb0_;					//!< Matrice di Trasformazione dal mondo alla base del Robot(costante)
 	Eigen::TransfMatrix baseTbi_;
 	Eigen::TransfMatrix Tz_;
 	Eigen::Vector3d base_ki_;
 	std::vector<Eigen::Vector6d> h_;
 	Eigen::TransfMatrix bTt_;
-	Eigen::TransfMatrix eTt_;		///< Matrice di Trasformazione dall'endeffector al tool (costante)
+	Eigen::TransfMatrix eTt_;						//!< Matrice di Trasformazione dall'endeffector al tool (costante)
 
 	std::vector<Eigen::MatrixXd> dJdq_;
 	Eigen::MatrixXd Jpinv_;

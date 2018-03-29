@@ -86,7 +86,7 @@ Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianTF(int armIndex) const
 	Eigen::MatrixXd bJt;
 	if (CheckArm(armIndex)) {
 		/// The robot model actually returns the jacobian of the end-effector  w.r.t. the base of the robot
-		bJt = arms_.at(armIndex)->GetbJt();
+		bJt = arms_.at(armIndex)->GetBaseToToolJacobian();
 		if (vehicle_) {
 			Eigen::RotMatrix vRb = vehicleTbase_.at(armIndex).GetRotMatrix();
 			bJt = vRb.GetCartesianRotationMatrix() * bJt;
