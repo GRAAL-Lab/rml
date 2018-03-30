@@ -19,10 +19,9 @@
 /**
  * \class RobotModel
  *
- *
  * \brief This class provides a container for storing a multi-arm mobile manipulator model,
  * including a series of model related functions. Using the LoadVehicle() and LoadArm() class
- * you can load one VehicleModel and \a n ArmModel(s)
+ * you can load one rml::VehicleModel and \a n rml::ArmModel(s)
  *
  * \author (last to touch it) fw
  *

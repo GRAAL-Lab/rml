@@ -22,7 +22,7 @@ namespace rml
 typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
 
 /**
- * @brief Exception to be thrown when the joint index out of bounds
+ * \brief Exception to be thrown when the joint index out of bounds
  */
 class ArmModelException: public std::exception
 {
@@ -31,11 +31,11 @@ class ArmModelException: public std::exception
 		return "[ArmModel] Joint index out of bounds!";
 	}
 };
-
 /**
- * @brief Arm Model class for serial kinematic chains (manipulators).
  *
- * @details This class implements a model for serial kinematic chains. It contains a
+ * \brief Arm Model class for serial kinematic chains (manipulators).
+ *
+ * \details This class implements a model for serial kinematic chains. It contains a
  * vector of RobotLink which can be added up using the AddLink() function, which attaches
  * each new link to the previous one. Optionally we can also add rigid bodies to each
  * link with the function AddRigidBodyFrame() which takes as input the \p linkIndex to be
@@ -69,39 +69,40 @@ class ArmModel
 public:
 
 	/**
-	 * @brief Default constructor
+	 * \brief Default constructor
 	 */
 	ArmModel();
 
 	/**
-	 * @brief Default destructor
+	 * \brief Default destructor
 	 */
 	virtual ~ArmModel();
 
 	/**
-	 * @brief Adds a link to the kinematic chain of the model
+	 * \brief Adds a link to the kinematic chain of the model
 	 *
-	 * @param type 			The JointType, whether: Fixed, Revolute, Prismatic
-	 * @param axis			The axis along which the joint rotates or translates
-	 * @param baseTransf 	Transformation matrix from previous to current
-	 * @param jointLimMin Minimum excursion for the joint
-	 * @param jointLimMax Maximum excursion for the joint
+	 * \param type 			The JointType, whether: Fixed, Revolute, Prismatic
+	 * \param axis			The axis along which the joint rotates or translates
+	 * \param baseTransf 	Transformation matrix from previous to current
+	 * \param jointLimMin Minimum excursion for the joint
+	 * \param jointLimMax Maximum excursion for the joint
 	 */
 	void AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin,
 			double jointLimMax);
 
 	/**
-	 * @brief Set the joint position
-	 * The method updates the internal joint position state. This method should be called before the evaluate methods in order to 
-	 * have the updated values 
+	 * \brief Set the joint position
 	 *
-	 * @param[in] q		the joint position vector (must be an numJoints x 1 vector)
+	 * The method updates the internal joint position state. This method updates also the internal transformation
+	 * matrices and jacobians.
+	 *
+	 * \param[in] q		the joint position vector (must be an numJoints x 1 vector)
 	 */
 	void SetJointsPosition(const Eigen::VectorXd& q);
 
 	/**
-	 * @brief Get the joint position
-	 * @return q the joint position vector (an armJoints x 1 vector)
+	 * \brief Get the joint position
+	 * \return q the joint position vector (an armJoints x 1 vector)
 	 */
 	const Eigen::VectorXd& GetJointsPosition() const;
 

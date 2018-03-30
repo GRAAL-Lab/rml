@@ -21,20 +21,11 @@ class TransfMatrix;
 namespace rml{
 
 /**
- * @brief Exception to be thrown when the joint index out of bounds
- */
-class GimbalLockException: public std::exception
-{
-	virtual const char* what() const throw ()
-	{
-		return "[rml::EulerRPY::GetDerivative()] Division by zero due to gimbal lock (pitch=Pi/2)!";
-	}
-};
-
-/**
- * @brief Euler angle representation.
+ * @brief Euler RPY angle representation.
  *
- * This class stores the orientation of a rigid body using the z-y-x (yaw, pitch, roll) rotation order
+ * This class stores the orientation of a rigid body in terms of the roll, pitch and yaw
+ * rotation. The order in which the rotation are applied follows the z-y-x convention:
+ * rotate around yaw, then pitch, then roll.
  */
 class EulerRPY
 {
@@ -71,6 +62,26 @@ private:
 };
 }
 
+/**
+ * \namespace Eigen
+ *
+ * \brief This namespace is used to extend the Eigen Dense library functionalites
+ *
+ * \details In order to maintain uniformity with the eigen library, the extensions of it have
+ * been included in the Eigen namespace. In particular the additions regard the definition of
+ * the following types:
+ *
+ *   1. Eigen::RotMatrix: represents a cartesian rotation matrix. Is an extension of the Matrix3d
+ *   class that defaults the constructor to an identity matrix, with the addition of member
+ *   functions to convert to different representations.
+ *
+ *   2. Eigen::TransfMatrix:: represents an homogeneus transformation matrix an extension of the
+ *   Matrix4d class that defaults the constructor to an identity matrix, with the addition of member
+ *   functions to convert do different representaions, set and extract rotation and translational
+ *   parts of it separately (rot and transl parts).
+ *
+ *   \note Full Eigen documentation can be found at http://eigen.tuxfamily.org/dox/index.html.
+ */
 namespace Eigen{
 
 typedef Eigen::Matrix<double, 6, 1> Vector6dBase;
@@ -125,6 +136,17 @@ public:
 	TransfMatrix ToTransfMatrix() const;
 };
 
+/**
+ * \class RotMatrix
+ *
+ * \brief This class extends the Eigen::Matrix3d
+ *
+ * \details The Eigen::RotMatrix represents a cartesian rotation matrix. Is an extension of
+ * the Matrix3d class that defaults the constructor to an identity matrix, with the addition
+ * of member functions to convert to different representations such as: Cartesian 6x6 rotation
+ * matrix, rml::EulerRPY and Eigen::Quaterniond reprensentation.
+ *
+ */
 class RotMatrix : public Eigen::Matrix3d
 {
 public:
@@ -157,6 +179,10 @@ public:
 
 	rml::EulerRPY ToEulerRPY() const{
 		return this->eulerAngles(0, 1, 2);
+	}
+
+	Eigen::Quaterniond ToQuaternion() const{
+		return Eigen::Quaterniond(*this);
 	}
 };
 
