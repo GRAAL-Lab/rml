@@ -1,8 +1,8 @@
-/*
- * PseudoInverse.h
+/**
+ * \file
  *
- *  Created on: Feb 15, 2018
- *      Author: fraw
+ * \date 	Feb 15, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef INCLUDE_RML_PSEUDOINVERSE_H_

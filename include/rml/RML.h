@@ -1,10 +1,8 @@
-/*
- *  RML.h
+/**
+ * \file
  *
- *  Created on: Feb 15, 2018
- *      Author: Francesco Wanderlingh
- *
- *      @defgroup RML RoboticMathLib
+ * \date 	Feb 15, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 /**

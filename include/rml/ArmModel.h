@@ -32,6 +32,7 @@ class ArmModelException: public std::exception
 	}
 };
 /**
+ * \class ArmModel
  *
  * \brief Arm Model class for serial kinematic chains (manipulators).
  *
@@ -81,7 +82,7 @@ public:
 	/**
 	 * \brief Adds a link to the kinematic chain of the model
 	 *
-	 * \param type 			The JointType, whether: Fixed, Revolute, Prismatic
+	 * \param type 			The JointType, whether: JointType::Fixed, JointType::Revolute, JointType::Prismatic
 	 * \param axis			The axis along which the joint rotates or translates
 	 * \param baseTransf 	Transformation matrix from previous to current
 	 * \param jointLimMin Minimum excursion for the joint
@@ -233,13 +234,13 @@ protected:
 	 */
 	void EvaluatebTt();
 
-	/**
+	/*
 	 * @brief Loads the model matrices from the files located in file_path
 	 * (file names: wTb0, eTt, biTri1, biTri2, biTri3, etc...)
 	 *
 	 * @param[in] file_path		where all the model matrices files are
 	 */
-	void ReadModelMatricesFromFile(std::string file_path);
+	//void ReadModelMatricesFromFile(std::string file_path);
 
 	/**
 	 * @brief Evaluates numerically the Jacobian derivative w.r.t. joint variations

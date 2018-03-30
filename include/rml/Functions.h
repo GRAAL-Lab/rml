@@ -1,8 +1,8 @@
-/*
- * Functions.h
+/**
+ * \file
  *
- *  Created on: Feb 21, 2018
- *      Author: fraw
+ * \date 	Feb 21, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef INCLUDE_RML_FUNCTIONS_H_

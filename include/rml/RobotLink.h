@@ -15,6 +15,9 @@
 
 namespace rml {
 
+/**
+ * \brief Used to describe the type of joint
+ */
 enum class JointType : uint8_t { Fixed, Revolute, Prismatic };
 
 const std::map<JointType, std::string> JointType2String = {
@@ -23,6 +26,9 @@ const std::map<JointType, std::string> JointType2String = {
 		{ JointType::Prismatic, "Prismatic" }
 };
 
+/**
+ * \brief Basic element of an rml::ArmModel
+ */
 class RobotLink
 {
 	// Kinematic properties

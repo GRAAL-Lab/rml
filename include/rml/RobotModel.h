@@ -16,23 +16,6 @@
 #include "VehicleModel.h"
 #include "ArmModel.h"
 
-/**
- * \class RobotModel
- *
- * \brief This class provides a container for storing a multi-arm mobile manipulator model,
- * including a series of model related functions. Using the LoadVehicle() and LoadArm() class
- * you can load one rml::VehicleModel and \a n rml::ArmModel(s)
- *
- * \author (last to touch it) fw
- *
- * \date 2018/02/28 12:06:20
- *
- * Contact: francesco.wanderlingh@dibris.unige.it
- *
- * Created on: Tue Feb 27 10:22:30 2018
- *
- */
-
 namespace rml {
 
 /**
@@ -56,15 +39,16 @@ class RobotModelVehicleException: public std::exception
 };
 
 /**
- * @brief Robot Model class, stores vehicle and arms models and evaluates total transformation
- * matrices and Jacobians.
+ * \class RobotModel
  *
- * @details This class implements a base vehicle model class.
- * The derived class should re-implement the InitMatrix method, to set the geometry of the arm and the
- * EvaluatedJdq method to evaluate the derivative of the Jacobian w.r.t. q that is used in the manipulability Jacobian
- * computation.
+ * \brief Robot Model class, to evaluate mobile manipulators total transformation
+ * matrices and jacobians.
+ *
+ * \details This class provides a container for storing a multi-arm mobile manipulator model,
+ * including a series of model related functions. Using the LoadVehicle() and LoadArm() class
+ * you can load one rml::VehicleModel and \a n rml::ArmModel(s).
+ *
  */
-
 class RobotModel {
 
 	std::shared_ptr<VehicleModel> vehicle_;

@@ -1,8 +1,8 @@
-/*
- * SVD.h
+/**
+ * \file
  *
- *  Created on: Feb 17, 2018
- *      Author: Francesco Wanderlingh
+ * \date 	Feb 17, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef INCLUDE_RML_SVD_H_
@@ -14,8 +14,6 @@
 #include "MatrixOperations.h"
 
 namespace rml{
-
-
 
 /**
  * @internal for internal use only
@@ -30,12 +28,12 @@ void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double 
 
 
 /**
+ *
  * @brief Singular Value Decomposition
  *
  * The methods computes the singular value decomposition of the given matrix A, defined as
  * A = USV'
  * if A is of size m x n, then U is m x m, S is m x n and V is n x n
- *
  *
  * @param[in] A the matrix to be decomposed
  * @param[out] U the m x m rotation matrix

@@ -346,13 +346,14 @@ Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID) {
 }
 
 
-void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
+/*void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
 
 	modelReadFromFile_ = true;
 	modelInitialized_ = true;
-	std::cout << "To be implemented" << std::endl;
+	std::cout << "[ReadModelMatricesFromFile] Not implemented yet" << std::endl;
+	exit(0);
 
-}
+}*/
 
 }
 

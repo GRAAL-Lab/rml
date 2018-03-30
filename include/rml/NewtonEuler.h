@@ -1,8 +1,8 @@
-/*
- * NewtonEuler.h
+/**
+ * \file
  *
- *  Created on: Mar 12, 2018
- *      Author: fraw
+ * \date 	Mar 12, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef INCLUDE_RML_NEWTONEULER_H_
@@ -17,6 +17,30 @@ namespace rml
 
 const double STD_GRAVITY = 9.80665;
 
+/**
+ * \class NewtonEuler
+ *
+ * \brief Implementation of the Newton-Euler equation for rigid-body chains
+ *
+ * \details This class makes use of rml::RobotModel to find the forces and moments
+ * acting on the manipulator. Some facilites equations are provided to use the class
+ * in order to simulated dynamic systems. The nomenclature used for the manipulators
+ * dynamic equation is the following:
+ *
+ * \f$ A(q)\ddot{q} + B(q_,\dot{q})\dot{q} + C(q) = m + \hat{m} \f$
+ *
+ * where \f$ \hat{m} \f$ are the external forces.
+ *
+ * I can evaluate the various A, B, C matrix by imposing q_dot, q_ddot
+ * equal to zero. After, I can compute q_ddot by inverting the above
+ * mentioned formula. Defined \f$ \tilde{m} = B\dot{q} + C \f$, we can write:
+ *
+ *  \f$ \ddot{q} = A^{-1}[ m + \hat{m} - \tilde{m}] \f$
+ *
+ *  The newton euler algorithm can be used to evaulate the \f$ A \f$ matrix and the
+ *  \f$ \tilde{m} \f$ , and the functions GetA() and GetMTilde() provide this
+ *  functionalities.
+ */
 class NewtonEuler
 {
 	int numJoints_;
@@ -35,10 +59,10 @@ class NewtonEuler
 	std::vector<Eigen::Vector3d> n_, f_;
 	std::vector<Eigen::Vector3d> r_qmc_, r_qpc_;
 
-    /**
-     * The interaction forces and moments associated with the link "i" are relative to the one between
-     * "i" and "i-1". While the "self" forces are the one relative to the acceleration of the CoM_i.
-     */
+	/**
+	 * The interaction forces and moments associated with the link "i" are relative to the one between
+	 * "i" and "i-1". While the "self" forces are the one relative to the acceleration of the CoM_i.
+	 */
 	std::vector<Eigen::Vector3d> self_f_, self_n_;
 	std::vector<Eigen::Vector3d> interaction_f_, interaction_n_;
 
@@ -54,10 +78,18 @@ public:
 	virtual ~NewtonEuler();
 
 	void SetGravity(const Eigen::Vector3d& gravity);
-	void EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::VectorXd& q_dot, const Eigen::VectorXd& q_ddot, const Eigen::Vector3d& gravity, Eigen::VectorXd& torques);
+	void EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::VectorXd& q_dot, const Eigen::VectorXd& q_ddot,
+			const Eigen::Vector3d& gravity, Eigen::VectorXd& torques);
+	/**
+	 * @return the A gravity matrix
+	 */
 	Eigen::MatrixXd GetA();
-	//void GetB();
+
 	Eigen::VectorXd GetC();
+
+	/**
+	 * @return \f$ \tilde{m} = B\dot{q} + C \f$
+	 */
 	Eigen::VectorXd GetMTilde();
 
 	void PrintVars() const;

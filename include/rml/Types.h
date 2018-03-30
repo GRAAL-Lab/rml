@@ -1,8 +1,8 @@
-/*
- * Defines.h
+/**
+ * \file
  *
- *  Created on: Feb 20, 2018
- *      Author: fraw
+ * \date 	Feb 20, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef INCLUDE_RML_TYPES_H_
@@ -12,7 +12,6 @@
 #define EIGEN_MATRIXBASE_PLUGIN <rml/MatrixBaseAddons.h>
 #include <eigen3/Eigen/Dense>
 
-/// Forward declaration
 namespace Eigen{
 class RotMatrix;
 class TransfMatrix;
@@ -186,7 +185,17 @@ public:
 	}
 };
 
-
+/**
+ * \class TransfMatrix
+ *
+ * \brief This class extends the Eigen::Matrix4d
+ *
+ * \details The Eigen::TransfMatrix represents an homogeneus transformation matrix an extension of the
+ *   Matrix4d class that defaults the constructor to an identity matrix, with the addition of member
+ *   functions to convert do different representaions, set and extract rotation and translational
+ *   parts of it separately (rot and transl parts).
+ *
+ */
 class TransfMatrix : public Eigen::Matrix4d
 {
 public:
