@@ -6,7 +6,7 @@
 #image: gcc:6.1
 
 # Specify a docker image from Dockerhub
-image: ubuntu/xenial
+image: library/ubuntu:xenial
 
 pipelines:
   default:
