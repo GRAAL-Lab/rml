@@ -13,13 +13,8 @@ pipelines:
     - step:
         script: # Modify the commands below to build your repository.
           # install deps
-            #- wget http://www.cmake.org/files/v3.2/cmake-3.2.2.tar.gz
-            #- tar xf cmake-3.2.2.tar.gz
-            #- cd cmake-3.2.2
-            #- ./configure
-            #- make install
             - apt-get update
-            - apt-get install -y libeigen3-dev
+            - apt-get install -y cmake libeigen3-dev
           #build
             - mkdir -p build
             - cd build
