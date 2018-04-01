@@ -14,7 +14,7 @@ pipelines:
             - tar xf cmake-3.2.2.tar.gz
             - cd cmake-3.2.2
             - ./configure
-            - make
+            - make install
             - apt-get update
             - apt-get install -y libeigen3-dev
           #build
