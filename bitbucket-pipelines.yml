@@ -6,7 +6,7 @@
 #image: gcc:6.1
 
 # Specify a docker image from Dockerhub
-image: madduci/docker-ubuntu-cpp:gcc-6
+image: ubuntu/ubuntu:16.04
 
 pipelines:
   default:
