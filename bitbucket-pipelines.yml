@@ -13,5 +13,5 @@ pipelines:
             - apt-get update
             - apt-get install -y cmake libeigen3-dev
           #build
-            - cmake
+            - cmake .
             - make
