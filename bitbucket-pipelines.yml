@@ -10,7 +10,10 @@ pipelines:
     - step:
         script: # Modify the commands below to build your repository.
           # install deps
-            - apt-get update && apt-get install -y cmake
+            - sudo apt-get install software-properties-common
+            - sudo add-apt-repository ppa:george-edison55/cmake-3.x
+            - sudo apt-get update
+            - apt-get update && apt-get install -y cmake libeigen3-dev
           #build
             - mkdir -p build
             - cd build
