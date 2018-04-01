@@ -3,18 +3,21 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: gcc:6.1
+#image: gcc:6.1
+
+# Specify a docker image from Dockerhub
+image: madduci/docker-ubuntu-cpp:gcc-6
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
           # install deps
-            - wget http://www.cmake.org/files/v3.2/cmake-3.2.2.tar.gz
-            - tar xf cmake-3.2.2.tar.gz
-            - cd cmake-3.2.2
-            - ./configure
-            - make install
+            #- wget http://www.cmake.org/files/v3.2/cmake-3.2.2.tar.gz
+            #- tar xf cmake-3.2.2.tar.gz
+            #- cd cmake-3.2.2
+            #- ./configure
+            #- make install
             - apt-get update
             - apt-get install -y libeigen3-dev
           #build
