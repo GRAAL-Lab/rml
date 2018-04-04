@@ -64,7 +64,7 @@ private:
 /**
  * \namespace Eigen
  *
- * \brief This namespace is used to extend the Eigen Dense library functionalites
+ * \brief This namespace is used to extend the Eigen Dense library functionalities
  *
  * \details In order to maintain uniformity with the eigen library, the extensions of it have
  * been included in the Eigen namespace. In particular the additions regard the definition of
@@ -74,9 +74,9 @@ private:
  *   class that defaults the constructor to an identity matrix, with the addition of member
  *   functions to convert to different representations.
  *
- *   2. Eigen::TransfMatrix:: represents an homogeneus transformation matrix an extension of the
+ *   2. Eigen::TransfMatrix:: represents an homogeneous transformation matrix an extension of the
  *   Matrix4d class that defaults the constructor to an identity matrix, with the addition of member
- *   functions to convert do different representaions, set and extract rotation and translational
+ *   functions to convert do different representations, set and extract rotation and translational
  *   parts of it separately (rot and transl parts).
  *
  *   \note Full Eigen documentation can be found at http://eigen.tuxfamily.org/dox/index.html.
@@ -88,7 +88,7 @@ typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 //typedef Eigen::Matrix3d RotationMatrix;
 
 /**
- * @brief A 6d vector that can contain a [r p y x y z] or an [wx wy wz x y z] vector
+ * @brief A 6d vector generally used for containing pose [r p y x y z] or velocity [wx wy wz x y z] vectors
  */
 class Vector6d : public Eigen::Vector6dBase
 {

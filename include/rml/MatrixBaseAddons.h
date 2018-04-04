@@ -1,8 +1,8 @@
-/*
- * MatrixBaseAddons.h
+/**
+ * \file
  *
- *  Created on: Feb 16, 2018
- *      Author: fw
+ * \date 	Feb 16, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef INCLUDE_RML_MATRIXBASEADDONS_H_

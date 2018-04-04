@@ -1,12 +1,9 @@
-/*
- * RobotModel.h
+/**
+ * \file
  *
- *  Created on: Feb 27, 2018
- *      Author: fraw
- *
- *  \ingroup RML
+ * \date 	Feb 27, 2018
+ * \author 	Francesco Wanderlingh
  */
-
 #ifndef INCLUDE_RML_ROBOTMODEL_H_
 #define INCLUDE_RML_ROBOTMODEL_H_
 

@@ -1,8 +1,8 @@
-/*
- * ctrl_vehiclemodel.h
+/**
+ * \file
  *
- *  Created on: May 16, 2017
- *      Author: francescow
+ * \date 	May 16, 2017
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef __CTRL_VEHICLEMODEL_H__

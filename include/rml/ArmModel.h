@@ -1,8 +1,8 @@
-/*
- * ctrl_armmodel.h
+/**
+ * \file
  *
- *  Created on: Feb 8, 2018
- *      Author: francescow
+ * \date 	Feb 8, 2018
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef __ARMMODEL_H__

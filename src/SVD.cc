@@ -15,7 +15,6 @@ namespace rml {
 //	The matrix V (NOT the transpose V') replaces "a" on output.
 //  The diagonal matrix of singular values S is output as a vector w[1..n].
 //	The matrix U is output as V_[n*n].
-
 void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double *rv1) {
 	int flag, i, its, j, jj, k, l, nm;
 	double anorm, c, f, g, h, s, scale, x, y, z;

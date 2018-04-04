@@ -1,8 +1,8 @@
 # RML: Robotics Mathematical Library
-This library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators.
+The **RML** library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators.
 
 ## Documentation
-Full doxygen-generated documentation can be found at: https://merosss.bitbucket.io/rml/.
+Full doxygen-generated documentation can be found at: https://merosss.bitbucket.io/rml.
 
 ## Features
 Its major features are:
@@ -12,8 +12,9 @@ Its major features are:
 3. Implementation of a **Pseudo-Inversion** algorithm (rml::RegularizedPseudoInverse()).
 4. Implementation of a slim **RobotModel** class able to manage multi arm mobile robotic platforms (rml::RobotModel), in which we can load a rml::VehicleModel and many rml::ArmModel(s), providing frame and jacobian utilities, also including dJdq and manipulability measurements.
 5. Implementation of the **Newton-Euler** algorithm (rml::NewtonEuler), with some utility functions to simulate dynamic systems.
-6. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more.
+6. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more ().
 
+Check out the doxygen ::rml namespace documentation for a brief overview of all functionalities.
 
 ## Dependencies
 Before building the repository you will have to install the following dependencies:
@@ -29,3 +30,7 @@ The build tool used for this project is CMake. To build and install the project 
     $ cd build
     $ cmake ..
     $ sudo make install
+    
+The CMakeLists.txt provides also an additional BUILD_TESTS option, which by default is set to OFF. If you want to build also the tests just run:
+    
+    $ cmake .. -DBUILD_TESTS=ON

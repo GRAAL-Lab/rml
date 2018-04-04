@@ -1,8 +1,8 @@
-/*
- * RobotLink.h
+/**
+ * \file
  *
- *  Created on: Jul 8, 2015
- *      Author: francescow
+ * \date 	July 08, 2015
+ * \author 	Francesco Wanderlingh
  */
 
 #ifndef SRC_ROBOTLINK_H_
