@@ -40,6 +40,9 @@ const double STD_GRAVITY = 9.80665;
  *  The newton euler algorithm can be used to evaulate the \f$ A \f$ matrix and the
  *  \f$ \tilde{m} \f$ , and the functions GetA() and GetMTilde() provide this
  *  functionalities.
+ *
+ *  \note Don't forget to set the dynamic properties of the ArmModel links before
+ *  using the algorithms in this class, by calling RobotLink::SetDynamicProperties().
  */
 class NewtonEuler
 {

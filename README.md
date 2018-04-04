@@ -15,6 +15,7 @@ Its major features are:
 6. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more ().
 
 Check out the doxygen ::rml namespace documentation for a brief overview of all functionalities.
+Where not explicitly stated so, the default units are the SI ones (meters, kg, seconds, etc.).
 
 ## Dependencies
 Before building the repository you will have to install the following dependencies:

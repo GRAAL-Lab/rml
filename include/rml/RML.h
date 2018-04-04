@@ -26,7 +26,11 @@
  *  **Structs**:
  *  	- PlaneParameters
  *
+ *  **Strong Enums**:
+ *  	- ::JointType
+ *
  *  **Classes**:
+ *  	- RobotLink
  *		- ArmModel
  *		- VehicleModel
  *		- RobotModel
