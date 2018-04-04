@@ -1,5 +1,6 @@
 h1, .h1, h2, .h2, h3, .h3{
     font-weight: 200 !important;
+    font-family: Roboto Slab;
 }
 
 #navrow1, #navrow2, #navrow3, #navrow4, #navrow5{
@@ -23,6 +24,46 @@ table{
 .breadcrumb {
 	display: none;
 }
+
+.xs-collapse {
+  display: none;
+  /*visibility: hidden;*/
+}
+
+.xs-toggle .icon-bar {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 1px;
+}
+.xs-toggle .icon-bar + .icon-bar {
+  margin-top: 4px;
+}
+
+.btn-default.xs-toggle .icon-bar {
+  background-color: #888;
+}
+
+@media (min-width: 769px) {
+  .xs-toggle {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  .xs-collapse {
+    display: block !important;
+    visibility: visible !important;
+  }
+}
+
+input.btn-menu {
+    background: #ccc url('https://cdn0.iconfinder.com/data/icons/slim-square-icons-basics/100/basics-12-32.png') no-repeat top left;
+    color: white;
+    background-color: #337ab7; /* transparent;  make the button transparent */
+    border: 0px; /* solid transparent */
+    padding-left: 32px;
+    /*height: 16px;*/
+}
+
 
 /* Sticky footer styles
 -------------------------------------------------- */

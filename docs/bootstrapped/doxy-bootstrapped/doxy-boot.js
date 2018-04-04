@@ -17,10 +17,12 @@ $( document ).ready(function() {
     $('img[src="ftv2ns.png"]').replaceWith('<span class="label label-danger">N</span> ');
     $('img[src="ftv2cl.png"]').replaceWith('<span class="label label-danger">C</span> ');
 
-    $("ul.tablist").addClass("nav nav-pills nav-justified");
+    $("ul.tablist").addClass("nav nav-pills nav-justified xs-collapse");
+    $("ul.tablist").attr("id", "pills");
     $("ul.tablist").css("margin-top", "0.5em");
     $("ul.tablist").css("margin-bottom", "0.5em");
     $("li.current").addClass("active");
+    $("li.current").attr("role","presentation");
     $("iframe").attr("scrolling", "yes");
 
     $("#nav-path > ul").addClass("breadcrumb");
@@ -100,12 +102,26 @@ $( document ).ready(function() {
   var nav_container = $('<div class="row"></div>');
   $('#navrow1').parent().prepend(nav_container);
 
+
+ /*  var collapsed_left_nav_button = $('<button type="button" class="btn btn-default xs-toggle" data-toggle="collapse" data-target="#pills"></button>');
+   for (i = 0; i < 6; i++) {
+    var navrow = $('#navrow' + i + ' > ul.tablist').detach();
+    left_nav.append(navrow);
+    $('#navrow' + i).remove();
+  }
+   */
   var left_nav = $('<div class="col-md-9"></div>');
+  left_nav.append('\
+  <input type="submit" class="btn btn-default xs-toggle btn-menu" data-toggle="collapse" data-target="#pills" value="Menu">\
+            <span class="sr-only">Toggle navigation</span>\
+        </input>');
+  
   for (i = 0; i < 6; i++) {
     var navrow = $('#navrow' + i + ' > ul.tablist').detach();
     left_nav.append(navrow);
     $('#navrow' + i).remove();
   }
+  
   var right_nav = $('<div class="col-md-3"></div>').append('\
     <div id="search-box" class="input-group">\
       <div class="input-group-btn">\

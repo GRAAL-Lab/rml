@@ -174,7 +174,7 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 
 
 /**
- * @brief Computes the skew symmetric matrix form for a vector
+ * \brief Computes the skew symmetric matrix form for a vector
  *
  * The output is the following:\n
  * \f$ t\wedge = \left| \begin{array}{ccc}
