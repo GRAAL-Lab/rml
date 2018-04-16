@@ -3,15 +3,19 @@
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
 #image: gcc:6.1
-image: library/ubuntu:xenial
+image: 
+  name: graalunige/xenial-testbench
+  username: $DOCKER_HUB_USERNAME_WANDERFRA
+  password: $DOCKER_HUB_PASSWORD_WANDERFRA
+  email: $DOCKER_HUB_EMAIL_WANDERFRA
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
           # install deps
-            - apt-get update
-            - apt-get install -y cmake libeigen3-dev
+          #  - apt-get update
+          #  - apt-get install -y cmake libeigen3-dev
           #build
             - cmake .
             - make
