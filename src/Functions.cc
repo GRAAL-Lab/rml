@@ -14,7 +14,7 @@ namespace rml
 
 const double VersorLemmaThreshold = 1E-9;
 
-Eigen::Vector3d ReducedVersorLemma(const double v1[], const double v2[])
+Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2)
 {
 	Eigen::Vector3d a(v1), b(v2), c;
 
