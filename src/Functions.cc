@@ -24,7 +24,7 @@ Eigen::Vector3d ReducedVersorLemma(const double v1[], const double v2[])
 
 	// Computing the Misalignment Vector if the two Frames are not Aligned in the
 	// Lungitudinal Direction, else c is Equal to 0 since the two Directions are Alligned.
-    if  (sinth > 0.00000000001){
+    if  (sinth > VersorLemmaThreshold){
         double theta = atan2(sinth, costh);
         c = (vsinth * (theta/sinth));
     }

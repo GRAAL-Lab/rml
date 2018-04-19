@@ -30,6 +30,13 @@ struct PlaneParameters
     PlaneParameters() : A(0), B(0), C(0), D(0) {}
 };
 
+/**
+ *
+ * @param v1
+ * @param v2
+ * @return
+ */
+Eigen::Vector3d ReducedVersorLemma(const double v1[], const double v2[]);
 
 /**
  * @brief Compute the versor lemma between the two rotation matrices.
