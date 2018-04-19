@@ -14,6 +14,27 @@ namespace rml
 
 const double VersorLemmaThreshold = 1E-9;
 
+Eigen::Vector3d ReducedVersorLemma(const double& v1[], const double& v2[])
+{
+	Eigen::Vector3d a(v1),b(v2),c;
+
+	Eigen::Vector3d vsinth = a.cross(b);
+	double costh = a.dot(b);
+	double sinth = vsinth.norm();
+
+	// Computing the Misalignment Vector if the two Frames are not Aligned in the
+	// Lungitudinal Direction, else c is Equal to 0 since the two Directions are Alligned.
+    if  (sinth > 0.00000000001){
+        double theta = atan2(sinth,costh);
+        c = (vsinth * (theta/sinth));
+    }
+    else{
+        c = 0;
+    }
+
+    return c;
+}
+
 Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2)
 {
 
@@ -186,9 +207,9 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
 Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t)
 {
 	Eigen::Matrix3d t_hat;
-	t_hat << 0, -t(2), t(1),
-			t(2), 0, -t(0),
-			-t(1), t(0), 0;
+	t_hat <<   0, -t(2),  t(1),
+			t(2),     0, -t(0),
+		   -t(1),  t(0),    0;
 	return t_hat;
 }
 
