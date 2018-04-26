@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "Types.h"
+#include "EulerRPY.h"
 
 namespace rml {
 

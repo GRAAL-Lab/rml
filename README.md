@@ -31,7 +31,11 @@ The build tool used for this project is CMake. To build and install the project 
     $ cd build
     $ cmake ..
     $ sudo make install
-    
+
 The CMakeLists.txt provides also an additional BUILD_TESTS option, which by default is set to OFF. If you want to build also the tests just run:
-    
+
     $ cmake .. -DBUILD_TESTS=ON
+
+### Mantainer
+
+* <fwanderlingh@gmail.com>

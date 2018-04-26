@@ -5,7 +5,7 @@
  *      Author: fraw
  */
 
-#include "Types.h"
+#include "EulerRPY.h"
 #include "PseudoInverse.h"
 
 namespace rml{
@@ -76,15 +76,4 @@ Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const throw (std:
 }
 
 } // namespace rml
-
-namespace Eigen{
-
-Eigen::TransfMatrix Vector6d::ToTransfMatrix() const {
-		Eigen::TransfMatrix TMat;
-		TMat.SetRotMatrix(rml::EulerRPY(this->GetFirstVect3()).ToRotMatrix());
-		TMat.SetTransl(this->GetSecondVect3());
-		return TMat;
-}
-
-} // namespace Eigen
 

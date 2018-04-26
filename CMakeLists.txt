@@ -17,16 +17,19 @@ project(RML_project VERSION 0.1 LANGUAGES CXX)
 option(BUILD_TESTS "Compile tests" OFF)
 
 add_library(rml SHARED
+    src/Vector6d.cc
+    src/RotMatrix.cc
+    src/TransfMatrix.cc
+    src/EulerRPY.cc
     src/Functions.cc
     src/PseudoInverse.cc
     src/PseudoInverse_Internal.cc
     src/SVD.cc
     src/SVD_Internal.cc
+    src/RobotLink.cc
     src/ArmModel.cc
     src/VehicleModel.cc
     src/RobotModel.cc
-    src/Types.cc
-    src/RobotLink.cc
     src/NewtonEuler.cc
 )
 
