@@ -257,15 +257,15 @@ protected:
 	std::unordered_map<std::string, IndexedTMat> attachedBodyFrames_;
 
 	Eigen::VectorXd q_, q_dot_, q_ddot_, controlRef_;
-	std::vector<Eigen::TransfMatrix> baseTei_; 		//!< Matrice di Trasformazione dalla base del robot all'endeffector della BRU i-esima
-	std::vector<Eigen::TransfMatrix> biTei_;		//!< biTei = biTri * Tz(qi); Matrice di T dalla base all'ee della BRU i-esima tenuto conto della rotazione del giunto
-	Eigen::TransfMatrix baseTb0_;					//!< Matrice di Trasformazione dal mondo alla base del Robot(costante)
+	std::vector<Eigen::TransfMatrix> baseTei_;
+	std::vector<Eigen::TransfMatrix> biTei_;
+	Eigen::TransfMatrix baseTb0_;
 	Eigen::TransfMatrix baseTbi_;
 	Eigen::TransfMatrix Tz_;
 	Eigen::Vector3d base_ki_;
 	std::vector<Eigen::Vector6d> h_;
 	Eigen::TransfMatrix bTt_;
-	Eigen::TransfMatrix eTt_;						//!< Matrice di Trasformazione dall'endeffector al tool (costante)
+	Eigen::TransfMatrix eTt_;
 
 	std::vector<Eigen::MatrixXd> dJdq_;
 	Eigen::MatrixXd Jpinv_;
