@@ -54,6 +54,11 @@ Eigen::Vector3d EulerRPY::ToVect3() const{
 	return Eigen::Vector3d(yaw_, pitch_, roll_);
 }
 
+Eigen::Quaterniond EulerRPY::ToQuaternion() const
+{
+	return this->ToRotMatrix().ToQuaternion();
+}
+
 /**
  * R = Rz(yaw)*Ry(pitch)*Rx(roll)
  */
@@ -74,6 +79,8 @@ Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const throw (std:
 	RegularizationData mySvd;
 	return RegularizedPseudoInverse(S, mySvd) * this->ToRotMatrix() * omega;
 }
+
+
 
 } // namespace rml
 

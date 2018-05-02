@@ -51,6 +51,7 @@ public:
 	Eigen::Vector3d ToVect3() const;
 	Eigen::RotMatrix ToRotMatrix() const;
 	Eigen::Vector3d GetDerivative(Eigen::Vector3d omega) const throw (std::exception);
+	Eigen::Quaterniond ToQuaternion() const;
 
 private:
 	double roll_, pitch_, yaw_ ;
