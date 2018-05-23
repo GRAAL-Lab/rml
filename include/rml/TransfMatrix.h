@@ -9,7 +9,6 @@
 #define INCLUDE_TRANSFMATRIX_H_
 
 #include "Types.h"
-#include "rml_internal/Futils.h"
 
 namespace Eigen
 {
