@@ -86,7 +86,7 @@ Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2);
  *
  * @return the Vect6 representing the axis around which in2 should rotate to reach in1 and the linear distance
  *
- * @note the two transformation matrix should have a common base frame, i.e. CartError(wTg, wTt) brings the tool
+ * @note the two transformation matrix should have a common base frame, i.e. CartesianError(wTt, wTg) brings the tool
  * 		 frame \<t\> towards a goal frame \<g\>, and returns the error projected on frame \<w\>
  */
 Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::TransfMatrix&  in2);
@@ -96,7 +96,7 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::Tra
  *
  * The method computes the misalignment error and the position error between two transformation matrices expressed as their 6 parameters representation
  * The method assumes that the two Vect6 are a 6 parameter representation of the type
- * v = [yaw -pitch roll x y z] leading to the following rotational part
+ * v = [yaw pitch roll x y z] leading to the following rotational part
  * R = Rz(yaw) * Ry(pitch) * Rx(roll)
  * It uses the VersorLemma to compute the misalignment, and a simple difference to compute the linear distance
  * The result is the error that brings in1 towards in2
@@ -106,7 +106,7 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::Tra
  *
  * @return the Vect6 representing the axis around which in2 should rotate to reach in1 and the linear distance
  *
- * @note the two vector should represent transformation matrix computed w.r.t a common frame, i.e. v1 = wTt, v2 = wTg then CartError(v1, v2)
+ * @note the two vector should represent transformation matrix computed w.r.t a common frame, i.e. v1 = wTt, v2 = wTg then CartesianError(v1, v2)
  *       brings the tool frame \<t\> towards a goal frame \<g\>, and returns the error projected on frame \<w\>
  */
 Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2);

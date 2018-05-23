@@ -9,6 +9,7 @@
 #define INCLUDE_TRANSFMATRIX_H_
 
 #include "Types.h"
+#include "rml_internal/Futils.h"
 
 namespace Eigen
 {
@@ -45,7 +46,7 @@ public:
 
 	RotMatrix GetRotMatrix() const;
 
-	void SetRotMatrix(const RotMatrix& rot);
+    void SetRotMatrix(const Eigen::RotMatrix& rot);
 
 	Vector3d GetTransl() const;
 

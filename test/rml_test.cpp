@@ -13,7 +13,7 @@ using std::cout;
 using std::endl;
 using futils::PrettyPrint;
 
-int main(int argc, char* argv[]){
+int main(int, char**){
 
 	const int m = 4, n = 4;
 
@@ -126,6 +126,29 @@ int main(int argc, char* argv[]){
 	Eigen::MatrixXd A_usv = U * S * V.transpose();
 	PrettyPrint(A_usv, "A as the result of: A = U*S*V'");
 
+    Eigen::TransfMatrix wTt, wTg;
+    std::cout << "CartesianError() 1: " << (rml::CartesianError(wTt, wTg)).transpose() << std::endl;
+
+    wTg.SetTransl(Eigen::Vector3d(1,1,1));
+    std::cout << "CartesianError() 2: " << (rml::CartesianError(wTt, wTg)).transpose() << std::endl;
+
+    Eigen::Matrix3d n_rot;
+    n_rot = Eigen::AngleAxisd(M_PI, Eigen::Vector3d::UnitZ());
+       // *Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
+       // *Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX());
+
+    rml::EulerRPY rpy(0, 0, M_PI);
+
+    futils::PrettyPrint(wTg, "wTg");
+    futils::PrettyPrint(rpy.ToRotMatrix(),"rpy.toRotMatrix");
+
+    wTg.SetRotMatrix(Eigen::Matrix3d::Identity());
+
+    wTg.SetRotMatrix(n_rot);
+
+    wTg.SetRotMatrix(rpy.ToRotMatrix());
+
+    futils::PrettyPrint(rml::CartesianError(wTt, wTg), "rml::CartesianError(wTt, wTg)");
 	return 0;
 }
 

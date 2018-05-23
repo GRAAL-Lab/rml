@@ -64,7 +64,7 @@ Eigen::Quaterniond EulerRPY::ToQuaternion() const
  */
 Eigen::RotMatrix EulerRPY::ToRotMatrix() const {
 
-	Eigen::Matrix3d n =
+	Eigen::Matrix3d n;
 	n = Eigen::AngleAxisd(this->GetYaw(), Eigen::Vector3d::UnitZ())
 		*Eigen::AngleAxisd(this->GetPitch(), Eigen::Vector3d::UnitY())
 		*Eigen::AngleAxisd(this->GetRoll(), Eigen::Vector3d::UnitX());
