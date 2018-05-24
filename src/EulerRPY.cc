@@ -18,6 +18,11 @@ EulerRPY::EulerRPY(Eigen::Vector3d vec3) {
 	yaw_ = vec3(2);
 }
 
+EulerRPY::EulerRPY(Eigen::Quaterniond q) {
+	*this = Eigen::RotMatrix(q.toRotationMatrix()).ToEulerRPY();
+}
+
+
 double EulerRPY::GetRoll() const {
 	return roll_;
 }

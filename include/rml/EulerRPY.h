@@ -28,6 +28,7 @@ public:
 	EulerRPY();
 	EulerRPY(double yaw, double pitch, double roll);
 	EulerRPY(Eigen::Vector3d vec3);
+	EulerRPY(Eigen::Quaterniond q);
 
 	virtual ~EulerRPY() {}
 
