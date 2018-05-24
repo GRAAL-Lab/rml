@@ -22,9 +22,15 @@ RotMatrix TransfMatrix::GetRotMatrix() const
 	return this->block(0, 0, 3, 3);
 }
 
-void TransfMatrix::SetRotMatrix(const RotMatrix& rot)
+void TransfMatrix::SetRotMatrix(const Eigen::RotMatrix& rot)
 {
-	this->block(0, 0, 3, 3) = rot;
+    //        futils::PrettyPrint(this->block<3,3>(0, 0), "this->block(0, 0, 3, 3)");
+    //        futils::PrettyPrint(rot.block<3,3>(0, 0), "rot.block(0, 0, 3, 3)");
+    if (rot.cols() == 3 && rot.rows() == 3) {
+        this->block(0, 0, 3, 3) = rot.block(0, 0, 3, 3);
+    } else {
+        std::cout << "[TransfMatrix::SetRotMatrix()] WARNING: Size is not 3x3" << std::endl;
+    }
 }
 
 Vector3d TransfMatrix::GetTransl() const

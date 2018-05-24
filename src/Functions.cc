@@ -86,13 +86,13 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 			Eigen::Vector3d temp2;
 			Eigen::Vector3d temp3;
 
-			temp1 = h.col(1);
-			temp2 = h.col(2);
-			temp3 = h.col(3);
+            temp1 = h.col(0);
+            temp2 = h.col(1);
+            temp3 = h.col(2);
 
 			temp1 = GreatestNormElement(temp1, temp2, temp3);
 
-			if (temp1.norm() != 0) {
+            if (temp1.norm() != 0.0) {
 				out = (temp1 * (M_PI / temp1.norm()));
 			} else {
 				out.setZero();
