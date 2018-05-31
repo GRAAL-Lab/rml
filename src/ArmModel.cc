@@ -59,6 +59,7 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
 	q_ = ZeroQ_;
 	q_dot_ = ZeroQ_;
 	q_ddot_ = ZeroQ_;
+    controlRef_ = ZeroQ_;
 
 	modelInitialized_ = true;
 
@@ -203,8 +204,8 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 
 
 void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
-	int flag;
-	double myMu;
+    //int flag;
+    //double myMu;
 	//EvaluatewJt(wJt_);
 	//EvaluatedJdqNumeric(dJdq_);
 	Jmu.resize(1, numberOfJoints_);

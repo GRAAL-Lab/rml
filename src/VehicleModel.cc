@@ -26,7 +26,7 @@ VehicleModel::VehicleModel() {
 	fbkPosition_.setZero();
 	velocityOnVehicle_.setZero();
 	accelerationOnVehicle_.setZero();
-	//cartVelocity_.setZero();
+    controlRef_.setZero();
 }
 
 VehicleModel::~VehicleModel() {
