@@ -161,7 +161,7 @@ public:
 		baseTb0_ = baseTb0;
 	}
 
-	const Eigen::MatrixXd& GetBaseToToolJacobian() const
+  const Eigen::MatrixXd& GetBase2ToolJacobian() const
 	{
 		return bJt_;
 	}

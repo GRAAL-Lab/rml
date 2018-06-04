@@ -78,9 +78,9 @@ Eigen::RotMatrix EulerRPY::ToRotMatrix() const {
 
 Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const throw (std::exception) {
 	Eigen::Matrix3d S;
-	S << cos(yaw_)*cos(pitch_), -sin(yaw_),    0;
-		 sin(yaw_)*cos(pitch_),  cos(yaw_),    0;
-		 -sin(pitch_)		  ,  0 		  ,	   1;
+  S << cos(yaw_)*cos(pitch_), -sin(yaw_),    0,
+       sin(yaw_)*cos(pitch_),  cos(yaw_),    0,
+      -sin(pitch_)		  ,       0 		  ,	   1;
 	RegularizationData mySvd;
 	return RegularizedPseudoInverse(S, mySvd) * this->ToRotMatrix() * omega;
 }
