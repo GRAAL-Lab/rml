@@ -56,7 +56,7 @@ void EulerRPY::SetRPY(Eigen::Vector3d& vec3){
 }
 
 Eigen::Vector3d EulerRPY::ToVect3() const{
-	return Eigen::Vector3d(yaw_, pitch_, roll_);
+	return Eigen::Vector3d(roll_, pitch_, yaw_);
 }
 
 Eigen::Quaterniond EulerRPY::ToQuaternion() const
