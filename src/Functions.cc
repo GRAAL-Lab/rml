@@ -129,14 +129,14 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
 double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x)
 {
     if (xmax < xmin) {
-        std::cout << "ERROR: in Decreasing bell shape function, xmax < xmin, swapping them...." << var << std::endl;
+        std::cout << "ERROR: in Decreasing bell shape function, xmax < xmin, swapping them...."  << std::endl;
         double temp;
         temp = xmax;
         xmax = xmin;
         xmin = temp;
     }
     if (ymax < ymin) {
-        std::cout << "ERROR: in Decreasing bell shape function, ymax<ymin, swapping them ... " << var << std::endl;
+        std::cout << "ERROR: in Decreasing bell shape function, ymax<ymin, swapping them ... "  << std::endl;
         double temp;
         temp = ymin;
         ymin = ymax;
@@ -157,7 +157,7 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
 double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x)
 {
     if (xmax < xmin) {
-        std::cout << "ERROR: in Increasing bell shape function, xmax < xmin, swapping them...." << var << std::endl;
+        std::cout << "ERROR: in Increasing bell shape function, xmax < xmin, swapping them...."  << std::endl;
         double temp;
         temp = xmax;
         xmax = xmin;
@@ -165,7 +165,7 @@ double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
     }
 
     if (ymax < ymin) {
-        std::cout << "ERROR: in Increasing bell shape function, ymax<ymin, swapping them ... " << var << std::endl;
+        std::cout << "ERROR: in Increasing bell shape function, ymax<ymin, swapping them ... " << std::endl;
         double temp;
         temp = ymin;
         ymin = ymax;
