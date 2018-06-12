@@ -72,12 +72,12 @@ public:
 	/**
 	 * \brief Default constructor
 	 */
-	ArmModel();
+    ArmModel(std::string id);
 
 	/**
 	 * \brief Default destructor
 	 */
-	virtual ~ArmModel();
+    virtual ~ArmModel();
 
 	/**
 	 * \brief Adds a link to the kinematic chain of the model
@@ -131,13 +131,13 @@ public:
 	 */
 	Eigen::TransfMatrix GetBase2JointTransf(int jointIndex);
 
-	/**
-	 * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
-	 *
-	 * @param[in] jointIndex    Joint index
-	 * @return				   Joint jacobian matrix
-	 */
-	Eigen::MatrixXd GetBase2JointJacobian(int jointIndex);
+    /**
+     * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
+     *
+     * @param[in] jointIndex    Joint index
+     * @return				   Joint jacobian matrix
+     */
+    Eigen::MatrixXd EvaluateBase2JointJacobian(int jointIndex);
 
 	void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
 
@@ -218,6 +218,15 @@ public:
 		}
 	}
 
+    Eigen::TransfMatrix GetTransformationMatrix(const std::string matrixId);
+    Eigen::MatrixXd GetJacobian(const std::string jacobianID);
+    std::string GetID() {
+        return id_;
+    }
+
+    void SetID(std::string id){
+        id_=id;
+    }
 protected:
 
 	/**
@@ -233,6 +242,8 @@ protected:
 	 * @return the tool transformation matrix
 	 */
 	void EvaluatebTt();
+
+
 
 	/*
 	 * @brief Loads the model matrices from the files located in file_path
@@ -255,9 +266,10 @@ protected:
 	int numberOfJoints_;
 	std::vector<RobotLink> links_;
 	std::unordered_map<std::string, IndexedTMat> attachedBodyFrames_;
-
+    std::unordered_map<std::string,Eigen::MatrixXd> jacobians_;
+    std::unordered_map<std::string, Eigen::TransfMatrix> transformation_;
 	Eigen::VectorXd q_, q_dot_, q_ddot_, controlRef_;
-	std::vector<Eigen::TransfMatrix> baseTei_;
+    std::vector<Eigen::TransfMatrix> baseTei_;
 	std::vector<Eigen::TransfMatrix> biTei_;
 	Eigen::TransfMatrix baseTb0_;
 	Eigen::TransfMatrix baseTbi_;
@@ -276,6 +288,7 @@ protected:
 	Eigen::VectorXd ZeroQ_;
 
 	bool modelReadFromFile_;
+    std::string id_;
 
 };
 

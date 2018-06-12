@@ -188,7 +188,10 @@ srv/_*.py
 *.pyc
 qtcreator-*
 *.user
-
+rml.creator 
+rml.config 
+rml.files
+rml.includes
 /planning/cfg
 /planning/docs
 /planning/src

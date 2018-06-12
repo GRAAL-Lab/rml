@@ -15,10 +15,11 @@ using std::endl;
 
 namespace rml {
 
-YouBotArmModel::YouBotArmModel()
+YouBotArmModel::YouBotArmModel(std::string id ): ArmModel(id)
 {
 	int numJoints = 5;
 	std::vector<Eigen::TransfMatrix> biTri(numJoints);
+
 
 	double min[] = { -2.94, -1.13, -2.616, -1.788, -2.68 };
 	double max[] = { +2.94, +1.57, +2.54, +1.788, +2.923 };
