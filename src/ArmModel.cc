@@ -32,7 +32,7 @@ using std::endl;
 
 namespace rml {
 
-ArmModel::ArmModel() : numberOfJoints_(0), modelReadFromFile_(false), modelInitialized_(false){
+ArmModel::ArmModel() : modelInitialized_(false), numberOfJoints_(0), modelReadFromFile_(false){
 }
 
 ArmModel::~ArmModel() {
@@ -42,7 +42,7 @@ ArmModel::~ArmModel() {
 void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax) {
 
 	links_.push_back(RobotLink(type, axis, baseTransf, jointLimMin, joinLimMax));
-	numberOfJoints_ = links_.size();
+    numberOfJoints_ = (int)links_.size();
 
 	//	cout << numberOfJoints_ << " - ";
 	//	futils::PrettyPrint(links_.back().baseTransf_, "baseTransf");
@@ -121,7 +121,7 @@ void ArmModel::EvaluatebJt() {
 
 	bJt_ = (h_[0]);
 	//wJt.PrintMtx("wJt start");
-	for (int i = 1; i < numberOfJoints_; i++) {
+    for (size_t i = 1; i < numberOfJoints_; i++) {
 		bJt_ = RightJuxtapose(bJt_, h_[i]);
 		//wJt.PrintMtx("wJt");
 	}
