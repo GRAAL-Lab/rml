@@ -59,6 +59,7 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
 	q_ = ZeroQ_;
 	q_dot_ = ZeroQ_;
 	q_ddot_ = ZeroQ_;
+    controlRef_ = ZeroQ_;
 
 	modelInitialized_ = true;
 
@@ -203,8 +204,8 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber) {
 
 
 void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu, double& mu) {
-	int flag;
-	double myMu;
+    //int flag;
+    //double myMu;
 	//EvaluatewJt(wJt_);
 	//EvaluatedJdqNumeric(dJdq_);
 	Jmu.resize(1, numberOfJoints_);
@@ -255,7 +256,7 @@ void ArmModel::EvaluatedJdqNumeric() {
 	Eigen::MatrixXd dQ, qVar, q_orig;
 	double delta_q = 1E-6;
 	q_orig = q_;
-	bJt_0 = GetBaseToToolJacobian();
+	bJt_0 = GetBase2ToolJacobian();
 	//futils::PrettyPrint(wJt_0,"wJt_0");
 
 	/// Here we iterate till "numJoints - 1" since the last joint will not influence
@@ -271,7 +272,7 @@ void ArmModel::EvaluatedJdqNumeric() {
 
 		EvaluatebTt();
 		EvaluatebJt();
-		bJt_dQ = GetBaseToToolJacobian();
+		bJt_dQ = GetBase2ToolJacobian();
 		//futils::PrettyPrint(wJt_dQ,"wJt_dQ");
 		for (int iJrow = 0; iJrow < 6; ++iJrow) {
 			for (int iJcol = 0; iJcol < numberOfJoints_; ++iJcol) {

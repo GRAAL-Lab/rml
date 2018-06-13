@@ -18,6 +18,11 @@ EulerRPY::EulerRPY(Eigen::Vector3d vec3) {
 	yaw_ = vec3(2);
 }
 
+EulerRPY::EulerRPY(Eigen::Quaterniond q) {
+	*this = Eigen::RotMatrix(q.toRotationMatrix()).ToEulerRPY();
+}
+
+
 double EulerRPY::GetRoll() const {
 	return roll_;
 }
@@ -51,7 +56,7 @@ void EulerRPY::SetRPY(Eigen::Vector3d& vec3){
 }
 
 Eigen::Vector3d EulerRPY::ToVect3() const{
-	return Eigen::Vector3d(yaw_, pitch_, roll_);
+	return Eigen::Vector3d(roll_, pitch_, yaw_);
 }
 
 Eigen::Quaterniond EulerRPY::ToQuaternion() const
@@ -73,9 +78,9 @@ Eigen::RotMatrix EulerRPY::ToRotMatrix() const {
 
 Eigen::Vector3d EulerRPY::GetDerivative(Eigen::Vector3d omega) const throw (std::exception) {
 	Eigen::Matrix3d S;
-	S << cos(yaw_)*cos(pitch_), -sin(yaw_),    0;
-		 sin(yaw_)*cos(pitch_),  cos(yaw_),    0;
-		 -sin(pitch_)		  ,  0 		  ,	   1;
+  S << cos(yaw_)*cos(pitch_), -sin(yaw_),    0,
+       sin(yaw_)*cos(pitch_),  cos(yaw_),    0,
+      -sin(pitch_)		  ,       0 		  ,	   1;
 	RegularizationData mySvd;
 	return RegularizedPseudoInverse(S, mySvd) * this->ToRotMatrix() * omega;
 }
