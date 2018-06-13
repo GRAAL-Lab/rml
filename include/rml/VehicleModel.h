@@ -30,7 +30,7 @@ public:
 	/**
 	 * @brief Default constructor
 	 */
-	VehicleModel();
+    VehicleModel(const std::string id);
 
 	/**
 	 * @brief Default destructor
@@ -93,9 +93,9 @@ public:
 	void AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat);
 
 	Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
-	Eigen::TransfMatrix GetCurrentAttachedBodyTransf(std::string& ID);
+    Eigen::TransfMatrix GetCurrentAttachedBodyTransf(const std::string ID);
 
-	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
+    Eigen::MatrixXd GetAttachedBodyJacobian(const std::string ID);
 
 	const Eigen::TransfMatrix GetwTv()
 	{
@@ -122,16 +122,31 @@ public:
 		controlRef_ = controlRef;
 	}
 
+    void SetID(std::string id)
+    {
+        id_=id;
+    }
+
+    std::string GetID()
+    {
+        return id_;
+    }
+
+    Eigen::TransfMatrix GetTransfMatrix(const std::string ID);
+
+    Eigen::MatrixXd GetJacobian(const std::string ID);
 protected:
 
 	bool modelInitialized_;
 	std::unordered_map<std::string, Eigen::TransfMatrix> attachedBodyFrames_;
 	Eigen::Vector6d fbkPosition_, velocityOnVehicle_, accelerationOnVehicle_, controlRef_;
-
+    std::unordered_map<std::string,Eigen::MatrixXd> jacobians_;
+    std::unordered_map<std::string, Eigen::TransfMatrix> transformation_;
 	Eigen::Matrix6d vJv_;
-	Eigen::TransfMatrix wTv_;
-	Eigen::TransfMatrix wTb_;
+    //Eigen::TransfMatrix wTv_;
+    //Eigen::TransfMatrix wTb_;
 	Eigen::RotMatrix I3_;
+    std::string id_;
 
 };
 
