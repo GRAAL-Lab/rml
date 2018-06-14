@@ -83,11 +83,11 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q)
     EvaluatebTt();
     transformation_.erase(transformation_.begin(), transformation_.end());
     jacobians_.erase(jacobians_.begin(), jacobians_.end());
-    transformation_.insert(std::make_pair(id_, bTt_));
+    transformation_.insert(std::make_pair(id_+"_Tool", bTt_));
 
     EvaluatebJt();
     EvaluatedJdqNumeric();
-    jacobians_.insert(std::make_pair(id_, bJt_));
+    jacobians_.insert(std::make_pair(id_+"_Tool", bJt_));
     //updating the joint jacobians
     for (int i = 0; i < numberOfJoints_; i++) {
         transformation_.insert(std::make_pair(id_ + "_Joint_" + std::to_string(i), baseTei_.at(i)));

@@ -20,9 +20,9 @@ namespace rml {
  */
 class RobotModelArmException: public std::exception
 {
-	virtual const char* what() const throw () {
-		return "[RobotModel] Error: Arm index out of bounds!!!";
-	}
+    virtual const char* what() const throw () {
+        return "[RobotModel] Error: Arm index out of bounds!!!";
+    }
 };
 
 /**
@@ -30,9 +30,9 @@ class RobotModelArmException: public std::exception
  */
 class RobotModelVehicleException: public std::exception
 {
-	virtual const char* what() const throw () {
-		return "[RobotModel] Error: No vehicle!!!";
-	}
+    virtual const char* what() const throw () {
+        return "[RobotModel] Error: No vehicle!!!";
+    }
 };
 
 /**
@@ -48,95 +48,109 @@ class RobotModelVehicleException: public std::exception
  */
 class RobotModel {
 
-	std::shared_ptr<VehicleModel> vehicle_;
-	std::vector<std::shared_ptr<ArmModel> > arms_;
+    std::shared_ptr<VehicleModel> vehicle_;
+    std::vector<std::shared_ptr<ArmModel> > arms_;
+    std::map<std::string, std::shared_ptr<ArmModel>> armsModel_;
+    std::unordered_map<std::string, Eigen::TransfMatrix> vehicleToBase_;
+    Eigen::MatrixXd J_;
+    std::vector<Eigen::TransfMatrix> vehicleTbase_;
+    std::vector<Eigen::MatrixXd> JArm_;
+    std::vector<Eigen::Matrix6d> JVeh_;
+    //std::map<std::string, Eigen::MatrixXd (*)(std::string *)> jacobianMethodsMap_ ;
+    std::map<std::string, Eigen::MatrixXd (*)(std::string, rml::RobotModel  )> jacobianMethodsMap_ ;
+    Eigen::MatrixXd GetIsolatedArmJacobianTF(const int armIndex) const;
+    Eigen::Matrix6d GetIsolatedVehicleJacobianEE(const int armIndex) const;
 
-	Eigen::MatrixXd J_;
-	std::vector<Eigen::TransfMatrix> vehicleTbase_;
-	std::vector<Eigen::MatrixXd> JArm_;
-	std::vector<Eigen::Matrix6d> JVeh_;
+    Eigen::MatrixXd GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const;
+    Eigen::Matrix6d GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const;
 
-	Eigen::MatrixXd GetIsolatedArmJacobianTF(const int armIndex) const;
-	Eigen::Matrix6d GetIsolatedVehicleJacobianEE(const int armIndex) const;
-
-	Eigen::MatrixXd GetIsolatedArmJacobianForJoint(int armIndex, int jointIndex) const;
-	Eigen::Matrix6d GetIsolatedVehicleJacobianForJoint(int armIndex, int jointIndex) const;
-
-	Eigen::VectorXd ExtractVehicleSlice(const Eigen::VectorXd& y) const;
-	Eigen::VectorXd ExtractArmSlice(const Eigen::VectorXd& y, int armIndex) const;
+    Eigen::VectorXd ExtractVehicleSlice(const Eigen::VectorXd& y) const;
+    Eigen::VectorXd ExtractArmSlice(const Eigen::VectorXd& y, int armIndex) const;
 
 public:
-	RobotModel();
-	virtual ~RobotModel();
+    RobotModel();
+    virtual ~RobotModel();
 
-	/**
-	 * @brief Returns the number of total degrees of fredoom of the system composed of
-	 * a vehicle plus \p n arms.
-	 * @return	The total number of DOFs (vehicle + arms)
-	 */
-	int GetTotalDOFs();
+    /**
+     * @brief Returns the number of total degrees of fredoom of the system composed of
+     * a vehicle plus \p n arms.
+     * @return	The total number of DOFs (vehicle + arms)
+     */
+    int GetTotalDOFs();
 
-	/**
-	 * @brief Loads a vehicle in the robot model
-	 *
-	 * Loads a vehicle in the robot model, only one vehicle is allowed. The VehicleModel
-	 * must be initialized before loading, otherwise is not accepted.
-	 *
-	 * @param vehicle		The vehicle model
-	 * @return				true on success, false otherwise
-	 */
-	bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle);
+    /**
+     * @brief Loads a vehicle in the robot model
+     *
+     * Loads a vehicle in the robot model, only one vehicle is allowed. The VehicleModel
+     * must be initialized before loading, otherwise is not accepted.
+     *
+     * @param vehicle		The vehicle model
+     * @return				true on success, false otherwise
+     */
+    bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle);
 
-	/**
-	 * @brief Loads an arm in the robot model
-	 *
-	 * Loads a arm in the robot model, there is no limit to the number of arms that can
-	 * be loaded. The ArmModel must be initialized before loading, otherwise is not
-	 * accepted. A <vehicle-to-base> transformation must be specified, which tells the
-	 * position of the arm's base frame with respect to the vehicle frame. If no vehicle
-	 * is meant to be loaded, it can be the identity matrix. The returning value is an
-	 * ID which identifies the loaded arm within the RobotModel class.
-	 *
-	 * @param arm		The arm model
-	 * @param vTb		The vehicle-to-base trasnformation matrix
-	 * @return			The arm ID
-	 */
-	int LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
+    /**
+     * @brief Loads an arm in the robot model
+     *
+     * Loads a arm in the robot model, there is no limit to the number of arms that can
+     * be loaded. The ArmModel must be initialized before loading, otherwise is not
+     * accepted. A <vehicle-to-base> transformation must be specified, which tells the
+     * position of the arm's base frame with respect to the vehicle frame. If no vehicle
+     * is meant to be loaded, it can be the identity matrix. The returning value is an
+     * ID which identifies the loaded arm within the RobotModel class.
+     *
+     * @param arm		The arm model
+     * @param vTb		The vehicle-to-base trasnformation matrix
+     * @return			The arm ID
+     */
+    int LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
 
-	/**
-	 * Checks that the given armIndex is within the allowed range (i.e. less or equal than
-	 * the number of loaded arms).
-	 * @param armIndex
-	 * @return
-	 */
-	bool CheckArm(int armIndex) const throw (std::exception);
-	bool CheckVehicle() const throw (std::exception);
+    /**
+     * Checks that the given armIndex is within the allowed range (i.e. less or equal than
+     * the number of loaded arms).
+     * @param armIndex
+     * @return
+     */
+    bool CheckArm(int armIndex) const throw (std::exception);
+    bool CheckVehicle() const throw (std::exception);
 
-	Eigen::MatrixXd GetArmJacobian_JointFrame(int armIndex, int jointIndex);
-	Eigen::MatrixXd GetVehicleJacobian_JointFrame(int armIndex, int jointIndex);
-	Eigen::MatrixXd GetArmJacobian_ToolFrame(int armIndex);
-	Eigen::MatrixXd GetVehicleJacobian_ToolFrame(int armIndex);
-	Eigen::MatrixXd GetArmJacobian_Identity(int armIndex);
-	Eigen::MatrixXd GetArmJacobian_Manipulability(int armIndex, double& mu);
-	Eigen::MatrixXd GetVehicleJacobian();
+    //TODO carlotta
 
-	Eigen::TransfMatrix GetTransfMatrix_VehicleToArmBase(int armIndex) const;
-	Eigen::TransfMatrix GetTransfMatrix_JointFrame(int armIndex, int jointIndex) const;
-	Eigen::TransfMatrix GetTransfMatrix_ToolFrame(int armIndex) const;
+    //Eigen::MatrixXd GetVehicleJacobian_JointFrame(std::string ArmID);
+    //Eigen::MatrixXd GetArmJacobian_ToolFrame(std::string ArmID);
+    //Eigen::MatrixXd GetVehicleJacobian_ToolFrame(std::string ArmID);
+    //Eigen::MatrixXd GetArmJacobian_Identity(std::string ArmID);
+    static  Eigen::MatrixXd GetJacobian_JointFrame(std::string ID, rml::RobotModel robot);
+    static Eigen::MatrixXd GetJacobian_ToolFrame(std::string ID,rml::RobotModel robot);
+    static Eigen::MatrixXd GetJacobian_Identity(std::string ID, rml::RobotModel robot);
+    static Eigen::MatrixXd GetJacobian_Manipulability(std::string ID, rml::RobotModel robot);
+    //TODO carlotta delete
+    Eigen::MatrixXd GetArmJacobian_JointFrame(int armIndex, int jointIndex);
+    Eigen::MatrixXd GetVehicleJacobian_JointFrame(int armIndex, int jointIndex);
+    Eigen::MatrixXd GetArmJacobian_ToolFrame(int armIndex);
+    Eigen::MatrixXd GetVehicleJacobian_ToolFrame(int armIndex);
+    Eigen::MatrixXd GetArmJacobian_Identity(int armIndex);
+    Eigen::MatrixXd GetArmJacobian_Manipulability(int armIndex, double& mu);
+    Eigen::MatrixXd GetVehicleJacobian();
+    Eigen::MatrixXd GetJacobian(std::string jacobianID);
 
-	const std::shared_ptr<ArmModel> GetArm(int index) const {
-		return arms_.at(index);
-	}
+    Eigen::TransfMatrix GetTransfMatrix_VehicleToArmBase(int armIndex) const;
+    Eigen::TransfMatrix GetTransfMatrix_JointFrame(int armIndex, int jointIndex) const;
+    Eigen::TransfMatrix GetTransfMatrix_ToolFrame(int armIndex) const;
+    Eigen::TransfMatrix GetTransformation(std::string transformationID) ;
+    const std::shared_ptr<ArmModel> GetArm(int index) const {
+        return arms_.at(index);
+    }
 
-	const std::shared_ptr<VehicleModel> GetVehicle() const {
-		return vehicle_;
-	}
+    const std::shared_ptr<VehicleModel> GetVehicle() const {
+        return vehicle_;
+    }
 
-	Eigen::VectorXd GetSystemPositionVector() const;
-	Eigen::VectorXd GetSystemVelocityVector() const;
+    Eigen::VectorXd GetSystemPositionVector() const;
+    Eigen::VectorXd GetSystemVelocityVector() const;
 
-	void SetRobotControl(const Eigen::VectorXd& y) const;
-	Eigen::VectorXd GetRobotControl() const;
+    void SetRobotControl(const Eigen::VectorXd& y) const;
+    Eigen::VectorXd GetRobotControl() const;
 
 };
 
