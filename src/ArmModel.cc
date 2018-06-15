@@ -38,6 +38,7 @@ ArmModel::ArmModel(std::string id)
     , modelReadFromFile_(false)
     , modelInitialized_(false)
     , id_(id)
+    , mu_(0.0)
 {
 }
 

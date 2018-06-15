@@ -1,6 +1,7 @@
 CMakeLists.txt
 README.md
 bitbucket-pipelines.yml
+build/CMakeFiles/3.5.1/CompilerIdCXX/CMakeCXXCompilerId.cpp
 build/CMakeFiles/feature_tests.cxx
 include/rml/ArmModel.h
 include/rml/EulerRPY.h
@@ -41,6 +42,7 @@ src/SVD_Internal.cc
 src/TransfMatrix.cc
 src/Vector6d.cc
 src/VehicleModel.cc
+test/ClassPointerTests.cpp
 test/OdeIntSimulator.cpp
 test/baxterLeft_armmodel.cc
 test/frameidentificationtest.cpp

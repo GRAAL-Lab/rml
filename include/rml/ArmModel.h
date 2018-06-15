@@ -220,6 +220,14 @@ public:
 
     Eigen::TransfMatrix GetTransformationMatrix(const std::string matrixId);
     Eigen::MatrixXd GetJacobian(const std::string jacobianID);
+
+    double GetManipulability(){
+        return mu_;
+    }
+    void SetManipulability(double mu){
+        mu_=mu;
+       }
+
     std::string GetID() {
         return id_;
     }
@@ -289,7 +297,7 @@ protected:
 
 	bool modelReadFromFile_;
     std::string id_;
-
+    double mu_;
 };
 
 }

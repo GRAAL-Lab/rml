@@ -156,8 +156,8 @@ int main ()
     //robot_model->GetJacobian(testJointVehicle);
     std::cout<<robot_model->GetJacobian(test_Arm_Tool)<<std::endl;
     //robot_model->GetJacobian(test_Vehcle_Tool);
-    robot_model->GetJacobian(test_Identitity);
-    robot_model->GetJacobian(test_Manipulability);
+    std::cout<<robot_model->GetJacobian(test_Identitity)<<std::endl;
+    //std::cout<<robot_model->GetJacobian(test_Manipulability)<<std::endl;
 
     return 0;
 
