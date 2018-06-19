@@ -198,6 +198,17 @@ Eigen::MatrixXd RobotModel::GetVehicleJacobian_ToolFrame(int armIndex)
 	return totJac;
 }
 
+Eigen::MatrixXd RobotModel::GetJacobian_ToolFrame(int armIndex){
+
+    Eigen::MatrixXd totJac  ;
+    if (vehicle_) {
+        totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianEE(armIndex));
+    }
+
+    totJac = RightJuxtapose(totJac, GetIsolatedArmJacobianTF(armIndex));
+    return totJac;
+}
+
 Eigen::MatrixXd RobotModel::GetArmJacobian_Identity(int armIndex)
 {
 	Eigen::MatrixXd totJac, tempJ;

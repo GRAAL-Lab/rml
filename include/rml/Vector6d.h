@@ -14,7 +14,7 @@ namespace Eigen
 {
 
 /**
- * @brief A 6d vector generally used for containing pose [r p y x y z] or velocity [wx wy wz x y z] vectors
+ * @brief A 6d vector generally used for containing pose [x y z r p y] or velocity [wx wy wz vx vy vz] vectors
  */
 class Vector6d: public Eigen::Vector6dBase
 {
