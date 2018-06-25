@@ -31,7 +31,8 @@ Eigen::Matrix6d RotMatrix::GetCartesianRotationMatrix() const
 
 rml::EulerRPY RotMatrix::ToEulerRPY() const
 {
-	return static_cast<rml::EulerRPY>(this->eulerAngles(0, 1, 2));
+        Eigen::Vector3d ypr = this->eulerAngles(2, 1, 0);
+        return rml::EulerRPY(ypr(2), ypr(1), ypr(0));
 }
 
 Eigen::Quaterniond RotMatrix::ToQuaternion() const

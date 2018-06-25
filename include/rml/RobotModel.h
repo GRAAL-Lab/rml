@@ -51,7 +51,7 @@ class RobotModel {
     std::shared_ptr<VehicleModel> vehicle_;
     std::map<std::string, std::shared_ptr<ArmModel>> armsModel_;
     std::unordered_map<std::string, Eigen::TransfMatrix> vehicleToBase_;
-    std::map<std::string, Eigen::MatrixXd (*)(std::string, rml::RobotModel  )> jacobianMethodsMap_ ;
+    std::map<std::string, int> jacobianMethodsMap_ ;
    // Eigen::MatrixXd GetIsolatedArmJacobianTF(const std::string ID) const;
     //Eigen::Matrix6d GetIsolatedVehicleJacobianEE(const std::string ID ) const;
 
@@ -109,11 +109,11 @@ public:
     bool CheckVehicle() const throw (std::exception);
 
 
-    static  Eigen::MatrixXd GetJacobian_JointFrame(std::string ID, rml::RobotModel robot);
-    static Eigen::MatrixXd GetJacobian_ToolFrame(std::string ID,rml::RobotModel robot);
-    static Eigen::MatrixXd GetJacobian_Identity(std::string ID, rml::RobotModel robot);
-    static Eigen::MatrixXd GetJacobian_Manipulability(std::string ID, rml::RobotModel robot);
-    static Eigen::MatrixXd GetJacobian_Vehicle(std::string ID, rml::RobotModel robot);
+      Eigen::MatrixXd GetJacobian_JointFrame(std::string ID);
+      Eigen::MatrixXd GetJacobian_ToolFrame(std::string ID);
+      Eigen::MatrixXd GetJacobian_Identity(std::string ID);
+      Eigen::MatrixXd GetJacobian_Manipulability(std::string ID);
+      Eigen::MatrixXd GetJacobian_Vehicle();
     Eigen::MatrixXd GetJacobian(std::string jacobianID);
 
     Eigen::TransfMatrix GetTransformation(std::string transformationID) ;

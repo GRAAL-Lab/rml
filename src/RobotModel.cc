@@ -15,12 +15,16 @@ namespace rml {
 
 RobotModel::RobotModel()
 {
-    std::cout << "inside the constructor" << std::endl;
-    jacobianMethodsMap_.insert(std::make_pair("Joint", GetJacobian_JointFrame));
-    jacobianMethodsMap_.insert(std::make_pair("Tool", GetJacobian_ToolFrame));
-    jacobianMethodsMap_.insert(std::make_pair("Identity", GetJacobian_Identity));
-    jacobianMethodsMap_.insert(std::make_pair("Manipulability", GetJacobian_Manipulability));
-    jacobianMethodsMap_.insert(std::make_pair("Vehicle", GetJacobian_Vehicle));
+    jacobianMethodsMap_.insert(std::make_pair("Joint", 1));
+    jacobianMethodsMap_.insert(std::make_pair("Tool", 2));
+    jacobianMethodsMap_.insert(std::make_pair("Identity", 3));
+    jacobianMethodsMap_.insert(std::make_pair("Manipulability", 4));
+    jacobianMethodsMap_.insert(std::make_pair("Vehicle", 5));
+    //jacobianMethodsMap_.insert(std::make_pair("Joint", GetJacobian_JointFrame));
+    //jacobianMethodsMap_.insert(std::make_pair("Tool", GetJacobian_ToolFrame));
+    //jacobianMethodsMap_.insert(std::make_pair("Identity", GetJacobian_Identity));
+    //jacobianMethodsMap_.insert(std::make_pair("Manipulability", GetJacobian_Manipulability));
+    //jacobianMethodsMap_.insert(std::make_pair("Vehicle", GetJacobian_Vehicle));
     // TODO Auto-generated constructor stub
 }
 
@@ -131,7 +135,7 @@ Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianForFrame(std::string ID) c
     std::string partID = ID.substr(0, partIDIndex);
 
     if (CheckVehicle()) {
-        //TODO
+        //TODO check it is not working correctly
         if (CheckArm(partID)) {
             vJv = vehicle_->GetvJv();
             Eigen::TransfMatrix bTj = armsModel_.at(partID)->GetTransformationMatrix(ID);
@@ -251,34 +255,60 @@ Eigen::MatrixXd RobotModel::GetJacobian(std::string ID)
         }
 
     }
-    return jacobianMethodsMap_.at(jacobianID)(ID, *this);
+    /*
+    jacobianMethodsMap_.insert(std::make_pair("Joint", 1));
+    jacobianMethodsMap_.insert(std::make_pair("Tool", 2));
+    jacobianMethodsMap_.insert(std::make_pair("Identity", 3));
+    jacobianMethodsMap_.insert(std::make_pair("Manipulability", 4));
+    jacobianMethodsMap_.insert(std::make_pair("Vehicle", 5));
+     */
+    Eigen::MatrixXd out;
+    switch (jacobianMethodsMap_.at(jacobianID)) {
+    case 1:
+            out=GetJacobian_JointFrame(ID);
+        break;
+    case 2:
+            out=GetJacobian_ToolFrame(ID);
+        break;
+    case 3:
+            out=GetJacobian_Identity(ID);
+        break;
+    case 4:
+            out=GetJacobian_Manipulability(ID);
+        break;
+    case 5:
+            out=GetJacobian_Vehicle();
+        break;
+    default:
+        break;
+    }
+    return out;
 }
 
-Eigen::MatrixXd RobotModel::GetJacobian_JointFrame(std::string ID, rml::RobotModel robot)
+Eigen::MatrixXd RobotModel::GetJacobian_JointFrame(std::string ID)
 {
 
     std::size_t partIDIndex = ID.find_first_of("_");
     std::string partID = ID.substr(0, partIDIndex);
     Eigen::MatrixXd totJac, tempJ;
-    if (partID == robot.vehicle_->GetID() && robot.vehicle_) {
-        std::string jacobianID = ID.substr(partIDIndex + 1);
-        totJac = RightJuxtapose(totJac, robot.GetIsolatedVehicleJacobianForFrame(ID.substr(partIDIndex + 1)));
-        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = robot.armsModel_.begin(); iter != robot.armsModel_.end();
+    if (partID == vehicle_->GetID() && vehicle_) {
+        totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianForFrame(ID.substr(partIDIndex + 1)));
+        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             tempJ = Eigen::MatrixXd::Zero(6, iter->second->GetNumJoints());
             totJac = RightJuxtapose(totJac, tempJ);
         }
-    } else if (robot.CheckArm(partID)) {
+    } else if (CheckArm(partID)) {
 
-        if (robot.vehicle_) {
+        if (vehicle_) {
             totJac = RightJuxtapose(totJac, Eigen::Matrix6d::Zero());
         }
-        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = robot.armsModel_.begin(); iter != robot.armsModel_.end();
+        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             if (iter->first == partID) {
-                tempJ = robot.GetIsolatedArmJacobianForFrame(ID);
+                tempJ = GetIsolatedArmJacobianForFrame(ID);
             } else {
-                tempJ = Eigen::MatrixXd::Zero(6, robot.armsModel_.at(partID)->GetNumJoints());
+                tempJ = Eigen::MatrixXd::Zero(6, armsModel_.at(partID)->GetNumJoints());
             }
             totJac = RightJuxtapose(totJac, tempJ);
         }
@@ -286,33 +316,33 @@ Eigen::MatrixXd RobotModel::GetJacobian_JointFrame(std::string ID, rml::RobotMod
     return totJac;
 }
 
-Eigen::MatrixXd RobotModel::GetJacobian_ToolFrame(std::string ID, rml::RobotModel robot)
+Eigen::MatrixXd RobotModel::GetJacobian_ToolFrame(std::string ID)
 {
 
     std::size_t partIDIndex = ID.find_first_of("_");
     std::string partID = ID.substr(0, partIDIndex);
     Eigen::MatrixXd totJac, tempJ;
-    if (partID == robot.vehicle_->GetID() && robot.vehicle_) {
-        totJac = RightJuxtapose(totJac, robot.GetIsolatedVehicleJacobianForFrame(ID.substr(partIDIndex + 1)));
-        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = robot.armsModel_.begin(); iter != robot.armsModel_.end();
+    if (partID == vehicle_->GetID() && vehicle_) {
+        totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianForFrame(ID.substr(partIDIndex + 1)));
+        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             tempJ = Eigen::MatrixXd::Zero(6, iter->second->GetNumJoints());
             totJac = RightJuxtapose(totJac, tempJ);
         }
-    } else if (robot.CheckArm(partID))
+    } else if (CheckArm(partID))
 
     {
-        if (robot.vehicle_) {
-
-            totJac = RightJuxtapose(totJac, Eigen::Matrix6d::Zero());
+        if (vehicle_) {
+            //TODO check
+            totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianForFrame(ID));
         }
-        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = robot.armsModel_.begin(); iter != robot.armsModel_.end();
+        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             if (iter->first == partID) {
 
-                tempJ = robot.GetIsolatedArmJacobianForFrame(ID);
+                tempJ = GetIsolatedArmJacobianForFrame(ID);
             } else {
-                tempJ = Eigen::MatrixXd::Zero(6, robot.armsModel_.at(partID)->GetNumJoints());
+                tempJ = Eigen::MatrixXd::Zero(6, armsModel_.at(partID)->GetNumJoints());
             }
             totJac = RightJuxtapose(totJac, tempJ);
         }
@@ -320,24 +350,24 @@ Eigen::MatrixXd RobotModel::GetJacobian_ToolFrame(std::string ID, rml::RobotMode
     return totJac;
 }
 
-Eigen::MatrixXd RobotModel::GetJacobian_Identity(std::string ID, rml::RobotModel robot)
+Eigen::MatrixXd RobotModel::GetJacobian_Identity(std::string ID)
 
 {
     std::size_t partIDIndex = ID.find_first_of("_");
     std::string partID = ID.substr(0, partIDIndex);
     Eigen::MatrixXd totJac, tempJ;
 
-    if (robot.CheckArm(partID)) {
-        int taskSize = robot.armsModel_.at(partID)->GetNumJoints();
-        if (robot.vehicle_) {
+    if (CheckArm(partID)) {
+        int taskSize = armsModel_.at(partID)->GetNumJoints();
+        if (vehicle_) {
             totJac = RightJuxtapose(totJac, Eigen::MatrixXd::Zero(taskSize, 6));
         }
-        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = robot.armsModel_.begin(); iter != robot.armsModel_.end();
+        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             if (iter->first == partID) {
                 tempJ = Eigen::MatrixXd::Identity(taskSize, taskSize);
             } else {
-                tempJ = Eigen::MatrixXd::Zero(taskSize, robot.armsModel_.at(partID)->GetNumJoints());
+                tempJ = Eigen::MatrixXd::Zero(taskSize, armsModel_.at(partID)->GetNumJoints());
             }
             totJac = RightJuxtapose(totJac, tempJ);
         }
@@ -345,27 +375,27 @@ Eigen::MatrixXd RobotModel::GetJacobian_Identity(std::string ID, rml::RobotModel
     return totJac;
 }
 
-Eigen::MatrixXd RobotModel::GetJacobian_Manipulability(std::string ID, rml::RobotModel robot)
+Eigen::MatrixXd RobotModel::GetJacobian_Manipulability(std::string ID)
 {
     std::size_t partIDIndex = ID.find_first_of("_");
     std::string partID = ID.substr(0, partIDIndex);
     Eigen::MatrixXd totJac, tempJ;
 
-    if (robot.CheckArm(partID)) {
-        if (robot.vehicle_) {
+    if (CheckArm(partID)) {
+        if (vehicle_) {
 
             totJac = RightJuxtapose(totJac, Eigen::MatrixXd::Zero(1, 6));
         }
-        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = robot.armsModel_.begin(); iter != robot.armsModel_.end();
+        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             if (iter->first == partID) {
 
                 double mu;
-                robot.armsModel_.at(partID)->EvaluateManipulability(tempJ, mu);
-                robot.armsModel_.at(partID)->SetManipulability(mu);
+                armsModel_.at(partID)->EvaluateManipulability(tempJ, mu);
+                armsModel_.at(partID)->SetManipulability(mu);
 
             } else {
-                tempJ = Eigen::MatrixXd::Zero(1, robot.armsModel_.at(iter->first)->GetNumJoints());
+                tempJ = Eigen::MatrixXd::Zero(1, armsModel_.at(iter->first)->GetNumJoints());
             }
             totJac = RightJuxtapose(totJac, tempJ);
         }
@@ -374,14 +404,14 @@ Eigen::MatrixXd RobotModel::GetJacobian_Manipulability(std::string ID, rml::Robo
     return totJac;
 }
 
-Eigen::MatrixXd RobotModel::GetJacobian_Vehicle(std::string ID, rml::RobotModel robot)
+Eigen::MatrixXd RobotModel::GetJacobian_Vehicle()
 {
     Eigen::MatrixXd totJac, tempJ;
-    if (robot.CheckVehicle()) {
-        if (robot.CheckVehicle()) {
-        totJac = RightJuxtapose(totJac, robot.vehicle_->GetvJv());
+    if (CheckVehicle()) {
+        if (CheckVehicle()) {
+        totJac = RightJuxtapose(totJac, vehicle_->GetvJv());
     }
-    for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = robot.armsModel_.begin(); iter != robot.armsModel_.end();
+    for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
          ++iter) {
         tempJ = Eigen::MatrixXd::Zero(6, iter->second->GetNumJoints());
         totJac = RightJuxtapose(totJac, tempJ);
