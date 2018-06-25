@@ -22,13 +22,13 @@ NewtonEuler::~NewtonEuler()
 	// TODO Auto-generated destructor stub
 }
 
-NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex)
+NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, std::string armID)
 {
 	//model_ = model;
-	armModel_ = model->GetArm(armIndex);
+    armModel_ = model->GetArm(armID);
 	vehicle_ = model->GetVehicle();
 
-	numJoints_ = model->GetArm(armIndex)->GetNumJoints();
+    numJoints_ = model->GetArm(armID)->GetNumJoints();
 
 	Init();
 

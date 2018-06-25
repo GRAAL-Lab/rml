@@ -147,18 +147,19 @@ int main ()
     //std::cout << "Transformation matrix vehicle model=\n" << robot_model->GetTransformation(vehicle_id) << std::endl;
     //std::cout << "Transformation matrix via vehicle model  = \n" << vehicle_model->GetTransfMatrix(vehicle_id) << std::endl;
     std::string testJointArm = arm_model->GetID()+"_Joint_3";
-    std::string testJointVehicle= vehicle_model->GetID()+"_Joint_5";
+    std::string testJointVehicle= vehicle_model->GetID()+"_"+arm_model->GetID()+"_Joint_3";
     std::string test_Arm_Tool= arm_model->GetID()+"_Tool";
-    std::string test_Vehcle_Tool= vehicle_model->GetID()+"_Tool";
+    std::string test_Vehcle_Tool= vehicle_model->GetID()+"_"+arm_model->GetID()+"_Tool";
     std::string test_Identitity =arm_model->GetID()+"_Identity";
     std::string test_Manipulability = arm_model->GetID()+"_Manipulability";
-    std::cout<<robot_model->GetJacobian(testJointArm)<<std::endl;
-    //robot_model->GetJacobian(testJointVehicle);
-    std::cout<<robot_model->GetJacobian(test_Arm_Tool)<<std::endl;
-    //robot_model->GetJacobian(test_Vehcle_Tool);
-    std::cout<<robot_model->GetJacobian(test_Identitity)<<std::endl;
-    //std::cout<<robot_model->GetJacobian(test_Manipulability)<<std::endl;
-
+    std::string test_Vehicle_Jacobian= vehicle_model->GetID();
+    std::cout<<"TEST JOINT ARM : \n"<<robot_model->GetJacobian(testJointArm)<<std::endl;
+    std::cout<<"TEST JOINT VEHICLE : \n " << robot_model->GetJacobian(testJointVehicle)<<std::endl;
+    std::cout<<"TEST TOOL ARM : \n "<<robot_model->GetJacobian(test_Arm_Tool)<<std::endl;
+    std::cout<<"TEST GET VEHICLE TOOL : \n" <<robot_model->GetJacobian(test_Vehcle_Tool);
+    std::cout<<"TEST IDENTITY ARM : \n "<<robot_model->GetJacobian(test_Identitity)<<std::endl;
+    std::cout<<"TEST MANIPULABILITY ARM : \n"<<robot_model->GetJacobian(test_Manipulability)<<std::endl;
+    std::cout << "TEST VEHICLE JACOBIAN : \n " << robot_model->GetJacobian(test_Vehicle_Jacobian) << std::endl;
     return 0;
 
 }

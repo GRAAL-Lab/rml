@@ -77,7 +77,7 @@ class NewtonEuler
 
 public:
 	//NewtonEuler();
-	NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex);
+    NewtonEuler(std::shared_ptr<RobotModel>& model, std::string armID);
 	virtual ~NewtonEuler();
 
 	void SetGravity(const Eigen::Vector3d& gravity);
