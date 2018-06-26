@@ -7,20 +7,20 @@
 #ifndef INCLUDE_RML_ROBOTMODEL_H_
 #define INCLUDE_RML_ROBOTMODEL_H_
 
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include "VehicleModel.h"
 #include "ArmModel.h"
+#include "VehicleModel.h"
 
 namespace rml {
 
 /**
  * @brief Exception to be thrown when the joint index out of bounds
  */
-class RobotModelArmException: public std::exception
-{
-    virtual const char* what() const throw () {
+class RobotModelArmException : public std::exception {
+    virtual const char* what() const throw()
+    {
         return "[RobotModel] Error: Arm index out of bounds!!!";
     }
 };
@@ -28,9 +28,9 @@ class RobotModelArmException: public std::exception
 /**
  * @brief Exception to be thrown when vehicle is not present
  */
-class RobotModelVehicleException: public std::exception
-{
-    virtual const char* what() const throw () {
+class RobotModelVehicleException : public std::exception {
+    virtual const char* what() const throw()
+    {
         return "[RobotModel] Error: No vehicle!!!";
     }
 };
@@ -49,17 +49,15 @@ class RobotModelVehicleException: public std::exception
 class RobotModel {
 
     std::shared_ptr<VehicleModel> vehicle_;
-    std::map<std::string, std::shared_ptr<ArmModel>> armsModel_;
+    std::map<std::string, std::shared_ptr<ArmModel> > armsModel_;
     std::unordered_map<std::string, Eigen::TransfMatrix> vehicleToBase_;
-    std::map<std::string, int> jacobianMethodsMap_ ;
-   // Eigen::MatrixXd GetIsolatedArmJacobianTF(const std::string ID) const;
-    //Eigen::Matrix6d GetIsolatedVehicleJacobianEE(const std::string ID ) const;
+    std::map<std::string, int> jacobianMethodsMap_;
 
     Eigen::MatrixXd GetIsolatedArmJacobianForFrame(std::string ID) const;
     Eigen::Matrix6d GetIsolatedVehicleJacobianForFrame(std::string ID) const;
 
     Eigen::VectorXd ExtractVehicleSlice(const Eigen::VectorXd& y) const;
-    Eigen::VectorXd ExtractArmSlice(const Eigen::VectorXd& y, std::string ID) ;
+    Eigen::VectorXd ExtractArmSlice(const Eigen::VectorXd& y, std::string ID);
 
 public:
     RobotModel();
@@ -105,32 +103,31 @@ public:
      * @param armIndex
      * @return
      */
-    bool CheckArm(std::string armID) const throw (std::exception);
-    bool CheckVehicle() const throw (std::exception);
+    bool CheckArm(std::string armID) const throw(std::exception);
+    bool CheckVehicle() const throw(std::exception);
 
-
-      Eigen::MatrixXd GetJacobian_JointFrame(std::string ID);
-      Eigen::MatrixXd GetJacobian_ToolFrame(std::string ID);
-      Eigen::MatrixXd GetJacobian_Identity(std::string ID);
-      Eigen::MatrixXd GetJacobian_Manipulability(std::string ID);
-      Eigen::MatrixXd GetJacobian_Vehicle();
+    Eigen::MatrixXd GetJacobian_Frame(std::string ID);
+    Eigen::MatrixXd GetJacobian_Identity(std::string ID);
+    Eigen::MatrixXd GetJacobian_Manipulability(std::string ID);
+    Eigen::MatrixXd GetJacobian_Vehicle(std::string ID);
     Eigen::MatrixXd GetJacobian(std::string jacobianID);
 
-    Eigen::TransfMatrix GetTransformation(std::string transformationID) ;
-    const std::shared_ptr<ArmModel> GetArm(std::string ID) const {
+    Eigen::TransfMatrix GetTransformation(std::string transformationID);
+    const std::shared_ptr<ArmModel> GetArm(std::string ID) const
+    {
         return armsModel_.at(ID);
     }
 
-    const std::shared_ptr<VehicleModel> GetVehicle() const {
+    const std::shared_ptr<VehicleModel> GetVehicle() const
+    {
         return vehicle_;
     }
 
-    Eigen::VectorXd GetSystemPositionVector() ;
-    Eigen::VectorXd GetSystemVelocityVector() ;
+    Eigen::VectorXd GetSystemPositionVector();
+    Eigen::VectorXd GetSystemVelocityVector();
 
     void SetRobotControl(const Eigen::VectorXd& y);
     Eigen::VectorXd GetRobotControl();
-
 };
 
 } /* namespace rml */

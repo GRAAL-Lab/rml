@@ -358,7 +358,7 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
 {
 
     IndexedTMat myMat(jointIndex, TMat);
-    std::string idRigidFrame=id_+ID;
+    std::string idRigidFrame=id_+"_Body_"+ID;
     attachedBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
     transformation_.insert(std::make_pair(idRigidFrame,GetAttachedBodyTransf(idRigidFrame)));
     jacobians_.insert(std::make_pair(idRigidFrame,GetAttachedBodyJacobian(idRigidFrame)));

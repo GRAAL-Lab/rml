@@ -82,8 +82,8 @@ void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian) {
 void VehicleModel::AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat)
 {
     attachedBodyFrames_.insert(std::make_pair(id_+ID, TMat));
-    transformation_.insert(std::make_pair(id_+ID,GetCurrentAttachedBodyTransf(id_+ID)));
-    jacobians_.insert(std::make_pair(id_+ID,GetAttachedBodyJacobian(id_+ID)));
+    transformation_.insert(std::make_pair(id_+"_Body_"+ID,GetCurrentAttachedBodyTransf(id_+ID)));
+    jacobians_.insert(std::make_pair(id_+"_Body_"+ID,GetAttachedBodyJacobian(id_+ID)));
 }
 
 Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(std::string& ID)
