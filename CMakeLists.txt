@@ -107,3 +107,34 @@ add_test(rml_test frame_test)
 #    add_test(rml_test_newtoneuler rml_test_newtoneuler)
 #    add_test(robot_simulator robot_simulator)
 endif(BUILD_TESTS)
+
+if(BUILD_TESTS_RML)
+    # Every library has unit tests, of course
+    add_executable(rml_test test/rml_test.cpp)
+
+    add_executable(rml_test_model test/rml_test_model.cpp
+        test/baxterLeft_armmodel.cc
+        test/youbot_armmodel.cc
+        test/youbot_vehiclemodel.cc)
+
+    add_executable(rml_test_newtoneuler test/rml_test_newtoneuler.cpp
+        test/youbot_armmodel.cc
+        test/youbot_vehiclemodel.cc
+        test/twolinks_armmodel.cc)
+
+   add_executable(robot_simulator test/robot_simulator.cpp
+        test/youbot_armmodel.cc
+        test/youbot_vehiclemodel.cc
+       test/twolinks_armmodel.cc
+      test/OdeIntSimulator.cpp)
+
+    target_link_libraries(rml_test rml)
+    target_link_libraries(rml_test_model rml)
+    target_link_libraries(rml_test_newtoneuler rml)
+    target_link_libraries(robot_simulator rml)
+
+   add_test(rml_test rml_test)
+    add_test(rml_test_model rml_test_model)
+    add_test(rml_test_newtoneuler rml_test_newtoneuler)
+    add_test(robot_simulator robot_simulator)
+endif(BUILD_TESTS_RML)

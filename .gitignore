@@ -175,10 +175,14 @@ doxygen_sqlite3.db
 
 
 # eclipse stuff
-.project
-.cproject
+*.project
+*.cproject
 language.settings.xml
-.settings
+*.settings
+*.files
+*.includes
+*.config 
+*.creator
 
 # qcreator stuff
 CMakeLists.txt.user
