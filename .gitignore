@@ -186,16 +186,17 @@ language.settings.xml
 
 # qcreator stuff
 CMakeLists.txt.user
+rml.creator 
+rml.config 
+rml.files
+rml.includes
+
 
 srv/_*.py
 *.pcd
 *.pyc
 qtcreator-*
 *.user
-rml.creator 
-rml.config 
-rml.files
-rml.includes
 /planning/cfg
 /planning/docs
 /planning/src
