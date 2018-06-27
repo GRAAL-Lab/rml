@@ -37,6 +37,7 @@ ArmModel::ArmModel(std::string id)
     : numberOfJoints_(0)
     , modelReadFromFile_(false)
     , modelInitialized_(false)
+    , isMapInitialized_(false)
     , id_(id)
     , mu_(0.0)
 {
@@ -69,7 +70,7 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
     controlRef_ = ZeroQ_;
 
     modelInitialized_ = true;
-
+    isMapInitialized_ = false;
     SetJointsPosition(ZeroQ_);
 }
 
@@ -82,26 +83,45 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q)
     }
     q_ = q;
     EvaluatebTt();
-    transformation_.erase(transformation_.begin(), transformation_.end());
-    jacobians_.erase(jacobians_.begin(), jacobians_.end());
-    transformation_.insert(std::make_pair(id_+"_Tool", bTt_));
 
     EvaluatebJt();
     EvaluatedJdqNumeric();
-    jacobians_.insert(std::make_pair(id_+"_Tool", bJt_));
-    //updating the joint jacobians
-    for (int i = 0; i < numberOfJoints_; i++) {
-        transformation_.insert(std::make_pair(id_ + "_Joint_" + std::to_string(i), baseTei_.at(i)));
-        jacobians_.insert(std::make_pair(id_ + "_Joint_" + std::to_string(i), EvaluateBase2JointJacobian(i)));
-    }
-    //updating rigid frame transformation matrix
-    for (std::unordered_map<std::string, IndexedTMat>::iterator iter = attachedBodyFrames_.begin();
-         iter != attachedBodyFrames_.end();
-         ++iter)
-    {
-        std::string id=iter->first;
-        transformation_.insert(std::make_pair(id,GetAttachedBodyTransf(id)));
-        jacobians_.insert(std::make_pair(id,GetAttachedBodyJacobian(id)));
+    if (!isMapInitialized_) {
+        transformation_.erase(transformation_.begin(), transformation_.end());
+        jacobians_.erase(jacobians_.begin(), jacobians_.end());
+        transformation_.insert(std::make_pair(id_ + "_Tool", bTt_));
+        jacobians_.insert(std::make_pair(id_ + "_Tool", bJt_));
+        //updating the joint jacobians
+        for (int i = 0; i < numberOfJoints_; i++) {
+            transformation_.insert(std::make_pair(id_ + "_Joint_" + std::to_string(i), baseTei_.at(i)));
+            jacobians_.insert(std::make_pair(id_ + "_Joint_" + std::to_string(i), EvaluateBase2JointJacobian(i)));
+        }
+        //updating rigid frame transformation matrix
+        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = attachedBodyFrames_.begin();
+             iter != attachedBodyFrames_.end();
+             ++iter) {
+            std::string id = iter->first;
+            transformation_.insert(std::make_pair(id, GetAttachedBodyTransf(id)));
+            jacobians_.insert(std::make_pair(id, GetAttachedBodyJacobian(id)));
+        }
+        isMapInitialized_ = true;
+    } else {
+
+        transformation_.find((id_ + "_Tool"))->second = bTt_;
+        jacobians_.find((id_ + "_Tool"))->second = bJt_;
+        //updating the joint jacobians
+        for (int i = 0; i < numberOfJoints_; i++) {
+            transformation_.find(id_ + "_Joint_" + std::to_string(i))->second = baseTei_.at(i);
+            jacobians_.find(id_ + "_Joint_" + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
+        }
+        //updating rigid frame transformation matrix
+        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = attachedBodyFrames_.begin();
+             iter != attachedBodyFrames_.end();
+             ++iter) {
+            std::string id = iter->first;
+            transformation_.find(id)->second = GetAttachedBodyTransf(id);
+            jacobians_.find(id)->second = GetAttachedBodyJacobian(id);
+        }
     }
 }
 
@@ -358,10 +378,10 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
 {
 
     IndexedTMat myMat(jointIndex, TMat);
-    std::string idRigidFrame=id_+"_Body_"+ID;
+    std::string idRigidFrame = id_ + "_Body_" + ID;
     attachedBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
-    transformation_.insert(std::make_pair(idRigidFrame,GetAttachedBodyTransf(idRigidFrame)));
-    jacobians_.insert(std::make_pair(idRigidFrame,GetAttachedBodyJacobian(idRigidFrame)));
+    transformation_.insert(std::make_pair(idRigidFrame, GetAttachedBodyTransf(idRigidFrame)));
+    jacobians_.insert(std::make_pair(idRigidFrame, GetAttachedBodyJacobian(idRigidFrame)));
 }
 
 Eigen::TransfMatrix ArmModel::GetAttachedBodyFrame(std::string& ID)
@@ -375,7 +395,7 @@ Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID)
     int jointIndex = attachedBodyFrames_.at(ID).first;
     Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
 
-    return transformation_.at(id_+"_Joint_"+std::to_string(jointIndex)) * TMat;
+    return transformation_.at(id_ + "_Joint_" + std::to_string(jointIndex)) * TMat;
     // return GetBase2JointTransf(jointIndex) * TMat;
 }
 
@@ -384,8 +404,8 @@ Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID)
 
     int jointIndex = attachedBodyFrames_.at(ID).first;
     Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
-    Eigen::Vector3d projectedTransl = transformation_.at(id_+"_Joint_"+std::to_string(jointIndex)).GetRotMatrix() * TMat.GetTransl();
-    return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(id_+"_Joint_"+std::to_string(jointIndex));
+    Eigen::Vector3d projectedTransl = transformation_.at(id_ + "_Joint_" + std::to_string(jointIndex)).GetRotMatrix() * TMat.GetTransl();
+    return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(id_ + "_Joint_" + std::to_string(jointIndex));
 
     //TODO CARLOTTA
     // Eigen::Vector3d projectedTransl = GetBase2JointTransf(jointIndex).GetRotMatrix() * TMat.GetTransl();

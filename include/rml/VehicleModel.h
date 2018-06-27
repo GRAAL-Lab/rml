@@ -138,6 +138,7 @@ public:
 protected:
 
 	bool modelInitialized_;
+    bool isMapInitialized_;
 	std::unordered_map<std::string, Eigen::TransfMatrix> attachedBodyFrames_;
 	Eigen::Vector6d fbkPosition_, velocityOnVehicle_, accelerationOnVehicle_, controlRef_;
     std::unordered_map<std::string,Eigen::MatrixXd> jacobians_;

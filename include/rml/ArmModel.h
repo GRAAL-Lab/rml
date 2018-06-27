@@ -271,6 +271,7 @@ protected:
 	void BackwardDirectGeometryToolFrame(int jointNumber);
 
 	bool modelInitialized_;
+    bool isMapInitialized_;
 	int numberOfJoints_;
 	std::vector<RobotLink> links_;
 	std::unordered_map<std::string, IndexedTMat> attachedBodyFrames_;

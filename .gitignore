@@ -186,10 +186,11 @@ language.settings.xml
 
 # qcreator stuff
 CMakeLists.txt.user
-rml.creator 
+*.config 
+*.creator 
 rml.config 
-rml.files
-rml.includes
+*.files
+*.includes
 
 
 srv/_*.py
