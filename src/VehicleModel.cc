@@ -21,11 +21,8 @@ using std::endl;
 
 namespace rml {
 
-VehicleModel::VehicleModel(const std::string id)
-    : id_(id)
-    , isMapInitialized_(false)
+VehicleModel::VehicleModel(const std::string id): id_(id), isMapInitialized_(false), modelInitialized_(false)
 {
-    modelInitialized_ = false;
     fbkPosition_.setZero();
     velocityOnVehicle_.setZero();
     accelerationOnVehicle_.setZero();
@@ -40,7 +37,8 @@ VehicleModel::~VehicleModel()
 void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos)
 {
     fbkPosition_ = fbkPos;
-    if (!isMapInitialized_) {
+    if (!isMapInitialized_)
+    {
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
         transformation_.insert(std::make_pair(id_, fbkPosition_.ToTransfMatrix()));
@@ -48,19 +46,23 @@ void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos)
         //updating rigid frame transformation matrix
         for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = attachedBodyFrames_.begin();
              iter != attachedBodyFrames_.end();
-             ++iter) {
+             ++iter)
+        {
             std::string id = iter->first;
             transformation_.insert(std::make_pair(id, GetAttachedBodyTransf(id)));
             jacobians_.insert(std::make_pair(id, GetAttachedBodyJacobian(id)));
         }
-        isMapInitialized_=true;
-    } else {
+        isMapInitialized_ = true;
+    }
+    else
+    {
         transformation_.find(id_)->second = fbkPosition_.ToTransfMatrix();
         jacobians_.find(id_)->second = vJv_;
         //updating rigid frame transformation matrix
         for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = attachedBodyFrames_.begin();
              iter != attachedBodyFrames_.end();
-             ++iter) {
+             ++iter)
+        {
             std::string id = iter->first;
             transformation_.find(id)->second = GetAttachedBodyTransf(id);
             jacobians_.find(id)->second = GetAttachedBodyJacobian(id);
@@ -77,20 +79,6 @@ void VehicleModel::SetAccelerationOnVehicle(const Eigen::Vector6d& accOnVehicle)
 {
     accelerationOnVehicle_ = accOnVehicle;
 }
-
-/*const Eigen::Vector6d& VehicleModel::GetCartesianVelocity() {
-		Eigen::TransfMatrix wTv;
-		wTv = fbkPosition_.ToTransfMatrix();
-	    cartVelocity_ = wTv.GetRotMatrix().Transpose().GetCartesianRotationMatrix() * fbkVelocity_;
-	    return cartVelocity_;
-}
-
-const Eigen::Vector6d& VehicleModel::GetCartesianAcceleration() {
-		Eigen::TransfMatrix wTv;
-		wTv = fbkPosition_.ToTransfMatrix();
-	    cartAcceleration_ = wTv.GetRotMatrix().Transpose().GetCartesianRotationMatrix() * fbkAcceleration_;
-	    return cartVelocity_;
-}*/
 
 void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian)
 {
@@ -117,16 +105,14 @@ Eigen::TransfMatrix VehicleModel::GetCurrentAttachedBodyTransf(const std::string
 {
     Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID);
     return transformation_.at(id_) * TMat;
-    //TODO carlotta
-    //return GetwTv() * TMat;
+
 }
 
 Eigen::MatrixXd VehicleModel::GetAttachedBodyJacobian(const std::string ID)
 {
     Eigen::TransfMatrix RBMat = attachedBodyFrames_.at(ID);
     return GetRigidBodyMatrix(RBMat.GetTransl()) * jacobians_.at(id_);
-    //TODO carlotta
-    //return GetRigidBodyMatrix(RBMat.GetTransl()) * GetvJv();
+
 }
 
 Eigen::TransfMatrix VehicleModel::GetTransfMatrix(const std::string ID)
@@ -137,5 +123,55 @@ Eigen::TransfMatrix VehicleModel::GetTransfMatrix(const std::string ID)
 Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID)
 {
     return jacobians_.at(ID);
+}
+
+const Eigen::TransfMatrix VehicleModel::GetwTv()
+{
+    return fbkPosition_.ToTransfMatrix();
+}
+
+const Eigen::Matrix6d& VehicleModel::GetvJv() const
+{
+    return vJv_;
+}
+
+bool VehicleModel::IsModelInitialized() const
+{
+    return modelInitialized_;
+}
+
+const Eigen::Vector6d& VehicleModel::GetControlVector() const
+{
+    return controlRef_;
+}
+
+void VehicleModel::SetControlVector(const Eigen::Vector6d& controlRef)
+{
+    controlRef_ = controlRef;
+}
+
+void VehicleModel::SetID(std::string id)
+{
+    id_ = id;
+}
+
+std::string VehicleModel::GetID()
+{
+    return id_;
+}
+
+const Eigen::Vector6d& VehicleModel::GetPositionOnInertial()
+{
+    return fbkPosition_;
+}
+
+const Eigen::Vector6d& VehicleModel::GetVelocityOnVehicle()
+{
+    return velocityOnVehicle_;
+}
+
+const Eigen::Vector6d& VehicleModel::GetAccelerationOnVehicle()
+{
+    return accelerationOnVehicle_;
 }
 }

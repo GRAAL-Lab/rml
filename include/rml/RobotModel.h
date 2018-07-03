@@ -52,15 +52,65 @@ class RobotModel {
     std::map<std::string, std::shared_ptr<ArmModel> > armsModel_;
     std::unordered_map<std::string, Eigen::TransfMatrix> vehicleToBase_;
     std::map<std::string, int> jacobianMethodsMap_;
-
+    /**
+     * @brief Method returning the isolated arm jacobian for the input framID.
+     * @param[in] ID frame id
+     * @return  isolated jacobian
+     */
     Eigen::MatrixXd GetIsolatedArmJacobianForFrame(std::string ID) const;
+    /**
+     * @brief Method reeturning the isolated vehicle jacobian for the input framID
+     * @param[in] ID frameID
+     * @return Jacobian
+     */
     Eigen::Matrix6d GetIsolatedVehicleJacobianForFrame(std::string ID) const;
-
+    /**
+     * @brief Method extracting from the input vector the vehicle part.
+     * @param[in] y input vector
+     * @return vehicle slice
+     */
     Eigen::VectorXd ExtractVehicleSlice(const Eigen::VectorXd& y) const;
+    /**
+     * @brief Method extracting from the input vector the arm  part.
+     * @param[in] y input vector
+     * @param[in] ID arm id
+     * @return arm slice
+     */
+
     Eigen::VectorXd ExtractArmSlice(const Eigen::VectorXd& y, std::string ID);
+    /**
+     * @brief Method computing the jacobin of the input frameID
+     * @param ID frameID
+     * @return Jacobian
+     */
+    Eigen::MatrixXd GetJacobian_Frame(std::string ID);
+    /**
+     * @brief Method computing the identity jacobian of the input arm ID
+     * @param ID armID
+     * @return Jacobian
+     */
+    Eigen::MatrixXd GetJacobian_Identity(std::string ID);
+    /**
+     * @brief Method computing the manipulability jacobian of the input arm ID
+     * @param ID armID
+     * @return Jacobian
+     */
+    Eigen::MatrixXd GetJacobian_Manipulability(std::string ID);
+    /**
+     * @brief Method computing the vehicle jacobian and rigid body attached to the vehicle jacobian depending on the input ID
+     * @param ID ID
+     * @return Jacobian
+     */
+    Eigen::MatrixXd GetJacobian_Vehicle(std::string ID);
 
 public:
+    /**
+     * @brief Default constructor
+     */
     RobotModel();
+    /**
+     * @brief Default deconstructor
+     */
     virtual ~RobotModel();
 
     /**
@@ -104,29 +154,69 @@ public:
      * @return
      */
     bool CheckArm(std::string armID) const throw(std::exception);
+    /**
+     * @brief Method checking whether a vehicle has been loaded
+     * @return true if the vehicle has been loaded, false otherwise.
+     */
     bool CheckVehicle() const throw(std::exception);
-
-    Eigen::MatrixXd GetJacobian_Frame(std::string ID);
-    Eigen::MatrixXd GetJacobian_Identity(std::string ID);
-    Eigen::MatrixXd GetJacobian_Manipulability(std::string ID);
-    Eigen::MatrixXd GetJacobian_Vehicle(std::string ID);
+    /**
+     * @brief Method returning a jacobian of the robot model .\n
+     * @details The method calls protected methods of the class depending on the input string. \n
+     * The following policy is used:\n
+     * ArmModel Frame only vehicle contribution (0 for arm ): “Frame_“+”VehicleID”+arm_frame_id.
+     * ArmModel Frame Jacobian both vehicle and arm contribution: : "Frame_" + arm_frame_id.
+     * Joints Identity Jacobian: "Identity_" + arm ID.
+     * Vehicle Body Frame (0 for the arm ): “Vehicle_” + Vehicle_frame_id.
+     * Manipulability : “Manipulability_“+ armID. * *
+     * @param jacobianID
+     * @return  Jacobian
+     */
     Eigen::MatrixXd GetJacobian(std::string jacobianID);
-
+    /**
+     * @brief Methdo returing a transformation matrix of the robot model.\n
+     * @details The methods returns a transformation matrix depending on the input string.\n
+     * the following policy is used:\n
+     * Tool Frame : armID+ “_Tool“
+     * Joint Frame : armID+ “_Joint_“+ joint°
+     * Rigid Body: armID+ “_Body_“+ frameID
+     *  wTt: vehicleID;
+     * vJv: vehicleID
+     * Rigid Body: vehicleID+ “_Body_“+ frameID
+     * @param transformationID
+     * @return Transformation Matrix.
+     */
     Eigen::TransfMatrix GetTransformation(std::string transformationID);
-    const std::shared_ptr<ArmModel> GetArm(std::string ID) const
-    {
-        return armsModel_.at(ID);
-    }
+    /**
+     * @brief Method returning shared pointer to one of the loaded arm.
+     * @param ID arm id.
+     * @return shared ptr to the arm.
+     */
+    const std::shared_ptr<ArmModel> GetArm(std::string ID) const;
+    /**
+     * @brief Method returning shared pointer to one of the loaded vehicle.
+     * @return shared ptr to the vehicle.
+     */
+    const std::shared_ptr<VehicleModel> GetVehicle() const;
 
-    const std::shared_ptr<VehicleModel> GetVehicle() const
-    {
-        return vehicle_;
-    }
-
+    /**
+     * @brief Method returning the position vector of the whole robot model.
+     * @return position vector.
+     */
     Eigen::VectorXd GetSystemPositionVector();
+    /**
+     * @brief Method returning the velocity vector of the whole robot model.
+     * @return velocity vector.
+     */
     Eigen::VectorXd GetSystemVelocityVector();
-
+    /**
+     * @brief Method setting the control vector of the whole robot model.
+     * @param[in] y  control vector.
+     */
     void SetRobotControl(const Eigen::VectorXd& y);
+    /**
+     * @brief Method returning the control vector of the whole robot model.
+     * @return control vector.
+     */
     Eigen::VectorXd GetRobotControl();
 };
 
