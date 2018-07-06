@@ -39,25 +39,25 @@ int RobotModel::GetTotalDOFs()
     return totDOFs;
 }
 
-bool RobotModel::LoadVehicle(const std::shared_ptr<VehicleModel> vehicle)
+bool RobotModel::LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) throw(std::exception)
 {
     if (vehicle->IsModelInitialized()) {
         vehicle_ = vehicle;
         return true;
     } else {
-        std::cout << tc::redL << "Error: Loaded a NOT initialised VehicleModel" << tc::none << std::endl;
+        throw(RobotModelNotInitializedVehicleModelException());
         return false;
     }
 }
 
-bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb)
+bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb) throw(std::exception)
 {
     if (arm->IsModelInitialized()) {
         armsModel_.insert(std::make_pair(arm->GetID(), arm));
         vehicleToBase_.insert(std::make_pair(arm->GetID(), vTb));
         return (true);
     } else {
-        std::cout << tc::redL << "Error: Loaded a NOT initialised ArmModel" << tc::none << std::endl;
+        throw(RobotModelNotInitializedArmModelException());
         return false;
     }
 }
@@ -67,7 +67,6 @@ bool RobotModel::CheckArm(std::string armID) const throw(std::exception)
     if (armsModel_.find(armID) != armsModel_.end()) {
         return true;
     } else {
-
         throw RobotModelArmException();
     }
 }
@@ -210,7 +209,7 @@ Eigen::TransfMatrix RobotModel::GetTransformation(std::string transformationID)
     return T;
 }
 
-Eigen::MatrixXd RobotModel::GetJacobian(std::string ID)
+Eigen::MatrixXd RobotModel::GetJacobian(std::string ID) throw(std::exception)
 {
     /**
      * POLICY FOR JACOBIANS (all projected on the vehicle and measured wrt to the inertial frame )
@@ -248,7 +247,7 @@ Eigen::MatrixXd RobotModel::GetJacobian(std::string ID)
         }
 
     } else {
-        std::cout << tc::red << "WRONG Jacobian Label!!" << tc::none << std::endl;
+        throw RobotModelWrongLabelException();
     }
 
     return out;
@@ -355,11 +354,14 @@ Eigen::MatrixXd RobotModel::GetJacobian_Vehicle(std::string ID)
 
 const std::shared_ptr<ArmModel> RobotModel::GetArm(std::string ID) const
 {
+    CheckArm(ID);
+
     return armsModel_.at(ID);
 }
 
 const std::shared_ptr<VehicleModel> RobotModel::GetVehicle() const
 {
+    CheckVehicle();
     return vehicle_;
 }
 }

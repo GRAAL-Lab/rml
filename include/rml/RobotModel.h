@@ -12,28 +12,12 @@
 
 #include "ArmModel.h"
 #include "VehicleModel.h"
+#include "RMLException.h"
 
 namespace rml {
 
-/**
- * @brief Exception to be thrown when the joint index out of bounds
- */
-class RobotModelArmException : public std::exception {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: Arm index out of bounds!!!";
-    }
-};
 
-/**
- * @brief Exception to be thrown when vehicle is not present
- */
-class RobotModelVehicleException : public std::exception {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: No vehicle!!!";
-    }
-};
+
 
 /**
  * \class RobotModel
@@ -131,7 +115,7 @@ public:
      * @param vehicle		The vehicle model
      * @return				true on success, false otherwise
      */
-    bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle);
+    bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) throw(std::exception);
 
     /**
      * @brief Loads an arm in the robot model
@@ -147,7 +131,7 @@ public:
      * @param vTb		The vehicle-to-base trasnformation matrix
      * @return			The arm ID
      */
-    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb);
+    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb) throw(std::exception);
 
     /**
      * Checks that the given armIndex is within the allowed range (i.e. less or equal than
@@ -173,7 +157,7 @@ public:
      * @param jacobianID
      * @return  Jacobian
      */
-    Eigen::MatrixXd GetJacobian(std::string jacobianID);
+    Eigen::MatrixXd GetJacobian(std::string jacobianID) throw(std::exception);
     /**
      * @brief Methdo returing a transformation matrix of the robot model.\n
      * @details The methods returns a transformation matrix depending on the input string.\n

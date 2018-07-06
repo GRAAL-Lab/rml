@@ -27,6 +27,7 @@
 #include "SVD.h"
 #include "Types.h"
 #include "rml_internal/Futils.h"
+#include "RMLException.h"
 
 using std::cout;
 using std::endl;
@@ -69,17 +70,20 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
     SetJointsPosition(ZeroQ_);
 }
 
-void ArmModel::SetJointsPosition(const Eigen::VectorXd& q)
+void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
 {
 
+
     if (!modelInitialized_) {
-        std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
-        exit(0);
+        ArmModelNotInitializedException armModelNotIntialized;
+        armModelNotIntialized.SetID("SetJointPosition");
+        throw(armModelNotIntialized);
     }
 
     if (q_.size() != q.size()){
-        std::cout << "SetJointPosition: Error in Q size!!!" << std::endl;
-        exit(0);
+        ArmModelWrongJointSizeException armModelWrongJointSize;
+        armModelWrongJointSize.SetID("SetJointPosition");
+        throw(armModelWrongJointSize);
     }
     q_ = q;
 
@@ -132,24 +136,37 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q)
     }
 }
 
-void ArmModel::SetJointsVelocity(const Eigen::VectorXd& qdot)
+void ArmModel::SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::exception)
 {
 
     if (!modelInitialized_)
+    {   ArmModelNotInitializedException armModelNotIntialized;
+        armModelNotIntialized.SetID("SetJointVelocity");
+        throw(armModelNotIntialized);
+    }
+    if(qdot.size() != q_dot_.size())
     {
-        std::cout << "ERROR: Called SetJointsVelocity() on an unitialised ArmModel().\nExiting..." << std::endl;
-        exit(0);
+        ArmModelWrongJointSizeException armModelWrongJointSize;
+        armModelWrongJointSize.SetID("SetJointVelocity");
+        throw(armModelWrongJointSize);
     }
     q_dot_ = qdot;
 }
 
-void ArmModel::SetJointsAcceleration(const Eigen::VectorXd& qddot)
+void ArmModel::SetJointsAcceleration(const Eigen::VectorXd& qddot) throw(std::exception)
 {
 
     if (!modelInitialized_) {
-        std::cout << "ERROR: Called SetJointsAcceleration() on an unitialised ArmModel().\nExiting..." << std::endl;
-        exit(0);
+        ArmModelNotInitializedException armModelNotIntialized;
+        armModelNotIntialized.SetID("SetJointAcceleration");
+        throw(armModelNotIntialized);
     }
+    if(qddot.size()!=q_ddot_.size())
+    {
+        ArmModelWrongJointSizeException armModelWrongJointSize;
+        armModelWrongJointSize.SetID("SetJointAcceleration");
+        throw(armModelWrongJointSize);
+     }
     q_ddot_ = qddot;
 }
 
@@ -375,12 +392,12 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
     return bJj;
 }
 
-void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat)
+void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception)
 {
     if(jointIndex >= numberOfJoints_){
-        std::cout << "[AddRigidBodyFrame]: Joint Index out of Range!!" << std::endl;
-        std::cout << "Joint Index = " << jointIndex << ", numJoints = " << numberOfJoints_ << std::endl;
-        exit(0);
+        ArmModelNotExistingJointException armModelNotExistingJoint;
+        armModelNotExistingJoint.SetID("AddRigidBodyFrame");
+        throw(armModelNotExistingJoint);
     }
     IndexedTMat myMat(jointIndex, TMat);
     std::string idRigidFrame = id_ + "_Body_" + ID;
@@ -389,8 +406,14 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
     jacobians_.insert(std::make_pair(idRigidFrame, GetAttachedBodyJacobian(idRigidFrame)));
 }
 
-Eigen::TransfMatrix ArmModel::GetAttachedBodyFrame(std::string& ID)
+Eigen::TransfMatrix ArmModel::GetAttachedBodyFrame(std::string& ID) throw(std::exception)
 {
+    if(attachedBodyFrames_.find(ID)==attachedBodyFrames_.end())
+    {
+        ArmModelWrongLabelException armModelWrongLabel;
+        armModelWrongLabel.SetID("GetAttachedBodyFrame");
+        throw(armModelWrongLabel);
+    }
     return attachedBodyFrames_.at(ID).second;
 }
 
@@ -413,13 +436,25 @@ Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID)
 
 }
 
-Eigen::TransfMatrix ArmModel::GetTransformationMatrix(const std::string matrixId)
+Eigen::TransfMatrix ArmModel::GetTransformationMatrix(const std::string matrixId) throw (std::exception)
 {
+    if(transformation_.find(matrixId)== transformation_.end())
+    {
+        ArmModelWrongLabelException armModelWrongLabel;
+        armModelWrongLabel.SetID("GetTransformationMatrix");
+        throw(armModelWrongLabel);
+    }
     return transformation_.at(matrixId);
 }
 
-Eigen::MatrixXd ArmModel::GetJacobian(const std::string jacobianID)
+Eigen::MatrixXd ArmModel::GetJacobian(const std::string jacobianID) throw (std::exception)
 {
+    if(jacobians_.find(jacobianID)== jacobians_.end())
+    {
+        ArmModelWrongLabelException armModelWrongLabel;
+        armModelWrongLabel.SetID("GetJacobian");
+        throw(armModelWrongLabel);
+    }
     return jacobians_.at(jacobianID);
 }
 
@@ -477,12 +512,15 @@ const std::vector<Eigen::MatrixXd>& ArmModel::GetdJdq() const
     return dJdq_;
 }
 
-RobotLink& ArmModel::GetLink(int jointIndex) throw(ArmModelException)
+RobotLink& ArmModel::GetLink(int jointIndex) throw(std::exception)
 {
     if (jointIndex < links_.size())
         return links_.at(jointIndex);
-    else
-        throw ArmModelException();
+    else{
+        ArmModelNotExistingJointException armModelNotExistingJoint;
+        armModelNotExistingJoint.SetID("GetLink");
+        throw (armModelNotExistingJoint);
+    }
 }
 
 bool ArmModel::IsModelInitialized() const
@@ -503,7 +541,9 @@ void ArmModel::SetControlVector(const Eigen::VectorXd& controlRef) throw(std::ex
     }
     else
     {
-        throw ArmModelException();
+        ArmModelWrongJointSizeException armModelWrongJointSize;
+        armModelWrongJointSize.SetID("SetControlVector");
+        throw (armModelWrongJointSize);
     }
 }
 

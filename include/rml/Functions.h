@@ -126,7 +126,7 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
  *
  * @return the value of the function
  */
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x);
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(std::exception);
 
 /**
  * @brief An increasing bell shaped (sigmoid) function.
@@ -144,7 +144,7 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
  *
  * @return the value of the function
  */
-double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x);
+double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(std::exception);
 
 /**
  * @brief Saturate the scalar to a given maximum value

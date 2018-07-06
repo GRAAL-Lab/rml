@@ -8,6 +8,7 @@
 #include <initializer_list>
 
 #include "Functions.h"
+#include "RMLException.h"
 
 namespace rml {
 
@@ -126,21 +127,13 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
     return Eigen::Vector6d(angular, linear);
 }
 
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x)
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw (std::exception)
 {
     if (xmax < xmin) {
-        std::cout << "ERROR: in Decreasing bell shape function, xmax < xmin, swapping them...."  << std::endl;
-        double temp;
-        temp = xmax;
-        xmax = xmin;
-        xmin = temp;
+        throw(FunctionBellShapeParameterException());
     }
     if (ymax < ymin) {
-        std::cout << "ERROR: in Decreasing bell shape function, ymax<ymin, swapping them ... "  << std::endl;
-        double temp;
-        temp = ymin;
-        ymin = ymax;
-        ymax = temp;
+        throw(FunctionBellShapeYException());
     }
     if (x <= xmin) {
         return ymax;
@@ -154,22 +147,14 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
     return (ymax - ymin) * (0.5 * cos(cosarg) + 0.5) + ymin;
 }
 
-double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x)
+double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(std::exception)
 {
     if (xmax < xmin) {
-        std::cout << "ERROR: in Increasing bell shape function, xmax < xmin, swapping them...."  << std::endl;
-        double temp;
-        temp = xmax;
-        xmax = xmin;
-        xmin = temp;
+        throw(FunctionBellShapeParameterException());
     }
 
     if (ymax < ymin) {
-        std::cout << "ERROR: in Increasing bell shape function, ymax<ymin, swapping them ... " << std::endl;
-        double temp;
-        temp = ymin;
-        ymin = ymax;
-        ymax = temp;
+        throw(FunctionBellShapeYException());
     }
 
     if (x <= xmin) {

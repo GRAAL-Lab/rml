@@ -19,16 +19,6 @@
 namespace rml {
 
 typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
-
-/**
- * \brief Exception to be thrown when the joint index out of bounds
- */
-class ArmModelException : public std::exception {
-    virtual const char* what() const throw()
-    {
-        return "[ArmModel] Joint index out of bounds!";
-    }
-};
 /**
  * \class ArmModel
  *
@@ -102,7 +92,7 @@ public:
 	 *
 	 * \param[in] q		the joint position vector (must be an numJoints x 1 vector)
 	 */
-    void SetJointsPosition(const Eigen::VectorXd& q);
+    void SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception);
 
     /**
 	 * \brief Get the joint position
@@ -114,7 +104,7 @@ public:
      * @brief Set the joints velocity
      * @param qdot the joint velocity vector (must be a vector of dimension equal to numJoints)
      */
-    void SetJointsVelocity(const Eigen::VectorXd& qdot);
+    void SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::exception) ;
 
     /**
      * @brief Get the joints velocity
@@ -126,7 +116,7 @@ public:
      * @brief Set the joints acceleration.
      * @param qddot the joints acceleration vector (must be a vector of dimension equal to numJoints)
      */
-    void SetJointsAcceleration(const Eigen::VectorXd& qddot);
+    void SetJointsAcceleration(const Eigen::VectorXd& qddot)  throw(std::exception);
 
     /**
      * @brief Get joints acceleration.
@@ -148,26 +138,26 @@ public:
      * @param jointIndex index of the joint to which the frame is attached.
      * @param TMat Transformation ,atrix of the frame.
      */
-    void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat);
+    void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception);
 
     /**
      * @brief Method returning the attached body frame wrt to the joint it is attached to.
      * @param ID frame ID.
      * @return transformation matrix.
      */
-    Eigen::TransfMatrix GetAttachedBodyFrame(std::string& ID);
+    Eigen::TransfMatrix GetAttachedBodyFrame(std::string& ID) throw(std::exception);
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.
      * @param matrixId frame id
      * @return  transformation matrix
      */
-    Eigen::TransfMatrix GetTransformationMatrix(const std::string matrixId);
+    Eigen::TransfMatrix GetTransformationMatrix(const std::string matrixId) throw (std::exception);
     /**
      * @brief Method returning the jacobian related to the input frameID wrt to the arm base.
      * @param matrixId frame id
      * @return jacobian
      */
-    Eigen::MatrixXd GetJacobian(const std::string jacobianID);
+    Eigen::MatrixXd GetJacobian(const std::string jacobianID) throw (std::exception);
     /**
      * @brief Method returning the arm number of joints
      * @return  arm number of joints
@@ -227,7 +217,7 @@ public:
      * @param jointIndex link index
      * @return robot link
      */
-    RobotLink& GetLink(int jointIndex) throw(ArmModelException);
+    RobotLink& GetLink(int jointIndex) throw(std::exception);
 
     /**
      * @brief Method returning true if the model is initialized false otherwise.

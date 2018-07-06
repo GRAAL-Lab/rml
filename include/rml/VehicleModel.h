@@ -73,20 +73,20 @@ public:
      * @param ID frame ID.
      * @return transformation matrix.
      */
-    Eigen::TransfMatrix GetAttachedBodyTransf(const std::string& ID);
+    Eigen::TransfMatrix GetAttachedBodyTransf(const std::string& ID) throw(std::exception);
 
     /**
      * @brief Method returning the transformation matrix related to the frame id in input.
      * @param ID frame id.
      * @return transformation matrix.
      */
-    Eigen::TransfMatrix GetTransfMatrix(const std::string ID);
+    Eigen::TransfMatrix GetTransfMatrix(const std::string ID) throw(std::exception);
     /**
      * @brief Method returning the jacobian related to the frame id in input.
      * @param ID frame id.
      * @return transformation matrix.
      */
-    Eigen::MatrixXd GetJacobian(const std::string ID);
+    Eigen::MatrixXd GetJacobian(const std::string ID) throw(std::exception);
     /**
      * @brief Method returning the world to vehicle transf matrix.
      * @return wTv
@@ -96,7 +96,7 @@ public:
      * @brief Method returning the vehicle jacobian.
      * @return vJv
      */
-    const Eigen::Matrix6d& GetvJv() const;
+    const Eigen::Matrix6d& GetvJv() const throw(std::exception);
     /**
      * @brief Method returning whether the model is initialized.
      * @return true if the model is initialized, false otherwise.

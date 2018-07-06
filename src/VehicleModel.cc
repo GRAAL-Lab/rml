@@ -15,6 +15,7 @@
 
 #include "Functions.h"
 #include "VehicleModel.h"
+#include "RMLException.h"
 
 using std::cout;
 using std::endl;
@@ -100,13 +101,20 @@ void VehicleModel::AddRigidBodyFrame(const std::string ID, const Eigen::TransfMa
     jacobians_.insert(std::make_pair(id_ + "_Body_" + ID, GetAttachedBodyJacobian(id_ + ID)));
 }
 
-Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(const std::string& ID)
+Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(const std::string& ID) throw(std::exception)
 {
+    if(attachedBodyFrames_.find(ID)==attachedBodyFrames_.end())
+    {
+        VehicleModelWrongLabelException vehicleModelWrongLabel;
+        vehicleModelWrongLabel.SetID("GetAttachedBodyTransf");
+        throw(vehicleModelWrongLabel);
+    }
     return attachedBodyFrames_.at(ID);
 }
 
 Eigen::TransfMatrix VehicleModel::GetCurrentAttachedBodyTransf(const std::string ID)
 {
+
     Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID);
     return transformation_.at(id_) * TMat;
 
@@ -114,18 +122,31 @@ Eigen::TransfMatrix VehicleModel::GetCurrentAttachedBodyTransf(const std::string
 
 Eigen::MatrixXd VehicleModel::GetAttachedBodyJacobian(const std::string ID)
 {
+
     Eigen::TransfMatrix RBMat = attachedBodyFrames_.at(ID);
     return GetRigidBodyMatrix(RBMat.GetTransl()) * jacobians_.at(id_);
 
 }
 
-Eigen::TransfMatrix VehicleModel::GetTransfMatrix(const std::string ID)
+Eigen::TransfMatrix VehicleModel::GetTransfMatrix(const std::string ID) throw(std::exception)
 {
+    if(transformation_.find(ID)==transformation_.end())
+    {
+        VehicleModelWrongLabelException vehicleModelWrongLabel;
+        vehicleModelWrongLabel.SetID("GetTransfMatrix");
+        throw(vehicleModelWrongLabel);
+    }
     return transformation_.at(ID);
 }
 
-Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID)
+Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID) throw(std::exception)
 {
+    if(jacobians_.find(ID)==jacobians_.end())
+    {
+        VehicleModelWrongLabelException vehicleModelWrongLabel;
+        vehicleModelWrongLabel.SetID("GetJacobian");
+        throw(vehicleModelWrongLabel);
+    }
     return jacobians_.at(ID);
 }
 
@@ -134,8 +155,12 @@ const Eigen::TransfMatrix VehicleModel::GetwTv()
     return fbkPosition_.ToTransfMatrix();
 }
 
-const Eigen::Matrix6d& VehicleModel::GetvJv() const
+const Eigen::Matrix6d& VehicleModel::GetvJv() const throw(std::exception)
 {
+    if(!modelInitialized_)
+    {
+        throw(VehicleModelNotInitializedException());
+    }
     return vJv_;
 }
 
