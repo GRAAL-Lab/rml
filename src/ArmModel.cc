@@ -76,6 +76,11 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q)
         std::cout << "ERROR: Called SetJointPosition() on an unitialised ArmModel().\nExiting..." << std::endl;
         exit(0);
     }
+
+    if (q_.size() != q.size()){
+        std::cout << "SetJointPosition: Error in Q size!!!" << std::endl;
+        exit(0);
+    }
     q_ = q;
 
     EvaluatebTt();
@@ -372,7 +377,11 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
 
 void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat)
 {
-
+    if(jointIndex >= numberOfJoints_){
+        std::cout << "[AddRigidBodyFrame]: Joint Index out of Range!!" << std::endl;
+        std::cout << "Joint Index = " << jointIndex << ", numJoints = " << numberOfJoints_ << std::endl;
+        exit(0);
+    }
     IndexedTMat myMat(jointIndex, TMat);
     std::string idRigidFrame = id_ + "_Body_" + ID;
     attachedBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
@@ -406,7 +415,6 @@ Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID)
 
 Eigen::TransfMatrix ArmModel::GetTransformationMatrix(const std::string matrixId)
 {
-
     return transformation_.at(matrixId);
 }
 

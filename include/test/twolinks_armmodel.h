@@ -21,7 +21,7 @@ class TwoLinksArmModel : public ArmModel
 {
 
 public:
-	TwoLinksArmModel();
+    TwoLinksArmModel(std::string id);
 	virtual ~TwoLinksArmModel();
 };
 

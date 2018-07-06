@@ -159,7 +159,7 @@ inline int MakeDir(const char *path)
 	 *  the mode with umask(), a further chmod() is needed.
 	 */
 	int ret;
-	struct stat buf;
+    //struct stat buf;
 	//std::string file(path);
 	//if (stat(path, &buf) == 0){
 	ret = mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO);
@@ -232,7 +232,7 @@ private:
 struct Dotter
 {
 	Dotter(int freq) :
-			freq(freq), spinIndex(0), spin_chars("... .. .. .. .... .... .")
+            spinIndex(0), spin_chars("... .. .. .. .... .... .")
 	{
 		clock_gettime(CLOCK_MONOTONIC, &last);
 		period = 1 / static_cast<double>(freq);
@@ -264,7 +264,7 @@ struct Dotter
 
 private:
 	struct timespec last, now;
-	int freq;
+    //int freq;
 	double period;
 	unsigned long spinIndex;
 	std::string spin_chars;
@@ -403,7 +403,7 @@ void PrintCMATArray(T arr, const int size, const char delimiter)
 }
 
 template<typename T>
-std::string ArrayToString(T arr, const int size, const char delimiter, const int precision = 0)
+std::string ArrayToString(T arr, const int size, const char delimiter)//, const int precision = 0)
 {
 	std::string arrayText;
 	for (int i = 0; i < size; ++i) {

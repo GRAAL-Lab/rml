@@ -48,10 +48,12 @@ class RobotModelVehicleException : public std::exception {
  */
 class RobotModel {
 
+    enum JacobianType { Vehicle, Arm };
+
     std::shared_ptr<VehicleModel> vehicle_;
     std::map<std::string, std::shared_ptr<ArmModel> > armsModel_;
     std::unordered_map<std::string, Eigen::TransfMatrix> vehicleToBase_;
-    std::map<std::string, int> jacobianMethodsMap_;
+    std::map<std::string, JacobianType> jacobianMethodsMap_;
     /**
      * @brief Method returning the isolated arm jacobian for the input framID.
      * @param[in] ID frame id

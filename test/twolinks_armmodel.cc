@@ -15,13 +15,13 @@ using std::endl;
 
 namespace rml {
 
-TwoLinksArmModel::TwoLinksArmModel()
+TwoLinksArmModel::TwoLinksArmModel(std::string id) : ArmModel(id)
 {
 	int numJoints = 2;
 	std::vector<Eigen::TransfMatrix> biTri(numJoints);
 
-	double min[] = { -2.94, -1.13};//, -2.616, -1.788, -2.68 };
-	double max[] = { +2.94, +1.57};//, +2.54, +1.788, +2.923 };
+    double min[] = { -2.94, -1.13 };//, -2.616, -1.788, -2.68 };
+    double max[] = { +2.94, +1.57 };//, +2.54, +1.788, +2.923 };
 
 	biTri.at(0)(0,0) = 1; biTri.at(0)(0,1) = 0; biTri.at(0)(0,2) = 0; biTri.at(0)(0,3) = 0;
 	biTri.at(0)(1,0) = 0; biTri.at(0)(1,1) = 1; biTri.at(0)(1,2) = 0; biTri.at(0)(1,3) = 0;

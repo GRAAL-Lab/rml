@@ -1,8 +1,11 @@
 #include "test/youbot_armmodel.h"
+#include "test/twolinks_armmodel.h"
 #include <iostream>
 #include <memory>
 #include <rml/RML.h>
+#include "rml_internal/Futils.h"
 #include <string>
+
 int main()
 {
     //std::string ID="TestArm";
@@ -62,22 +65,21 @@ int main()
     //    //std::cout<<"with via method \n"<< arm_model->EvaluateBase2JointJacobian(i)<<std::endl;
     //}
 
-
     //TEST ATTCHED BODY FRAME TRANSF AND JACOBIANS
-     //std::string rigid_body_frame_id("cameraFrame");
-     //Eigen::TransfMatrix T;
-     //T.SetTransl(Eigen::Vector3d(0.2,0.0,0.2));
-     //arm_model->AddRigidBodyFrame(rigid_body_frame_id,2,T);
-     //std::cout << "TransformationMatrix \n" << arm_model->GetTransformationMatrix(rigid_body_frame_id) << std::endl;
-     ////std::cout << "TransfMatrix with method\n " << arm_model->GetAttachedBodyTransf(rigid_body_frame_id) << std::endl;
-     //std::cout << "Jacobian\n" << arm_model->GetJacobian(rigid_body_frame_id) << std::endl;
-     ////std::cout << "Jacobian with method \n " << arm_model->GetAttachedBodyJacobian(rigid_body_frame_id) << std::endl;
-     //initial_joint_pos << 0.011, 0.11, -1.4, -0.11, 1.57;
-     //arm_model->SetJointsPosition(initial_joint_pos);
-     //std::cout << "TransformationMatrix \n" << arm_model->GetTransformationMatrix(rigid_body_frame_id) << std::endl;
-     ////std::cout << "TransfMatrix with method\n " << arm_model->GetAttachedBodyTransf(rigid_body_frame_id) << std::endl;
-     //std::cout << "Jacobian\n" << arm_model->GetJacobian(rigid_body_frame_id) << std::endl;
-     //std::cout << "Jacobian with method \n " << arm_model->GetAttachedBodyJacobian(rigid_body_frame_id) << std::endl;
+    //std::string rigid_body_frame_id("cameraFrame");
+    //Eigen::TransfMatrix T;
+    //T.SetTransl(Eigen::Vector3d(0.2,0.0,0.2));
+    //arm_model->AddRigidBodyFrame(rigid_body_frame_id,2,T);
+    //std::cout << "TransformationMatrix \n" << arm_model->GetTransformationMatrix(rigid_body_frame_id) << std::endl;
+    ////std::cout << "TransfMatrix with method\n " << arm_model->GetAttachedBodyTransf(rigid_body_frame_id) << std::endl;
+    //std::cout << "Jacobian\n" << arm_model->GetJacobian(rigid_body_frame_id) << std::endl;
+    ////std::cout << "Jacobian with method \n " << arm_model->GetAttachedBodyJacobian(rigid_body_frame_id) << std::endl;
+    //initial_joint_pos << 0.011, 0.11, -1.4, -0.11, 1.57;
+    //arm_model->SetJointsPosition(initial_joint_pos);
+    //std::cout << "TransformationMatrix \n" << arm_model->GetTransformationMatrix(rigid_body_frame_id) << std::endl;
+    ////std::cout << "TransfMatrix with method\n " << arm_model->GetAttachedBodyTransf(rigid_body_frame_id) << std::endl;
+    //std::cout << "Jacobian\n" << arm_model->GetJacobian(rigid_body_frame_id) << std::endl;
+    //std::cout << "Jacobian with method \n " << arm_model->GetAttachedBodyJacobian(rigid_body_frame_id) << std::endl;
 
     //TEST FOR VEHICLE JACOBIAN, TRANSFORMATION MATRIX and ATTACHED BODY TRANSFORMATION
     //std::string vehicle_id("vehicleTest");
@@ -117,7 +119,7 @@ int main()
 
     ////ROBOT MODEL TEST
     std::string arm_id = "TestArm";
-    auto arm_model = std::make_shared<rml::YouBotArmModel>(rml::YouBotArmModel(arm_id));
+    auto arm_model = std::make_shared<rml::TwoLinksArmModel>(rml::TwoLinksArmModel(arm_id));
     std::string vehicle_id("vehicleTest");
     Eigen::TransfMatrix vTb;
     vTb(0, 0) = -1;
@@ -142,34 +144,34 @@ int main()
     robot_model->LoadVehicle(vehicle_model);
     robot_model->LoadArm(arm_model, vTb);
     Eigen::VectorXd initial_joint_pos(arm_model->GetNumJoints());
-    initial_joint_pos << 0.011, 0.11, -1.4, -0.11, 1.57;
+    initial_joint_pos << 0.011, 0.11;//, -1.4, -0.11, 1.57;
     arm_model->SetJointsPosition(initial_joint_pos);
     std::string rigid_body_frame_id("CameraFrame");
     Eigen::TransfMatrix T;
-    T.SetTransl(Eigen::Vector3d(0.2,0.0,0.2));
-    arm_model->AddRigidBodyFrame(rigid_body_frame_id,2,T);
-    vehicle_model->AddRigidBodyFrame(rigid_body_frame_id,T);
-    std::string testJointArm = "Frame_"+arm_model->GetID() + "_Joint_3";
-    std::string testJointVehicle = "Frame_"+vehicle_model->GetID() + "_" + arm_model->GetID() + "_Joint_3";
-    std::string test_Arm_Tool = "Frame_"+arm_model->GetID() + "_Tool";
-    std::string test_Vehcle_Tool = "Frame_"+vehicle_model->GetID() + "_" + arm_model->GetID() + "_Tool";
-    std::string test_Identitity = "Identity_"+arm_model->GetID() + "_Identity";
-    std::string test_Manipulability = "Manipulability_"+arm_model->GetID() + "_Manipulability";
-    std::string test_Vehicle_Jacobian = "Vehicle_"+vehicle_model->GetID();
-    std::string test_Rigid_Body_Arm="Frame_"+arm_model->GetID()+"_Body_"+rigid_body_frame_id;
-    std::string test_Rigid_Body_Vehicle = "Vehicle_"+vehicle_model->GetID()+"_Body_"+rigid_body_frame_id;
-    std::cout << "\e[1mTEST JOINT ARM:\e[0m \n"
-              << robot_model->GetJacobian(testJointArm) << std::endl;
-    std::cout << "\e[1mTEST JOINT VEHICLE : \e[0m \n " << robot_model->GetJacobian(testJointVehicle) << std::endl;
-    std::cout << "\e[1mTEST TOOL ARM : \e[0m \n " << robot_model->GetJacobian(test_Arm_Tool) << std::endl;
-    std::cout << "\e[1mTEST GET VEHICLE TOOL : \e[0m \n"
-              << robot_model->GetJacobian(test_Vehcle_Tool) << std::endl;
-    std::cout << "\e[1mTEST IDENTITY ARM : \e[0m \n " << robot_model->GetJacobian(test_Identitity) << std::endl;
-    std::cout << "\e[1mTEST MANIPULABILITY ARM : \e[0m \n"
-              << robot_model->GetJacobian(test_Manipulability) << std::endl;
-    std::cout << "\e[1mTEST VEHICLE JACOBIAN : \e[0m \n " << robot_model->GetJacobian(test_Vehicle_Jacobian) << std::endl;
-    std::cout << "\e[1mTEST ARM RIGID BODY JACOBIAN : \e[0m \n " << robot_model->GetJacobian(test_Rigid_Body_Arm) << std::endl;
-    std::cout << "\e[1mTEST VEHICLE RIGID BODY JACOBIAN : \e[0m \n " << robot_model->GetJacobian(test_Rigid_Body_Vehicle) << std::endl;
+    T.SetTransl(Eigen::Vector3d(0.2, 0.0, 0.2));
+    arm_model->AddRigidBodyFrame(rigid_body_frame_id, arm_model->GetNumJoints() - 1, T);
+    vehicle_model->AddRigidBodyFrame(rigid_body_frame_id, T);
+    std::string testJointArm = "Frame_" + arm_model->GetID() + "_Joint_3";
+    std::string testJointVehicle = "Frame_" + vehicle_model->GetID() + "_" + arm_model->GetID() + "_Joint_3";
+    std::string test_Arm_Tool = "Frame_" + arm_model->GetID() + "_Tool";
+    std::string test_Vehcle_Tool = "Frame_" + vehicle_model->GetID() + "_" + arm_model->GetID() + "_Tool";
+    std::string test_Identitity = "Identity_" + arm_model->GetID() + "_Identity";
+    std::string test_Manipulability = "Manipulability_" + arm_model->GetID() + "_Manipulability";
+    std::string test_Vehicle_Jacobian = "Vehicle_" + vehicle_model->GetID();
+    std::string test_Rigid_Body_Arm = "Frame_" + arm_model->GetID() + "_Body_" + rigid_body_frame_id;
+    std::string test_Rigid_Body_Vehicle = "Vehicle_" + vehicle_model->GetID() + "_Body_" + rigid_body_frame_id;
+
+    std::cout << "-- FRAMES ADDED --" << std::endl;
+
+    futils::PrettyPrint(robot_model->GetJacobian(testJointArm), "TEST JOINT ARM");
+    futils::PrettyPrint(robot_model->GetJacobian(testJointVehicle), "TEST JOINT VEHICLE");
+    futils::PrettyPrint(robot_model->GetJacobian(test_Arm_Tool), "TEST TOOL ARM");
+    futils::PrettyPrint(robot_model->GetJacobian(test_Vehcle_Tool), "TEST GET VEHICLE TOOL");
+    futils::PrettyPrint(robot_model->GetJacobian(test_Identitity), "TEST IDENTITY ARM");
+    futils::PrettyPrint(robot_model->GetJacobian(test_Manipulability), "TEST MANIPULABILITY ARM");
+    futils::PrettyPrint(robot_model->GetJacobian(test_Vehicle_Jacobian), "TEST VEHICLE JACOBIAN");
+    futils::PrettyPrint(robot_model->GetJacobian(test_Rigid_Body_Arm), "TEST ARM RIGID BODY JACOBIAN");
+    futils::PrettyPrint(robot_model->GetJacobian(test_Rigid_Body_Vehicle), "TEST VEHICLE RIGID BODY JACOBIAN");
 
     ///MAP TESTING
     //std::map<std::string, Eigen::MatrixXd> testMap;
@@ -198,7 +200,6 @@ int main()
     //    std::cout  << iter->first << std::endl;
     //    std::cout << "Matrix\n" << iter->second << std::endl;
     //}
-
 
     return 0;
 }

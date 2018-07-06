@@ -73,7 +73,7 @@ public:
      * @param ID frame ID.
      * @return transformation matrix.
      */
-    Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
+    Eigen::TransfMatrix GetAttachedBodyTransf(const std::string& ID);
 
     /**
      * @brief Method returning the transformation matrix related to the frame id in input.

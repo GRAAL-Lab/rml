@@ -14,6 +14,8 @@ endif()
 # Define library. Only source files here!
 project(RML_project VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
+
 option(BUILD_TESTS "Compile tests" OFF)
 option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
 
@@ -92,7 +94,7 @@ if(BUILD_TESTS)
         test/youbot_armmodel.cc
         test/youbot_vehiclemodel.cc
        test/twolinks_armmodel.cc
-      test/OdeIntSimulator.cpp)
+       test/OdeIntSimulator.cpp)
 
     target_link_libraries(rml_test rml)
     target_link_libraries(rml_test_model rml)
@@ -108,7 +110,8 @@ endif(BUILD_TESTS)
 
 if(BUILD_TESTS_DEVEL)
     add_executable(frameTest test/frameidentificationtest.cpp
-                             test/youbot_armmodel.cc)
+                             test/youbot_armmodel.cc
+                             test/twolinks_armmodel.cc)
 
     target_link_libraries(frameTest rml)
 

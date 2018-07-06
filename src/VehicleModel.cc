@@ -21,7 +21,7 @@ using std::endl;
 
 namespace rml {
 
-VehicleModel::VehicleModel(const std::string id): id_(id), isMapInitialized_(false), modelInitialized_(false)
+VehicleModel::VehicleModel(const std::string id): modelInitialized_(false), isMapInitialized_(false), id_(id)
 {
     fbkPosition_.setZero();
     velocityOnVehicle_.setZero();
@@ -39,11 +39,15 @@ void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos)
     fbkPosition_ = fbkPos;
     if (!isMapInitialized_)
     {
+        // If the Jacobian has been changed we need to rebuild the transformation
+        // map --> Question is, will it ever change? Does it make sense to erase
+        // everytime
+
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
         transformation_.insert(std::make_pair(id_, fbkPosition_.ToTransfMatrix()));
         jacobians_.insert(std::make_pair(id_, vJv_));
-        //updating rigid frame transformation matrix
+        // Updating rigid frame transformation matrix
         for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = attachedBodyFrames_.begin();
              iter != attachedBodyFrames_.end();
              ++iter)
@@ -96,7 +100,7 @@ void VehicleModel::AddRigidBodyFrame(const std::string ID, const Eigen::TransfMa
     jacobians_.insert(std::make_pair(id_ + "_Body_" + ID, GetAttachedBodyJacobian(id_ + ID)));
 }
 
-Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(std::string& ID)
+Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(const std::string& ID)
 {
     return attachedBodyFrames_.at(ID);
 }
