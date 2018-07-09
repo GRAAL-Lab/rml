@@ -16,6 +16,12 @@ RotMatrix::RotMatrix() :
 	*this = Eigen::Matrix3d::Identity();
 }
 
+RotMatrix::RotMatrix(Eigen::Quaterniond q) :
+        Eigen::Matrix3d()
+{
+    *this = q.toRotationMatrix();
+}
+
 RotMatrix RotMatrix::Transpose() const
 {
 	return this->transpose();

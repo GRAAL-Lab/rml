@@ -10,13 +10,13 @@
 #include <memory>
 #include <vector>
 
+#include "RMLDefines.h"
+#include "RMLExceptions.h"
 #include "ArmModel.h"
 #include "VehicleModel.h"
-#include "RMLException.h"
+
 
 namespace rml {
-
-
 
 
 /**
@@ -31,8 +31,6 @@ namespace rml {
  *
  */
 class RobotModel {
-
-    enum JacobianType { Vehicle, Arm };
 
     std::shared_ptr<VehicleModel> vehicle_;
     std::map<std::string, std::shared_ptr<ArmModel> > armsModel_;
@@ -163,7 +161,7 @@ public:
      * @details The methods returns a transformation matrix depending on the input string.\n
      * the following policy is used:\n
      * Tool Frame : armID+ “_Tool“
-     * Joint Frame : armID+ “_Joint_“+ joint°
+     * Joint Frame : armID+ “FrameID::Joint“+ joint°
      * Rigid Body: armID+ “_Body_“+ frameID
      *  wTt: vehicleID;
      * vJv: vehicleID

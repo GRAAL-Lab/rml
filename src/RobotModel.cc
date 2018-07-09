@@ -101,6 +101,8 @@ Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianForFrame(std::string ID) c
     Eigen::Matrix6d vJv;
     std::size_t partIDIndex = ID.find_first_of("_");
     std::string partID = ID.substr(0, partIDIndex);
+    std::cout << "GetIsolatedVehicleJacobianForFrame::ID=" << ID << std::endl;
+    std::cout << "GetIsolatedVehicleJacobianForFrame::partID=" << partID << std::endl;
 
     if (CheckVehicle()) {
         if (CheckArm(partID)) {
@@ -221,11 +223,14 @@ Eigen::MatrixXd RobotModel::GetJacobian(std::string ID) throw(std::exception)
      * "Frame"    + "_" + arm ID + "_" + "Body" + "_" + Frame ID : Jacobian Rigid Body attached to the arm.
      * "Vehicle"  + "_" + vehicleID + "_" + "Body" + "_" + Frame ID : Jacobian Rigid Body attached to the vehicle i.e. no arm contribution.
      * "Vehicle"  + "_" + vehicle ID : Vehicle Jacobian projected on the vehicle
-     *
-     *
      */
+
+
     std::string partID = ID.substr(0, ID.find_first_of("_"));
     std::string temp = ID.substr(ID.find_first_of("_") + 1);
+    std::cout << "ID=" << ID << std::endl;
+    std::cout << "partID=" << partID << std::endl;
+    std::cout << "temp=" << temp << std::endl;
 
     Eigen::MatrixXd out;
 
@@ -235,12 +240,6 @@ Eigen::MatrixXd RobotModel::GetJacobian(std::string ID) throw(std::exception)
         case JacobianType::Arm:
             out = GetJacobian_Frame(temp);
             break;
-        /**case 2:
-            out = GetJacobian_Identity(temp);
-            break;
-        case 3:
-            out = GetJacobian_Manipulability(temp);
-            break;*/
         case JacobianType::Vehicle:
             out = GetJacobian_Vehicle(temp);
             break;
@@ -258,9 +257,14 @@ Eigen::MatrixXd RobotModel::GetJacobian_Frame(std::string ID)
 
     std::size_t partIDIndex = ID.find_first_of("_");
     std::string partID = ID.substr(0, partIDIndex);
+    std::string temp = ID.substr(partIDIndex + 1);
+    std::cout << "GetJacobian_Frame::partID=" << partID << std::endl;
+    std::cout << "GetJacobian_Frame::temp=" << temp << std::endl;
+
+
     Eigen::MatrixXd totJac, tempJ;
     if (partID == vehicle_->GetID() && vehicle_) {
-        totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianForFrame(ID.substr(partIDIndex + 1)));
+        totJac = RightJuxtapose(totJac, GetIsolatedVehicleJacobianForFrame(temp));
         for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             tempJ = Eigen::MatrixXd::Zero(6, iter->second->GetNumJoints());

@@ -57,6 +57,7 @@
  *
  */
 
+#include "RMLDefines.h"
 #include "Types.h"
 #include "MatrixOperations.h"
 #include "Functions.h"

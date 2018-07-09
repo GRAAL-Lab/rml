@@ -13,16 +13,20 @@
 #include <iostream>
 #include <vector>
 
+#include "RMLDefines.h"
+#include "RMLExceptions.h"
 #include "Functions.h"
 #include "VehicleModel.h"
-#include "RMLException.h"
 
 using std::cout;
 using std::endl;
 
 namespace rml {
 
-VehicleModel::VehicleModel(const std::string id): modelInitialized_(false), isMapInitialized_(false), id_(id)
+VehicleModel::VehicleModel(const std::string id)
+    : modelInitialized_(false)
+    , isMapInitialized_(false)
+    , id_(id)
 {
     fbkPosition_.setZero();
     velocityOnVehicle_.setZero();
@@ -38,11 +42,10 @@ VehicleModel::~VehicleModel()
 void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos)
 {
     fbkPosition_ = fbkPos;
-    if (!isMapInitialized_)
-    {
+    if (!isMapInitialized_) {
         // If the Jacobian has been changed we need to rebuild the transformation
         // map --> Question is, will it ever change? Does it make sense to erase
-        // everytime
+        // everytime?
 
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
@@ -51,23 +54,19 @@ void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos)
         // Updating rigid frame transformation matrix
         for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = attachedBodyFrames_.begin();
              iter != attachedBodyFrames_.end();
-             ++iter)
-        {
+             ++iter) {
             std::string id = iter->first;
             transformation_.insert(std::make_pair(id, GetAttachedBodyTransf(id)));
             jacobians_.insert(std::make_pair(id, GetAttachedBodyJacobian(id)));
         }
         isMapInitialized_ = true;
-    }
-    else
-    {
+    } else {
         transformation_.find(id_)->second = fbkPosition_.ToTransfMatrix();
         jacobians_.find(id_)->second = vJv_;
         //updating rigid frame transformation matrix
         for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = attachedBodyFrames_.begin();
              iter != attachedBodyFrames_.end();
-             ++iter)
-        {
+             ++iter) {
             std::string id = iter->first;
             transformation_.find(id)->second = GetAttachedBodyTransf(id);
             jacobians_.find(id)->second = GetAttachedBodyJacobian(id);
@@ -87,7 +86,6 @@ void VehicleModel::SetAccelerationOnVehicle(const Eigen::Vector6d& accOnVehicle)
 
 void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian)
 {
-
     vJv_ = vehicleJacobian;
     jacobians_.insert(std::make_pair(id_, vJv_));
     modelInitialized_ = true;
@@ -97,14 +95,13 @@ void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian)
 void VehicleModel::AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat)
 {
     attachedBodyFrames_.insert(std::make_pair(id_ + ID, TMat));
-    transformation_.insert(std::make_pair(id_ + "_Body_" + ID, GetCurrentAttachedBodyTransf(id_ + ID)));
-    jacobians_.insert(std::make_pair(id_ + "_Body_" + ID, GetAttachedBodyJacobian(id_ + ID)));
+    transformation_.insert(std::make_pair(id_ + FrameID::Body + ID, GetCurrentAttachedBodyTransf(id_ + ID)));
+    jacobians_.insert(std::make_pair(id_ + FrameID::Body + ID, GetAttachedBodyJacobian(id_ + ID)));
 }
 
 Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(const std::string& ID) throw(std::exception)
 {
-    if(attachedBodyFrames_.find(ID)==attachedBodyFrames_.end())
-    {
+    if (attachedBodyFrames_.find(ID) == attachedBodyFrames_.end()) {
         VehicleModelWrongLabelException vehicleModelWrongLabel;
         vehicleModelWrongLabel.SetID("GetAttachedBodyTransf");
         throw(vehicleModelWrongLabel);
@@ -114,24 +111,19 @@ Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(const std::string& ID) t
 
 Eigen::TransfMatrix VehicleModel::GetCurrentAttachedBodyTransf(const std::string ID)
 {
-
     Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID);
     return transformation_.at(id_) * TMat;
-
 }
 
 Eigen::MatrixXd VehicleModel::GetAttachedBodyJacobian(const std::string ID)
 {
-
     Eigen::TransfMatrix RBMat = attachedBodyFrames_.at(ID);
     return GetRigidBodyMatrix(RBMat.GetTransl()) * jacobians_.at(id_);
-
 }
 
 Eigen::TransfMatrix VehicleModel::GetTransfMatrix(const std::string ID) throw(std::exception)
 {
-    if(transformation_.find(ID)==transformation_.end())
-    {
+    if (transformation_.find(ID) == transformation_.end()) {
         VehicleModelWrongLabelException vehicleModelWrongLabel;
         vehicleModelWrongLabel.SetID("GetTransfMatrix");
         throw(vehicleModelWrongLabel);
@@ -141,8 +133,7 @@ Eigen::TransfMatrix VehicleModel::GetTransfMatrix(const std::string ID) throw(st
 
 Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID) throw(std::exception)
 {
-    if(jacobians_.find(ID)==jacobians_.end())
-    {
+    if (jacobians_.find(ID) == jacobians_.end()) {
         VehicleModelWrongLabelException vehicleModelWrongLabel;
         vehicleModelWrongLabel.SetID("GetJacobian");
         throw(vehicleModelWrongLabel);
@@ -157,8 +148,7 @@ const Eigen::TransfMatrix VehicleModel::GetwTv()
 
 const Eigen::Matrix6d& VehicleModel::GetvJv() const throw(std::exception)
 {
-    if(!modelInitialized_)
-    {
+    if (!modelInitialized_) {
         throw(VehicleModelNotInitializedException());
     }
     return vJv_;

@@ -46,7 +46,7 @@ typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
  *
  * Each frame is identified by a label. The following policy is used:
  * Tool Frame : armID+ “_Tool“
- * Joint Frame : armID+ “_Joint_“+ joint°
+ * Joint Frame : armID+ “FrameID::Joint“+ joint°
  * Rigid Body: armID+ “_Body_“+ frameID
  * In order to get the transformation matrix the GetTransformation(string) method is provided.
  * The string in input is the id of the frame asked. \n

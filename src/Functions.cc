@@ -8,7 +8,7 @@
 #include <initializer_list>
 
 #include "Functions.h"
-#include "RMLException.h"
+#include "RMLExceptions.h"
 
 namespace rml {
 

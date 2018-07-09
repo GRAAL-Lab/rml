@@ -19,22 +19,23 @@
 #include <utility>
 #include <vector>
 
+#include "RMLDefines.h"
+#include "RMLExceptions.h"
+#include "Types.h"
+#include "rml_internal/Futils.h"
 #include "ArmModel.h"
 #include "Functions.h"
 #include "MatrixOperations.h"
 #include "PseudoInverse.h"
 #include "RobotLink.h"
 #include "SVD.h"
-#include "Types.h"
-#include "rml_internal/Futils.h"
-#include "RMLException.h"
 
 using std::cout;
 using std::endl;
 
 namespace rml {
 
-ArmModel::ArmModel(std::string id) : numberOfJoints_(0), modelReadFromFile_(false), modelInitialized_(false), isMapInitialized_(false),
+ArmModel::ArmModel(std::string id) : modelInitialized_(false),  isMapInitialized_(false), numberOfJoints_(0), modelReadFromFile_(false),
     id_(id), mu_(0.0)
 {
 }
@@ -95,13 +96,13 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
     {
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
-        transformation_.insert(std::make_pair(id_ + "_Tool", bTt_));
-        jacobians_.insert(std::make_pair(id_ + "_Tool", bJt_));
+        transformation_.insert(std::make_pair(id_ + FrameID::Tool, bTt_));
+        jacobians_.insert(std::make_pair(id_ + FrameID::Tool, bJt_));
         //updating the joint jacobians
         for (int i = 0; i < numberOfJoints_; i++)
         {
-            transformation_.insert(std::make_pair(id_ + "_Joint_" + std::to_string(i), baseTei_.at(i)));
-            jacobians_.insert(std::make_pair(id_ + "_Joint_" + std::to_string(i), EvaluateBase2JointJacobian(i)));
+            transformation_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), baseTei_.at(i)));
+            jacobians_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), EvaluateBase2JointJacobian(i)));
         }
         //updating rigid frame transformation matrix
         for (std::unordered_map<std::string, IndexedTMat>::iterator iter = attachedBodyFrames_.begin();
@@ -116,13 +117,13 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
     }
     else
     {
-        transformation_.find((id_ + "_Tool"))->second = bTt_;
-        jacobians_.find((id_ + "_Tool"))->second = bJt_;
+        transformation_.find((id_ + FrameID::Tool))->second = bTt_;
+        jacobians_.find((id_ + FrameID::Tool))->second = bJt_;
         //updating the joint jacobians
         for (int i = 0; i < numberOfJoints_; i++)
         {
-            transformation_.find(id_ + "_Joint_" + std::to_string(i))->second = baseTei_.at(i);
-            jacobians_.find(id_ + "_Joint_" + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
+            transformation_.find(id_ + FrameID::Joint + std::to_string(i))->second = baseTei_.at(i);
+            jacobians_.find(id_ + FrameID::Joint + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
         }
         //updating rigid frame transformation matrix
         for (std::unordered_map<std::string, IndexedTMat>::iterator iter = attachedBodyFrames_.begin();
@@ -400,7 +401,7 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
         throw(armModelNotExistingJoint);
     }
     IndexedTMat myMat(jointIndex, TMat);
-    std::string idRigidFrame = id_ + "_Body_" + ID;
+    std::string idRigidFrame = id_ + FrameID::Body + ID;
     attachedBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
     transformation_.insert(std::make_pair(idRigidFrame, GetAttachedBodyTransf(idRigidFrame)));
     jacobians_.insert(std::make_pair(idRigidFrame, GetAttachedBodyJacobian(idRigidFrame)));
@@ -423,7 +424,7 @@ Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID)
     int jointIndex = attachedBodyFrames_.at(ID).first;
     Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
 
-    return transformation_.at(id_ + "_Joint_" + std::to_string(jointIndex)) * TMat;
+    return transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)) * TMat;
 }
 
 Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID)
@@ -431,13 +432,14 @@ Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID)
 
     int jointIndex = attachedBodyFrames_.at(ID).first;
     Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
-    Eigen::Vector3d projectedTransl = transformation_.at(id_ + "_Joint_" + std::to_string(jointIndex)).GetRotMatrix() * TMat.GetTransl();
-    return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(id_ + "_Joint_" + std::to_string(jointIndex));
+    Eigen::Vector3d projectedTransl = transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)).GetRotMatrix() * TMat.GetTransl();
+    return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(id_ + FrameID::Joint + std::to_string(jointIndex));
 
 }
 
 Eigen::TransfMatrix ArmModel::GetTransformationMatrix(const std::string matrixId) throw (std::exception)
 {
+    //// TODO: GIVE INFO ON THE FACT THE INDEX IS OUT OF RANGE IF GREATER THAN NUMJOINTS
     if(transformation_.find(matrixId)== transformation_.end())
     {
         ArmModelWrongLabelException armModelWrongLabel;
