@@ -52,7 +52,7 @@ void EulerRPY::SetRPY(double roll, double pitch, double yaw){
 }
 
 void EulerRPY::SetRPY(Eigen::Vector3d& vec3){
-	*this = EulerRPY(vec3);
+  *this = EulerRPY(vec3);
 }
 
 Eigen::Vector3d EulerRPY::ToVect3() const{

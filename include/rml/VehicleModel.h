@@ -92,10 +92,10 @@ public:
 
 	void AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat);
 
-	Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
-	Eigen::TransfMatrix GetCurrentAttachedBodyTransf(std::string& ID);
+	Eigen::TransfMatrix GetAttachedBodyTransf(const std::string& ID);
+	Eigen::TransfMatrix GetCurrentAttachedBodyTransf(const std::string& ID);
 
-	Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
+	Eigen::MatrixXd GetAttachedBodyJacobian(const std::string& ID);
 
 	const Eigen::TransfMatrix GetwTv()
 	{
