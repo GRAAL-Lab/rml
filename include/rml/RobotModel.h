@@ -119,6 +119,7 @@ public:
 	Eigen::MatrixXd GetArmJacobian_Identity(int armIndex);
 	Eigen::MatrixXd GetArmJacobian_Manipulability(int armIndex, double& mu);
 	Eigen::MatrixXd GetVehicleJacobian();
+    Eigen::MatrixXd GetJacobian_ToolFrame(int armIndex);
 
 	Eigen::TransfMatrix GetTransfMatrix_VehicleToArmBase(int armIndex) const;
 	Eigen::TransfMatrix GetTransfMatrix_JointFrame(int armIndex, int jointIndex) const;
