@@ -286,7 +286,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu)
     {
         //TODO change svd data
         mySVD.params.lambda = 0.0;
-        mySVD.params.threshold = 0.0;
+        mySVD.params.threshold = 0.00;
         /// For defective manipulators
         //std::cout << "nrow: " << dJdq_[0].rows() << " ncol:" << dJdq_[0].cols() << std::endl;
         Jpinv_ = rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), mySVD);
@@ -296,7 +296,7 @@ void ArmModel::EvaluateManipulability(Eigen::MatrixXd& Jmu)
             Jmu(k) = 0;
             djdqJpinv_ = dJdq_[k].transpose() * Jpinv_;
 
-            for (int i = 0; i < 5; i++) // now 5 is correct
+            for (int i = 0; i < numberOfJoints_; i++)
                 Jmu(k) += djdqJpinv_(i, i);
 
             Jmu(k) *= mySVD.results.mu;

@@ -18,7 +18,6 @@
 
 namespace rml {
 
-
 /**
  * \class RobotModel
  *
@@ -48,44 +47,9 @@ class RobotModel {
      * @return Jacobian
      */
     Eigen::Matrix6d GetIsolatedVehicleJacobianForFrame(std::string ID) const;
-    /**
-     * @brief Method extracting from the input vector the vehicle part.
-     * @param[in] y input vector
-     * @return vehicle slice
-     */
-    Eigen::VectorXd ExtractVehicleSlice(const Eigen::VectorXd& y) const;
-    /**
-     * @brief Method extracting from the input vector the arm  part.
-     * @param[in] y input vector
-     * @param[in] ID arm id
-     * @return arm slice
-     */
 
-    Eigen::VectorXd ExtractArmSlice(const Eigen::VectorXd& y, std::string ID);
-    /**
-     * @brief Method computing the jacobin of the input frameID
-     * @param ID frameID
-     * @return Jacobian
-     */
-    Eigen::MatrixXd GetJacobian_Frame(std::string ID);
-    /**
-     * @brief Method computing the identity jacobian of the input arm ID
-     * @param ID armID
-     * @return Jacobian
-     */
-    Eigen::MatrixXd GetJacobian_Identity(std::string ID);
-    /**
-     * @brief Method computing the manipulability jacobian of the input arm ID
-     * @param ID armID
-     * @return Jacobian
-     */
-    Eigen::MatrixXd GetJacobian_Manipulability(std::string ID);
-    /**
-     * @brief Method computing the vehicle jacobian and rigid body attached to the vehicle jacobian depending on the input ID
-     * @param ID ID
-     * @return Jacobian
-     */
-    Eigen::MatrixXd GetJacobian_Vehicle(std::string ID);
+
+
 
 public:
     /**
@@ -143,19 +107,25 @@ public:
      * @return true if the vehicle has been loaded, false otherwise.
      */
     bool CheckVehicle() const throw(std::exception);
+
     /**
-     * @brief Method returning a jacobian of the robot model .\n
-     * @details The method calls protected methods of the class depending on the input string. \n
-     * The following policy is used:\n
-     * ArmModel Frame only vehicle contribution (0 for arm ): “Frame_“+”VehicleID”+arm_frame_id.
-     * ArmModel Frame Jacobian both vehicle and arm contribution: : "Frame_" + arm_frame_id.
-     * Joints Identity Jacobian: "Identity_" + arm ID.
-     * Vehicle Body Frame (0 for the arm ): “Vehicle_” + Vehicle_frame_id.
-     * Manipulability : “Manipulability_“+ armID. * *
-     * @param jacobianID
-     * @return  Jacobian
+     * @brief Method computing the jacobin of the input frameID
+     * @param ID frameID
+     * @return Jacobian
      */
-    Eigen::MatrixXd GetJacobian(std::string jacobianID) throw(std::exception);
+    Eigen::MatrixXd GetJacobian_Frame(std::string frameID, JacobianObserver jacobianObserver);
+    /**
+     * @brief Method computing the identity jacobian of the input arm ID
+     * @param ID armID
+     * @return Jacobian
+     */
+    Eigen::MatrixXd GetJacobian_JointSpace(std::string armID);
+    /**
+     * @brief Method computing the manipulability jacobian of the input arm ID
+     * @param ID armID
+     * @return Jacobian
+     */
+    Eigen::MatrixXd GetJacobian_Manipulability(std::string armID);
     /**
      * @brief Methdo returing a transformation matrix of the robot model.\n
      * @details The methods returns a transformation matrix depending on the input string.\n
@@ -198,12 +168,36 @@ public:
      */
     void SetRobotControl(const Eigen::VectorXd& y);
     /**
-     * @brief Method returning the control vector of the whole robot model.
+     * @brief Method returning the control vector of a part of  robot model.
+     * @param[in] partID either armModelID or vehicleModelID
      * @return control vector.
      */
-    Eigen::VectorXd GetRobotControl();
+    Eigen::VectorXd GetRobotControl(std::string partID);
 };
 
 } /* namespace rml */
+
+
+///**
+// * @brief Method returning a jacobian of the robot model .\n
+// * @details The method calls protected methods of the class depending on the input string. \n
+// * The following policy is used:\n
+// * ArmModel Frame only vehicle contribution (0 for arm ): “Frame_“+”VehicleID”+arm_frame_id.
+// * ArmModel Frame Jacobian both vehicle and arm contribution: : "Frame_" + arm_frame_id.
+// * Joints Identity Jacobian: "Identity_" + arm ID.
+// * Vehicle Body Frame (0 for the arm ): “Vehicle_” + Vehicle_frame_id.
+// * Manipulability : “Manipulability_“+ armID. * *
+// * @param jacobianID
+// * @return  Jacobian
+// */
+//Eigen::MatrixXd GetJacobian(std::string jacobianID) throw(std::exception);
+
+
+///**
+// * @brief Method computing the vehicle jacobian and rigid body attached to the vehicle jacobian depending on the input ID
+// * @param ID ID
+// * @return Jacobian
+// */
+//Eigen::MatrixXd GetJacobian_Vehicle(std::string ID);
 
 #endif /* INCLUDE_RML_ROBOTMODEL_H_ */

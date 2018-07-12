@@ -6,6 +6,7 @@
 namespace rml {
 
 enum JacobianType { Vehicle, Arm };
+enum JacobianObserver {VehicleFrame, InertialFrame};
 
 namespace FrameID{
 

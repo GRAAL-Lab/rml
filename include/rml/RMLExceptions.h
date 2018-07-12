@@ -26,10 +26,10 @@ private:
 /**
  * @brief Exception to be thrown when the joint index out of bounds
  */
-class RobotModelArmException : public std::exception {
+class RobotModelArmException : public ExceptionWithID {
     virtual const char* what() const throw()
     {
-        return "[RobotModel] Error: Arm index out of bounds!!!";
+        return "[RobotModel] Error: Not existing arm model !!!";
     }
 };
 
@@ -60,6 +60,16 @@ class RobotModelNotInitializedArmModelException : public std::exception {
     virtual const char* what() const throw()
     {
         return "[RobotModel] Error: loaded a not initialized arm model";
+    }
+};
+
+/**
+ * @brief Exception to be thrown when load a not initialized arm model
+ */
+class RobotModelConflictingArmModelIDException : public ExceptionWithID {
+    virtual const char* what() const throw()
+    {
+        return "[RobotModel] Error: existing arm model with same id ";
     }
 };
 
