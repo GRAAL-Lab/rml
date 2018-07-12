@@ -22,7 +22,7 @@ class YouBotVehicleModel : public VehicleModel
 {
 
 public:
-	YouBotVehicleModel();
+	YouBotVehicleModel(const std::string id);
 	virtual ~YouBotVehicleModel();
 
 };

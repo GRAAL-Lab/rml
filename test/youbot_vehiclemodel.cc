@@ -7,11 +7,6 @@
  *      		Università Degli Studi di Genova
  */
 
-
-#ifndef CMAT_STANDALONE
-#define CMAT_STANDALONE
-#endif
-
 #include "test/youbot_vehiclemodel.h"
 
 using std::cout;
@@ -19,7 +14,7 @@ using std::endl;
 
 namespace rml {
 
-YouBotVehicleModel::YouBotVehicleModel()
+YouBotVehicleModel::YouBotVehicleModel(const std::string id) : ArmModel(id)
 {
 	Eigen::Matrix6d vJac;
 	vJac.setZero();

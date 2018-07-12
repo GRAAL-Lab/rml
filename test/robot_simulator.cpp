@@ -93,8 +93,8 @@ int main(int, char**)
 
     goalReached = false;
 
-    std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
-    armModel = std::make_shared<rml::ArmModel>();
+    std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>("youbot");
+    armModel = std::make_shared<rml::ArmModel>("genericAM");
 
     armModel = youbotAM;
     numJoints = armModel->GetNumJoints();
