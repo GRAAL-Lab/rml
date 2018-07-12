@@ -115,6 +115,17 @@ class ArmModelNotExistingJointException : public ExceptionWithID {
 };
 
 /**
+ * @brief Exception to be thrown when trying to access a not existing joint
+ */
+class LabelAlreadyUsedException : public ExceptionWithID {
+    virtual const char* what() const throw()
+    {
+        return "[ArmModel] Error: Label for frame already associated to another joint";
+    }
+};
+
+
+/**
  * @brief Exception to be thrown when wrong label in input
  */
 class ArmModelWrongLabelException : public ExceptionWithID {

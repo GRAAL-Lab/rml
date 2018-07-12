@@ -211,11 +211,6 @@ public:
      */
     double GetManipulability();
     /**
-     * @brief Method setting the arm manipulability
-     * @param mu manipulability value.
-     */
-    void SetManipulability(double mu);
-    /**
      * @brief Method returning the arm id.
      * @return arm id
      */
@@ -257,13 +252,13 @@ protected:
      * @param ID frame ID.
      * @return  transformation matrix.
      */
-    Eigen::TransfMatrix GetAttachedBodyTransf(std::string& ID);
+    Eigen::TransfMatrix GetRigidBodyTransf(std::string& ID);
     /**
      * @brief Method returning the attached body frame jacobian wrt to the arm base.
      * @param ID frame ID.
      * @return jacobian matrix.
      */
-    Eigen::MatrixXd GetAttachedBodyJacobian(std::string& ID);
+    Eigen::MatrixXd GetRigidBodyJacobian(std::string& ID);
     /**
      * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
      *
