@@ -71,18 +71,18 @@ void VehicleModel::AddRigidBodyFrame(const std::string ID, const Eigen::TransfMa
 	attachedBodyFrames_.insert(std::make_pair(ID, TMat));
 }
 
-Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(std::string& ID)
+Eigen::TransfMatrix VehicleModel::GetAttachedBodyTransf(const std::string &ID)
 {
 	return attachedBodyFrames_.at(ID);
 }
 
-Eigen::TransfMatrix VehicleModel::GetCurrentAttachedBodyTransf(std::string& ID)
+Eigen::TransfMatrix VehicleModel::GetCurrentAttachedBodyTransf(const std::string& ID)
 {
 	Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID);
 	return GetwTv() * TMat;
 }
 
-Eigen::MatrixXd VehicleModel::GetAttachedBodyJacobian(std::string& ID)
+Eigen::MatrixXd VehicleModel::GetAttachedBodyJacobian(const std::string& ID)
 {
 	Eigen::TransfMatrix RBMat = attachedBodyFrames_.at(ID);
 	return GetRigidBodyMatrix(RBMat.GetTransl()) * GetvJv();
