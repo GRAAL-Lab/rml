@@ -104,7 +104,7 @@ public:
      * @brief Set the joints velocity
      * @param qdot the joint velocity vector (must be a vector of dimension equal to numJoints)
      */
-    void SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::exception) ;
+    void SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::exception);
 
     /**
      * @brief Get the joints velocity
@@ -116,21 +116,13 @@ public:
      * @brief Set the joints acceleration.
      * @param qddot the joints acceleration vector (must be a vector of dimension equal to numJoints)
      */
-    void SetJointsAcceleration(const Eigen::VectorXd& qddot)  throw(std::exception);
+    void SetJointsAcceleration(const Eigen::VectorXd& qddot) throw(std::exception);
 
     /**
      * @brief Get joints acceleration.
      * @return  the joints acceleration vector (vector of dimension equal to numJoints)
      */
     const Eigen::VectorXd& GetJointsAcceleration() const;
-
-    /**
-	 * @brief Evaluates the manipulability measure and its Jacobian
-	 * This method returns he manipulability measure and its Jacobian
-	 * @param[out] Jmu the manipulability measure Jacobian
-	 */
-    void EvaluateManipulability(Eigen::MatrixXd& Jmu);
-
     /**
      * @brief Method adding a rigid body frame to a joint.
      * @param ID Id of the frame-
@@ -150,31 +142,18 @@ public:
      * @param frameId frame id
      * @return  transformation matrix
      */
-    Eigen::TransfMatrix GetTransformationMatrix(const std::string frameId) throw (std::exception);
+    Eigen::TransfMatrix GetTransformationMatrix(const std::string frameId) throw(std::exception);
     /**
      * @brief Method returning the jacobian related to the input frameID wrt to the arm base.
      * @param frameId frame id
      * @return jacobianID the string identificator for the jacobian
      */
-    Eigen::MatrixXd GetJacobian(const std::string frameId) throw (std::exception);
+    Eigen::MatrixXd GetJacobian(const std::string frameId) throw(std::exception);
     /**
      * @brief Method returning the arm number of joints
      * @return  arm number of joints
      */
     int GetNumJoints() const;
-
-    /**
-     * @brief Method returning the base to tool jacobian
-     * @return base to tool jacobian
-     */
-    const Eigen::MatrixXd& GetBase2ToolJacobian() const;
-
-    /**
-     * @brief Method returning the joint transformation matrix wrt to the robot base
-     * @param ji joint number
-     * @return  transformation matrix
-     */
-    const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji);
 
     /**
      * @brief Method returning dJdq evaluated numerically
@@ -221,19 +200,19 @@ public:
      */
     void SetID(std::string id);
 
+    /**
+     * @brief Method returning the base to tool jacobian
+     * @return base to tool jacobian
+     */
+    //const Eigen::MatrixXd& GetBase2ToolJacobian() const;
+
 protected:
     /**
      * @brief ArmModel::EvaluateTotalForwardGeometry
      */
     void EvaluateTotalForwardGeometry();
-    /**
-     * @brief Evaluates the transformation matrix (w.r.t. robot base) of the specified joint
-     *
-     * @param[in] jointIndex    Joint index
-     * @return				   Joint transformation matrix
-     */
-    Eigen::TransfMatrix GetBase2JointTransf(int jointIndex);
 
+    ;
     /*
 	 * @brief Loads the model matrices from the files located in file_path
 	 * (file names: wTb0, eTt, biTri1, biTri2, biTri3, etc...)
@@ -248,17 +227,22 @@ protected:
 	 */
     void EvaluatedJdqNumeric();
     /**
+     * @brief Evaluates the manipulability measure and its Jacobian
+     * This method returns he manipulability measure and its Jacobian
+     */
+    void EvaluateManipulability();
+    /**
      * @brief Method returning the attached body frame wrt to the arm base.
      * @param ID frame ID.
      * @return  transformation matrix.
      */
-    Eigen::TransfMatrix GetRigidBodyTransf(std::string& ID);
+    Eigen::TransfMatrix EvaluateRigidBodyTransf(std::string& ID);
     /**
      * @brief Method returning the attached body frame jacobian wrt to the arm base.
      * @param ID frame ID.
      * @return jacobian matrix.
      */
-    Eigen::MatrixXd GetRigidBodyJacobian(std::string& ID);
+    Eigen::MatrixXd EvaluateRigidBodyJacobian(std::string& ID);
     /**
      * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
      *
@@ -295,14 +279,11 @@ protected:
     Eigen::VectorXd q_ddot_; //<! vector of joints acceleration.
     Eigen::VectorXd controlRef_; //<! control vector .
     std::vector<Eigen::TransfMatrix> baseTei_; //<! vector of transformation matrix from base to joint.   ??
-    std::vector<Eigen::TransfMatrix> biTei_; //<! vector of transformation matrix from joint i-1 to joint i. ??
-    //Eigen::TransfMatrix baseTb0_; //<! transformation matrix of the base. ??
+    std::vector<Eigen::TransfMatrix> biTei_; //<! vector of transformation matrix from joint i-1 to joint i. ??    
     Eigen::TransfMatrix baseTbi_; //<! transformation matrix from base to joint i.??
     Eigen::TransfMatrix Tz_; //!< transformation matrix for rotation or prismatic joint.
     Eigen::Vector3d base_ki_; //!<
     std::vector<Eigen::Vector6d> h_; //!<
-    //Eigen::TransfMatrix bTt_; //!< base to tool transformation matrix.
-    //Eigen::TransfMatrix eTt_; //!< end effector to tool transformation matrix.
     std::vector<Eigen::MatrixXd> dJdq_; //!< dJdq evaluated numerically.
     Eigen::MatrixXd Jpinv_; //!< jacobian pseudoinverse.
     Eigen::MatrixXd djdqJpinv_; //!< djdq * jacobian pseudoinverse.
@@ -312,7 +293,24 @@ protected:
     bool modelReadFromFile_; //!< boolean stating whether the model is read from file.
     std::string id_; //!< arm id.
     double mu_; //!< manipulability.
+    //Eigen::TransfMatrix baseTb0_; //<! transformation matrix of the base. ??
+    //Eigen::TransfMatrix bTt_; //!< base to tool transformation matrix.
+    //Eigen::TransfMatrix eTt_; //!< end effector to tool transformation matrix.
+
 };
 }
+/**
+ * @brief Evaluates the transformation matrix (w.r.t. robot base) of the specified joint
+ *
+ * @param[in] jointIndex    Joint index
+ * @return				   Joint transformation matrix
+ */
+// Eigen::TransfMatrix GetBase2JointTransf(int jointIndex)
 
+/**
+ * @brief Method returning the joint transformation matrix wrt to the robot base
+ * @param ji joint number
+ * @return  transformation matrix
+ */
+const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji);
 #endif /* __ARMMODEL_H__ */

@@ -13,6 +13,7 @@ namespace FrameID{
      const std::string Tool = "_Tool";
      const std::string Joint = "_Joint_";
      const std::string Body = "_Body_";
+     const std::string Manipulability = "_Manipulability_";
 }
 }
 

@@ -183,13 +183,18 @@ Eigen::TransfMatrix RobotModel::GetTransformation(std::string transformationID)
     std::string partID = transformationID.substr(0, partIDIndex);
     Eigen::TransfMatrix T;
 
+    if(vehicle_){
     if (partID == vehicle_->GetID() || transformationID == vehicle_->GetID()) {
         return vehicle_->GetTransfMatrix(transformationID);
-    } else if (CheckArm(partID)) {
+    }
+    }else if (CheckArm(partID)) {
         //check arm
         T = armsModel_.at(partID)->GetTransformationMatrix(transformationID);
         if (vehicle_) {
             T = vehicle_->GetwTv() * vehicleToBase_.at(partID) * T;
+        } else {
+            //if there is no vehicle, the inertial frame wrt all is expressed is the vehicle to base.
+            T = vehicleToBase_.at(partID) * T;
         }
     }
 
@@ -202,12 +207,18 @@ Eigen::MatrixXd RobotModel::GetJacobian_Frame(std::string frameID, JacobianObser
     std::string modelID = frameID.substr(0, frameID.find_first_of("_"));
 
     Eigen::MatrixXd totJac, tempJ;
-    if ((frameID == vehicle_->GetID() || modelID == vehicle_->GetID()) && vehicle_) {
-        totJac = RightJuxtapose(totJac, vehicle_->GetJacobian(frameID));
-        for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
-             ++iter) {
-            tempJ = Eigen::MatrixXd::Zero(6, iter->second->GetNumJoints());
-            totJac = RightJuxtapose(totJac, tempJ);
+    if (vehicle_) {
+        if ((frameID == vehicle_->GetID() || modelID == vehicle_->GetID()) && vehicle_) {
+            if (jacobianObserver == InertialFrame) {
+                totJac = RightJuxtapose(totJac, vehicle_->GetJacobian(frameID));
+            } else if (jacobianObserver == VehicleFrame) {
+                totJac = RightJuxtapose(totJac, Eigen::MatrixXd::Zero(6, 6));
+            }
+            for (std::map<std::string, std::shared_ptr<rml::ArmModel> >::iterator iter = armsModel_.begin(); iter != armsModel_.end();
+                 ++iter) {
+                tempJ = Eigen::MatrixXd::Zero(6, iter->second->GetNumJoints());
+                totJac = RightJuxtapose(totJac, tempJ);
+            }
         }
     } else if (CheckArm(modelID)) {
 
@@ -221,6 +232,7 @@ Eigen::MatrixXd RobotModel::GetJacobian_Frame(std::string frameID, JacobianObser
         for (auto iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
             if (iter->first == modelID) {
+                //in get isolated arm jacobian the vTb is taken into account
                 tempJ = GetIsolatedArmJacobianForFrame(frameID);
             } else {
                 tempJ = Eigen::MatrixXd::Zero(6, armsModel_.at(modelID)->GetNumJoints());
@@ -268,7 +280,7 @@ Eigen::MatrixXd RobotModel::GetJacobian_Manipulability(std::string armID)
              ++iter) {
 
             if (iter->first == armID) {
-                armsModel_.at(armID)->EvaluateManipulability(tempJ);
+                tempJ = iter->second->GetJacobian(armID + FrameID::Manipulability);
 
             } else {
                 tempJ = Eigen::MatrixXd::Zero(1, armsModel_.at(iter->first)->GetNumJoints());

@@ -82,12 +82,11 @@ public:
      * be loaded. The ArmModel must be initialized before loading, otherwise is not
      * accepted. A <vehicle-to-base> transformation must be specified, which tells the
      * position of the arm's base frame with respect to the vehicle frame. If no vehicle
-     * is meant to be loaded, it can be the identity matrix. The returning value is an
-     * ID which identifies the loaded arm within the RobotModel class.
-     *
+     * is meant to be loaded, it identifies the transformation in between the robot base and the robot
+     * common frame.
      * @param arm		The arm model
      * @param vTb		The vehicle-to-base trasnformation matrix
-     * @return			The arm ID
+     * @return			True if the arm has been loaded false otherwise
      */
     bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb) throw(std::exception);
 
