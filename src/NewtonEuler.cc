@@ -133,13 +133,13 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
 	for (int i = 1; i < numJoints_; ++i) {
 		rhoVec_.at(i) = armModel_->GetCurrentLinkTransf(i).GetTransl();
 	}
-	rhoVec_.at(numJoints_) = armModel_->GeteTt().GetTransl();
+    rhoVec_.at(numJoints_) = armModel_->GeteTt().GetTransl();
 
 	R_.at(0) = armModel_->GetBaseTransf().GetRotMatrix(); // Base TODO Check
 	for (int i = 0; i < numJoints_; ++i) {
 		R_.at(i + 1) = armModel_->GetCurrentLinkTransf(i).GetRotMatrix(); // Base_i to Joint_i
 	}
-	R_.at(numJoints_ + 1) = armModel_->GeteTt().GetRotMatrix(); // Last joint to end effector
+    R_.at(numJoints_ + 1) = armModel_->GeteTt().GetRotMatrix(); // Last joint to end effector
 
 	for (int i = 0; i < numJoints_; ++i) {
 		q_ = armModel_->GetJointsPosition();

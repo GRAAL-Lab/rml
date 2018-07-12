@@ -10,11 +10,10 @@
 #include <memory>
 #include <vector>
 
+#include "ArmModel.h"
 #include "RMLDefines.h"
 #include "RMLExceptions.h"
-#include "ArmModel.h"
 #include "VehicleModel.h"
-
 
 namespace rml {
 
@@ -47,9 +46,6 @@ class RobotModel {
      * @return Jacobian
      */
     Eigen::Matrix6d GetIsolatedVehicleJacobianForFrame(std::string ID) const;
-
-
-
 
 public:
     /**
@@ -127,7 +123,7 @@ public:
      */
     Eigen::MatrixXd GetJacobian_Manipulability(std::string armID);
     /**
-     * @brief Methdo returing a transformation matrix of the robot model.\n
+     * @brief Method returing a transformation matrix of the robot model.\n
      * @details The methods returns a transformation matrix depending on the input string.\n
      * the following policy is used:\n
      * Tool Frame : armID+ “_Tool“
@@ -177,7 +173,6 @@ public:
 
 } /* namespace rml */
 
-
 ///**
 // * @brief Method returning a jacobian of the robot model .\n
 // * @details The method calls protected methods of the class depending on the input string. \n
@@ -191,7 +186,6 @@ public:
 // * @return  Jacobian
 // */
 //Eigen::MatrixXd GetJacobian(std::string jacobianID) throw(std::exception);
-
 
 ///**
 // * @brief Method computing the vehicle jacobian and rigid body attached to the vehicle jacobian depending on the input ID

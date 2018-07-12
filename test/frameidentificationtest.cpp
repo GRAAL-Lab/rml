@@ -155,7 +155,7 @@ int main()
     std::string rigid_body_frame_id("CameraFrame");
     Eigen::TransfMatrix T;
     T.SetTransl(Eigen::Vector3d(0.2, 0.0, 0.2));
-    arm_model->AddRigidBodyFrame(rigid_body_frame_id, arm_model->GetNumJoints() - 1, T);
+    arm_model->SetRigidBodyFrame(rigid_body_frame_id, arm_model->GetNumJoints() - 1, T);
     vehicle_model->AddRigidBodyFrame(rigid_body_frame_id, T);
     std::string joint_one_frame =arm_model->GetID() + rml::FrameID::Joint + "1";
     std::string tool_frame = arm_model->GetID() + rml::FrameID::Tool;

@@ -84,15 +84,17 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
     }
     q_ = q;
 
-    EvaluatebTt();
-    EvaluatebJt();
+    //EvaluatebTt();
+    //EvaluatebJt();
+    EvaluateTotalForwardGeometry();
+    EvaluateBase2JointJacobian(numberOfJoints_ - 1);
     EvaluatedJdqNumeric();
 
     if (!isMapInitialized_)
     {
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
-        transformation_.insert(std::make_pair(id_ + FrameID::Tool, bTt_));
+        //transformation_.insert(std::make_pair(id_ + FrameID::Tool, bTt_));
         jacobians_.insert(std::make_pair(id_ + FrameID::Tool, bJt_));
         //updating the joint jacobians
         for (int i = 0; i < numberOfJoints_; i++)
@@ -101,8 +103,8 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
             jacobians_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), EvaluateBase2JointJacobian(i)));
         }
         //updating rigid frame transformation matrix
-        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = attachedBodyFrames_.begin();
-             iter != attachedBodyFrames_.end();
+        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin();
+             iter != rigidBodyFrames_.end();
              ++iter)
         {
             std::string id = iter->first;
@@ -113,7 +115,7 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
     }
     else
     {
-        transformation_.find((id_ + FrameID::Tool))->second = bTt_;
+        //transformation_.find((id_ + FrameID::Tool))->second = bTt_;
         jacobians_.find((id_ + FrameID::Tool))->second = bJt_;
         //updating the joint jacobians
         for (int i = 0; i < numberOfJoints_; i++)
@@ -122,8 +124,8 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
             jacobians_.find(id_ + FrameID::Joint + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
         }
         //updating rigid frame transformation matrix
-        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = attachedBodyFrames_.begin();
-             iter != attachedBodyFrames_.end();
+        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin();
+             iter != rigidBodyFrames_.end();
              ++iter)
         {
             std::string id = iter->first;
@@ -182,7 +184,7 @@ const Eigen::VectorXd& ArmModel::GetJointsAcceleration() const
     return q_ddot_;
 }
 
-void ArmModel::EvaluatebJt()
+/*void ArmModel::EvaluatebJt()
 {
 
 
@@ -192,29 +194,28 @@ void ArmModel::EvaluatebJt()
     for (int i = 1; i < numberOfJoints_; i++) {
         bJt_ = RightJuxtapose(bJt_, h_[i]);
     }
-}
+}*/
 
-void ArmModel::EvaluatebTt()
+void ArmModel::EvaluateTotalForwardGeometry()
 {
     for (int jointNumber = 0; jointNumber < numberOfJoints_; jointNumber++) {
         ForwardDirectGeometry(jointNumber);
     }
-    bTt_ = baseTei_[numberOfJoints_ - 1] * eTt_;
 }
 
 void ArmModel::ForwardDirectGeometry(int jointNumber)
 {
 
     // wTbi is the transformation between the base of joint <jointNumber> and the world frame <w>
-    if (jointNumber == 0)
+    /*if (jointNumber == 0)
     {
         baseTbi_ = baseTb0_;
     }
     else
-    {
+    {*/
         // in this case, the base of joint <jointNumber> is the position of the end-effector of the joint <jointNumber - 1>
         baseTbi_ = baseTei_[jointNumber - 1];
-    }
+    //}
 
     // biTri is the constant transformation between the base of the joint <i> and its end-effector
     // biTei also takes into account the actual rotation of the joint, so
@@ -266,7 +267,7 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber)
     base_ki_ = baseTei_.at(jointNumber).block(0, 2, 3, 1); //GetSubMatrix(1, 3, 3, 3));
 
     h_[jointNumber].SetFirstVect3(base_ki_);
-    h_[jointNumber].SetSecondVect3(base_ki_.cross(bTt_.GetTransl() - baseTei_[jointNumber].GetTransl()));
+    h_[jointNumber].SetSecondVect3(base_ki_.cross(baseTei_[numberOfJoints_ - 1].GetTransl() - baseTei_[jointNumber].GetTransl()));
 
     //cout << "backward index = " << jointNumber << endl;
     //wTei_[jointNumber - 1].PrintMtx("wTei");
@@ -346,8 +347,8 @@ void ArmModel::EvaluatedJdqNumeric()
         /// Computing scalar delta_q (the denominator of the numerical integration).
         q_ = qVar;
 
-        EvaluatebTt();
-        EvaluatebJt();
+        EvaluateTotalForwardGeometry();
+        EvaluateBase2JointJacobian(numberOfJoints_ - 1);
         bJt_dQ = GetBase2ToolJacobian();
         //futils::PrettyPrint(wJt_dQ,"wJt_dQ");
         for (int iJrow = 0; iJrow < 6; ++iJrow) {
@@ -362,8 +363,8 @@ void ArmModel::EvaluatedJdqNumeric()
     }
     q_ = q_orig;
 
-    EvaluatebTt();
-    EvaluatebJt();
+    EvaluateTotalForwardGeometry();
+    EvaluateBase2JointJacobian(numberOfJoints_ - 1);
 }
 
 Eigen::TransfMatrix ArmModel::GetBase2JointTransf(int jointIndex)
@@ -389,7 +390,7 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
     return bJj;
 }
 
-void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception)
+void ArmModel::SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception)
 {
     if(jointIndex >= numberOfJoints_){
         ArmModelNotExistingJointException armModelNotExistingJoint;
@@ -398,27 +399,27 @@ void ArmModel::AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
     }
     IndexedTMat myMat(jointIndex, TMat);
     std::string idRigidFrame = id_ + FrameID::Body + ID;
-    attachedBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
+    rigidBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
     transformation_.insert(std::make_pair(idRigidFrame, GetAttachedBodyTransf(idRigidFrame)));
     jacobians_.insert(std::make_pair(idRigidFrame, GetAttachedBodyJacobian(idRigidFrame)));
 }
 
-Eigen::TransfMatrix ArmModel::GetAttachedBodyFrame(std::string& ID) throw(std::exception)
+Eigen::TransfMatrix ArmModel::GetRigidBodyFrame(std::string& ID) throw(std::exception)
 {
-    if(attachedBodyFrames_.find(ID)==attachedBodyFrames_.end())
+    if(rigidBodyFrames_.find(ID)==rigidBodyFrames_.end())
     {
         ArmModelWrongLabelException armModelWrongLabel;
         armModelWrongLabel.SetID("GetAttachedBodyFrame");
         throw(armModelWrongLabel);
     }
-    return attachedBodyFrames_.at(ID).second;
+    return rigidBodyFrames_.at(ID).second;
 }
 
 Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID)
 {
 
-    int jointIndex = attachedBodyFrames_.at(ID).first;
-    Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
+    int jointIndex = rigidBodyFrames_.at(ID).first;
+    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(ID).second;
 
     return transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)) * TMat;
 }
@@ -426,8 +427,8 @@ Eigen::TransfMatrix ArmModel::GetAttachedBodyTransf(std::string& ID)
 Eigen::MatrixXd ArmModel::GetAttachedBodyJacobian(std::string& ID)
 {
 
-    int jointIndex = attachedBodyFrames_.at(ID).first;
-    Eigen::TransfMatrix TMat = attachedBodyFrames_.at(ID).second;
+    int jointIndex = rigidBodyFrames_.at(ID).first;
+    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(ID).second;
     Eigen::Vector3d projectedTransl = transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)).GetRotMatrix() * TMat.GetTransl();
     return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(id_ + FrameID::Joint + std::to_string(jointIndex));
 
@@ -470,15 +471,15 @@ int ArmModel::GetNumJoints() const
     return links_.size();
 }
 
-const Eigen::TransfMatrix& ArmModel::GetBaseTransf()
+/*const Eigen::TransfMatrix& ArmModel::GetBaseTransf()
 {
     return baseTb0_; ;
-}
+}*/
 
-void ArmModel::SetBaseTransf(const Eigen::TransfMatrix& baseTb0)
+/*void ArmModel::SetBaseTransf(const Eigen::TransfMatrix& baseTb0)
 {
     baseTb0_ = baseTb0;
-}
+}*/
 
 const Eigen::MatrixXd& ArmModel::GetBase2ToolJacobian() const
 {
@@ -490,7 +491,7 @@ const Eigen::TransfMatrix& ArmModel::GetCurrentLinkTransf(int ji)
     return biTei_.at(ji);
 }
 
-const Eigen::TransfMatrix& ArmModel::GetBase2ToolTransf()
+/*const Eigen::TransfMatrix& ArmModel::GetBase2ToolTransf()
 {
     return bTt_;
 }
@@ -503,7 +504,7 @@ const Eigen::TransfMatrix& ArmModel::GeteTt() const
 void ArmModel::SeteTt(const Eigen::TransfMatrix& eTt)
 {
     eTt_ = eTt;
-}
+}*/
 
 const std::vector<Eigen::MatrixXd>& ArmModel::GetdJdq() const
 {

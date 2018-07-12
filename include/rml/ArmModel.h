@@ -137,14 +137,14 @@ public:
      * @param jointIndex index of the joint to which the frame is attached.
      * @param TMat Transformation ,atrix of the frame.
      */
-    void AddRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception);
+    void SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception);
 
     /**
      * @brief Method returning the attached body frame wrt to the joint it is attached to.
      * @param ID frame ID.
      * @return transformation matrix.
      */
-    Eigen::TransfMatrix GetAttachedBodyFrame(std::string& ID) throw(std::exception);
+    Eigen::TransfMatrix GetRigidBodyFrame(std::string& ID) throw(std::exception);
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.
      * @param frameId frame id
@@ -163,19 +163,6 @@ public:
      */
     int GetNumJoints() const;
 
-    //TODO ELIMINATE ?
-    /**
-     * @brief Method returning the base transformation matrix
-     * @return transformation matrix
-     */
-    const Eigen::TransfMatrix& GetBaseTransf();
-
-    /**
-     * @brief Method setting the base transformation matrix.
-     * @param baseTb0 base transformation matrix
-     */
-    void SetBaseTransf(const Eigen::TransfMatrix& baseTb0);
-
     /**
      * @brief Method returning the base to tool jacobian
      * @return base to tool jacobian
@@ -188,23 +175,6 @@ public:
      * @return  transformation matrix
      */
     const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji);
-
-    /**
-     * @brief Method returning the base to tool transformation matrix.
-     * @return  transformation matrix.
-     */
-    const Eigen::TransfMatrix& GetBase2ToolTransf();
-    /**
-     * @brief Method returnint eTt transformation matrix.
-     * @return  eTt.
-     */
-    const Eigen::TransfMatrix& GeteTt() const;
-
-    /**
-     * @brief Method setting eTt transformation matrix
-     * @param eTt eTt transformation matrix
-     */
-    void SeteTt(const Eigen::TransfMatrix& eTt);
 
     /**
      * @brief Method returning dJdq evaluated numerically
@@ -258,19 +228,9 @@ public:
 
 protected:
     /**
-	 * @brief Evaluates the Jacobian of the arm
-	 * This method returns the Jacobian matrix
-	 * @return wJt the Jacobian matrix
-	 */
-    void EvaluatebJt();
-
-    /**
-	 * @brief Evaluates the tool transformation matrix
-	 * This method returns tool transformation matrix
-	 * @return the tool transformation matrix
-	 */
-    void EvaluatebTt();
-
+     * @brief ArmModel::EvaluateTotalForwardGeometry
+     */
+    void EvaluateTotalForwardGeometry();
     /**
      * @brief Evaluates the transformation matrix (w.r.t. robot base) of the specified joint
      *
@@ -332,7 +292,7 @@ protected:
     bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized.
     int numberOfJoints_; //<! joints number.
     std::vector<RobotLink> links_; //!< vector of the arm links.
-    std::unordered_map<std::string, IndexedTMat> attachedBodyFrames_; //<! map of the attached body frames.
+    std::unordered_map<std::string, IndexedTMat> rigidBodyFrames_; //<! map of the attached body frames.
     std::unordered_map<std::string, Eigen::MatrixXd> jacobians_; //<! map of the jacobians.
     std::unordered_map<std::string, Eigen::TransfMatrix> transformation_; //<! map of the transformations.
     Eigen::VectorXd q_; //<! vector of joints position.
@@ -341,13 +301,13 @@ protected:
     Eigen::VectorXd controlRef_; //<! control vector .
     std::vector<Eigen::TransfMatrix> baseTei_; //<! vector of transformation matrix from base to joint.   ??
     std::vector<Eigen::TransfMatrix> biTei_; //<! vector of transformation matrix from joint i-1 to joint i. ??
-    Eigen::TransfMatrix baseTb0_; //<! transformation matrix of the base. ??
+    //Eigen::TransfMatrix baseTb0_; //<! transformation matrix of the base. ??
     Eigen::TransfMatrix baseTbi_; //<! transformation matrix from base to joint i.??
     Eigen::TransfMatrix Tz_; //!< transformation matrix for rotation or prismatic joint.
     Eigen::Vector3d base_ki_; //!<
     std::vector<Eigen::Vector6d> h_; //!<
-    Eigen::TransfMatrix bTt_; //!< base to tool transformation matrix.
-    Eigen::TransfMatrix eTt_; //!< end effector to tool transformation matrix.
+    //Eigen::TransfMatrix bTt_; //!< base to tool transformation matrix.
+    //Eigen::TransfMatrix eTt_; //!< end effector to tool transformation matrix.
     std::vector<Eigen::MatrixXd> dJdq_; //!< dJdq evaluated numerically.
     Eigen::MatrixXd Jpinv_; //!< jacobian pseudoinverse.
     Eigen::MatrixXd djdqJpinv_; //!< djdq * jacobian pseudoinverse.

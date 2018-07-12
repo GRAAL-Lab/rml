@@ -33,7 +33,7 @@ add_library(rml SHARED
     src/ArmModel.cc
     src/VehicleModel.cc
     src/RobotModel.cc
-    src/NewtonEuler.cc
+#    src/NewtonEuler.cc
 )
 
 set_target_properties(rml PROPERTIES LINKER_LANGUAGE CXX)

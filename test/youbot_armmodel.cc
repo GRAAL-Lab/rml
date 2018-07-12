@@ -54,11 +54,11 @@ YouBotArmModel::YouBotArmModel(std::string id): ArmModel(id)
 		AddLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), biTri.at(i), min[i], max[i]);
 	}
 
-	eTt_(0,0) =  1;   eTt_(0,1) =  0;   eTt_(0,2) =  0;   eTt_(0,3) = 0;
+    /*eTt_(0,0) =  1;   eTt_(0,1) =  0;   eTt_(0,2) =  0;   eTt_(0,3) = 0;
 	eTt_(1,0) =  0;   eTt_(1,1) =  1;   eTt_(1,2) =  0;   eTt_(1,3) = 0;
 	eTt_(2,0) =  0;   eTt_(2,1) =  0;   eTt_(2,2) =  1;   eTt_(2,3) = 0;
 	eTt_(3,0) =  0;   eTt_(3,1) =  0;   eTt_(3,2) =  0;   eTt_(3,3) = 1;
-
+*/
 }
 
 YouBotArmModel::~YouBotArmModel()
