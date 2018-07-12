@@ -5,10 +5,6 @@
  *      Author: francescow
  */
 
-#ifndef CMAT_STANDALONE
-#define CMAT_STANDALONE
-#endif
-
 #include <climits>
 #include <cmath>
 #include <fstream>

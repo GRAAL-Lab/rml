@@ -127,7 +127,6 @@ public:
     /**
 	 * @brief Evaluates the manipulability measure and its Jacobian
 	 * This method returns he manipulability measure and its Jacobian
-	 * @param[out] mu the manipulability measure
 	 * @param[out] Jmu the manipulability measure Jacobian
 	 */
     void EvaluateManipulability(Eigen::MatrixXd& Jmu);
@@ -148,16 +147,16 @@ public:
     Eigen::TransfMatrix GetAttachedBodyFrame(std::string& ID) throw(std::exception);
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.
-     * @param matrixId frame id
+     * @param frameId frame id
      * @return  transformation matrix
      */
-    Eigen::TransfMatrix GetTransformationMatrix(const std::string matrixId) throw (std::exception);
+    Eigen::TransfMatrix GetTransformationMatrix(const std::string frameId) throw (std::exception);
     /**
      * @brief Method returning the jacobian related to the input frameID wrt to the arm base.
-     * @param matrixId frame id
-     * @return jacobian
+     * @param frameId frame id
+     * @return jacobianID the string identificator for the jacobian
      */
-    Eigen::MatrixXd GetJacobian(const std::string jacobianID) throw (std::exception);
+    Eigen::MatrixXd GetJacobian(const std::string frameId) throw (std::exception);
     /**
      * @brief Method returning the arm number of joints
      * @return  arm number of joints
@@ -314,12 +313,12 @@ protected:
     Eigen::MatrixXd EvaluateBase2JointJacobian(int jointIndex);
     /**
      * @brief Method performing the forward direct geometry untill the input joint number.
-     * @param jointNumber.
+     * @param jointNumber which joint is intended as last of the chain
      */
     void ForwardDirectGeometry(int jointNumber);
     /**
      * @brief Backward Direct Geometry from the input joint number to the input end effector index
-     * @param jointNumber
+     * @param jointNumber which joint is intended as last of the chain
      * @param endEffectorIndex
      */
     void BackwardDirectGeometry(int jointNumber, int endEffectorIndex);

@@ -134,7 +134,7 @@ public:
     /**
      * Checks that the given armIndex is within the allowed range (i.e. less or equal than
      * the number of loaded arms).
-     * @param armIndex
+     * @param armID the arm index
      * @return
      */
     bool CheckArm(std::string armID) const throw(std::exception);
