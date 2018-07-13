@@ -68,35 +68,28 @@ public:
      * @param TMat Transformation matrix of the frame.
      */
     void AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat);
-    /**
-     * @brief Method returning the attached body frame.
-     * @param ID frame ID.
-     * @return transformation matrix.
-     */
-    Eigen::TransfMatrix GetAttachedBodyTransf(const std::string& ID) throw(std::exception);
 
     /**
      * @brief Method returning the transformation matrix related to the frame id in input.
      * @param ID frame id.
      * @return transformation matrix.
      */
-    Eigen::TransfMatrix GetTransfMatrix(const std::string ID) throw(std::exception);
+    Eigen::TransfMatrix GetTransformation(const std::string frameID) throw(std::exception);
+
+    /**
+     * @brief Method returing a transformation matrix from frameID_j to frameID_k, i.e. jTk.\n
+     * @param[in] frameID_j first frame;
+     * @param[in] framID_k second frame;
+     * @return Transformation Matrix jTk.
+     */
+    Eigen::TransfMatrix GetTransformationFrames(const std::string& frameID_j,const std::string& frameID_k);
     /**
      * @brief Method returning the jacobian related to the frame id in input.
      * @param ID frame id.
      * @return transformation matrix.
      */
     Eigen::MatrixXd GetJacobian(const std::string ID) throw(std::exception);
-    /**
-     * @brief Method returning the world to vehicle transf matrix.
-     * @return wTv
-     */
-    const Eigen::TransfMatrix GetwTv();
-    /**
-     * @brief Method returning the vehicle jacobian.
-     * @return vJv
-     */
-    const Eigen::Matrix6d& GetvJv() const throw(std::exception);
+
     /**
      * @brief Method returning whether the model is initialized.
      * @return true if the model is initialized, false otherwise.
@@ -143,19 +136,6 @@ public:
     const Eigen::Vector6d& GetAccelerationOnVehicle();
 
 protected:
-    /**
-     * @brief Method returning the attached body transformation matrix.
-     * @param ID frame ID.
-     * @return  transformation matrix.
-     */
-    Eigen::TransfMatrix GetCurrentAttachedBodyTransf(const std::string ID);
-    /**
-     * @brief Method returning the attached body frame jacobian.
-     * @param ID frame ID.
-     * @return jacobian matrix.
-     */
-    Eigen::MatrixXd GetAttachedBodyJacobian(const std::string ID);
-
     bool modelInitialized_; //!< boolean stating whether the model is initialized.
     bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized.
     std::unordered_map<std::string, Eigen::TransfMatrix> attachedBodyFrames_; //!< map of the attached body frames.
@@ -172,3 +152,31 @@ protected:
 }
 
 #endif /* __CTRL_VEHICLEMODEL_H__ */
+/**
+ * @brief Method returning the world to vehicle transf matrix.
+ * @return wTv
+ */
+// const Eigen::TransfMatrix GetwTv();
+/**
+ * @brief Method returning the vehicle jacobian.
+ * @return vJv
+ */
+//const Eigen::Matrix6d& GetvJv() const throw(std::exception);
+/**
+ * @brief Method returning the attached body frame.
+ * @param ID frame ID.
+ * @return transformation matrix.
+ */
+//Eigen::TransfMatrix GetAttachedBodyTransf(const std::string& ID) throw(std::exception);
+/**
+ * @brief Method returning the attached body frame jacobian.
+ * @param ID frame ID.
+ * @return jacobian matrix.
+ */
+//Eigen::MatrixXd GetAttachedBodyJacobian(const std::string ID);
+/**
+ * @brief Method returning the attached body transformation matrix.
+ * @param ID frame ID.
+ * @return  transformation matrix.
+ */
+//Eigen::TransfMatrix GetCurrentAttachedBodyTransf(const std::string ID);

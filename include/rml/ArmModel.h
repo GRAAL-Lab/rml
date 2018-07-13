@@ -136,19 +136,34 @@ public:
      * @param ID frame ID.
      * @return transformation matrix.
      */
-    Eigen::TransfMatrix GetRigidBodyFrame(std::string& ID) throw(std::exception);
+    //TODO ELIMINATE
+    //Eigen::TransfMatrix GetRigidBodyFrame(const std::string& frameID) throw(std::exception);
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.
      * @param frameId frame id
      * @return  transformation matrix
      */
-    Eigen::TransfMatrix GetTransformationMatrix(const std::string frameId) throw(std::exception);
+    Eigen::TransfMatrix GetTransformation(const std::string& frameID) throw(std::exception);
+    /**
+     * @brief Method returing a transformation matrix from frameID_j to frameID_k, i.e. jTk.\n
+     * @param[in] frameID_j first frame;
+     * @param[in] framID_k second frame;
+     * @return Transformation Matrix jTk.
+     */
+    Eigen::TransfMatrix GetTransformationFrames(const std::string& frameID_j,const std::string& frameID_k);
     /**
      * @brief Method returning the jacobian related to the input frameID wrt to the arm base.
      * @param frameId frame id
      * @return jacobianID the string identificator for the jacobian
      */
-    Eigen::MatrixXd GetJacobian(const std::string frameId) throw(std::exception);
+    Eigen::MatrixXd GetJacobian(const std::string& frameID) throw(std::exception);
+
+    /**
+     * @brief Method returning the manipulability jacobian related to the input frameID wrt to the arm base.
+     * @param frameId frame id
+     * @return frameID the string identificator for the frame
+     */
+    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID) throw(std::exception);
     /**
      * @brief Method returning the arm number of joints
      * @return  arm number of joints
@@ -170,6 +185,7 @@ public:
     /**
      * @brief Method returning true if the model is initialized false otherwise.
      */
+    //TODO DELETE
     bool IsModelInitialized() const;
 
     /**
@@ -188,7 +204,7 @@ public:
      * @brief Method returning the arm manipulability
      * @return  manipulability value.
      */
-    double GetManipulability();
+    double GetManipulability(std::string frameID);
     /**
      * @brief Method returning the arm id.
      * @return arm id
@@ -230,19 +246,19 @@ protected:
      * @brief Evaluates the manipulability measure and its Jacobian
      * This method returns he manipulability measure and its Jacobian
      */
-    void EvaluateManipulability();
+    Eigen::MatrixXd EvaluateManipulability(const std::string frameID);
     /**
      * @brief Method returning the attached body frame wrt to the arm base.
      * @param ID frame ID.
      * @return  transformation matrix.
      */
-    Eigen::TransfMatrix EvaluateRigidBodyTransf(std::string& ID);
+    Eigen::TransfMatrix EvaluateRigidBodyTransf(const std::string& frameID);
     /**
      * @brief Method returning the attached body frame jacobian wrt to the arm base.
      * @param ID frame ID.
      * @return jacobian matrix.
      */
-    Eigen::MatrixXd EvaluateRigidBodyJacobian(std::string& ID);
+    Eigen::MatrixXd EvaluateRigidBodyJacobian(const std::string& frameID);
     /**
      * @brief Evaluates the jacobian matrix (w.r.t. robot base) of the specified joint
      *
@@ -274,6 +290,8 @@ protected:
     std::unordered_map<std::string, IndexedTMat> rigidBodyFrames_; //<! map of the attached body frames.
     std::unordered_map<std::string, Eigen::MatrixXd> jacobians_; //<! map of the jacobians.
     std::unordered_map<std::string, Eigen::TransfMatrix> transformation_; //<! map of the transformations.
+    std::unordered_map<std::string, Eigen::MatrixXd> manipulabilityJacobians_;
+    std::unordered_map<std::string, double > manipulability_;
     Eigen::VectorXd q_; //<! vector of joints position.
     Eigen::VectorXd q_dot_; //<! vector of joints velocity.
     Eigen::VectorXd q_ddot_; //<! vector of joints acceleration.
@@ -285,14 +303,14 @@ protected:
     Eigen::Vector3d base_ki_; //!<
     std::vector<Eigen::Vector6d> h_; //!<
     std::vector<Eigen::MatrixXd> dJdq_; //!< dJdq evaluated numerically.
-    Eigen::MatrixXd Jpinv_; //!< jacobian pseudoinverse.
+    //Eigen::MatrixXd Jpinv_; //!< jacobian pseudoinverse.
     Eigen::MatrixXd djdqJpinv_; //!< djdq * jacobian pseudoinverse.
     Eigen::MatrixXd bJt_; //!< base to tool jacobian matrix.
     Eigen::RotMatrix I3_; //!< identity matrix
     Eigen::VectorXd ZeroQ_; //!< zero vector
     bool modelReadFromFile_; //!< boolean stating whether the model is read from file.
     std::string id_; //!< arm id.
-    double mu_; //!< manipulability.
+
     //Eigen::TransfMatrix baseTb0_; //<! transformation matrix of the base. ??
     //Eigen::TransfMatrix bTt_; //!< base to tool transformation matrix.
     //Eigen::TransfMatrix eTt_; //!< end effector to tool transformation matrix.

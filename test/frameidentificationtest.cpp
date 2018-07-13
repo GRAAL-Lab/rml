@@ -117,75 +117,6 @@ int main()
     //std::cout << "Jacobian\n" << vehicle_model->GetJacobian(rigid_body_frame_id_for_look_up) << std::endl;
     //std::cout << "Jacobian with method \n " << vehicle_model->GetAttachedBodyJacobian(rigid_body_frame_id_for_look_up) << std::endl;
 
-    ////ROBOT MODEL TEST
-    std::string arm_id = "TestArm";
-    auto arm_model = std::make_shared<rml::TwoLinksArmModel>(rml::TwoLinksArmModel(arm_id));
-    std::string vehicle_id("vehicleTest");
-    Eigen::TransfMatrix vTb;
-    vTb(0, 0) = -1;
-    vTb(0, 1) = 0;
-    vTb(0, 2) = 0;
-    vTb(0, 3) = 0.85;
-    vTb(1, 0) = 0;
-    vTb(1, 1) = -1;
-    vTb(1, 2) = 0;
-    vTb(1, 3) = 0;
-    vTb(2, 0) = 0;
-    vTb(2, 1) = 0;
-    vTb(2, 2) = 1;
-    vTb(2, 3) = 0.42;
-    vTb(3, 0) = 0;
-    vTb(3, 1) = 0;
-    vTb(3, 2) = 0;
-    vTb(3, 3) = 1;
-    auto vehicle_model = std::make_shared<rml::VehicleModel>(rml::VehicleModel(vehicle_id));
-    vehicle_model->SetJacobian(Eigen::MatrixXd::Identity(6, 6));
-    auto robot_model = std::make_shared<rml::RobotModel>(rml::RobotModel());
-    //robot_model->LoadVehicle(vehicle_model);
-    robot_model->LoadArm(arm_model, vTb);
-    try {
-        robot_model->LoadArm(arm_model,vTb);
-    } catch (rml::ExceptionWithID&e) {
-        std::cerr<<e.what()<<std::endl;
-        std::cerr<<e.who()<<std::endl;
-    }
-    Eigen::VectorXd initial_tool_pos(arm_model->GetNumJoints());
-    initial_tool_pos << 0.011, 0.11;//, -1.4, -0.11, 1.57;
-    arm_model->SetJointsPosition(initial_tool_pos);
-    std::string rigid_body_frame_id("CameraFrame");
-    Eigen::TransfMatrix T;
-    T.SetTransl(Eigen::Vector3d(0.2, 0.0, 0.2));
-    arm_model->SetRigidBodyFrame(rigid_body_frame_id, arm_model->GetNumJoints() - 1, T);
-    vehicle_model->AddRigidBodyFrame(rigid_body_frame_id, T);
-    std::string joint_one_frame =arm_model->GetID() + rml::FrameID::Joint + "1";
-    std::string tool_frame = arm_model->GetID() + rml::FrameID::Tool;
-    std::string vehicle_frame = vehicle_model->GetID();
-    std::string rigid_body_arm_frame =  arm_model->GetID() + rml::FrameID::Body + rigid_body_frame_id;
-    std::string rigid_body_vehicle_frame = vehicle_model->GetID() + rml::FrameID::Body + rigid_body_frame_id;
-    rml::JacobianObserver obsVehicle=rml::VehicleFrame;
-    rml::JacobianObserver obsInertial=rml::InertialFrame;
-    std::cout << "-- FRAMES ADDED --" << std::endl;
-
-    //Eigen::VectorXd control;
-    //control.setZero(8);
-    //robot_model->SetRobotControl(control);
-   // futils::PrettyPrint(robot_model->GetRobotControl(vehicle_id), "TEST GET ROBOT CONTROL VEHICLE");
-    //futils::PrettyPrint(robot_model->GetRobotControl(arm_id), "TEST GET ROBOT CONTROL ARM");
-    futils::PrettyPrint(robot_model->GetJacobian_Frame(joint_one_frame,obsVehicle), "JACOBIAN JOINT FRAME VEHICLE OBSERVER");
-    futils::PrettyPrint(robot_model->GetJacobian_Frame(joint_one_frame,obsInertial), "JACOBIAN JOINT FRAME INERTIAL OBSERVER");
-    futils::PrettyPrint(robot_model->GetJacobian_Frame(tool_frame,obsVehicle), "JACOBIAN TOOL FRAME VEHICLE OBSERVER");
-    //futils::PrettyPrint(robot_model->GetJacobian_Frame(tool_frame,obsInertial), "JACOBIAN TOOL FRAME INERTIAL OBSERVER");
-    futils::PrettyPrint(robot_model->GetJacobian_JointSpace(arm_id), "JACOBIAN JOINT SPACE");
-    futils::PrettyPrint(robot_model->GetJacobian_Manipulability(arm_id), "JACOBIAN MANIPULABILITY ");
-    //futils::PrettyPrint(robot_model->GetJacobian_Frame(vehicle_frame,obsInertial), "JACOBIAN VEHICLE");
-    futils::PrettyPrint(robot_model->GetJacobian_Frame(rigid_body_arm_frame,obsVehicle), "JACOBIAN ARM RIGID BODY FRAME JACOBIAN OBS VEHICLE");
-    futils::PrettyPrint(robot_model->GetJacobian_Frame(rigid_body_arm_frame,obsInertial), "JACOBIAN ARM RIGID BODY FRAME JACOBIAN OBS INERTIAL");
-    //futils::PrettyPrint(robot_model->GetJacobian_Frame(rigid_body_vehicle_frame,obsInertial), "JACOBIAN VEHICLE RIGID BODY FRAME JACOBIAN");
-    futils::PrettyPrint(robot_model->GetTransformation(joint_one_frame), "JOINT FRAME TRANSFORMATION ");
-   // futils::PrettyPrint(robot_model->GetTransformation(tool_frame), "TOOL FRAME TRANSFORMATION");
-   // futils::PrettyPrint(robot_model->GetTransformation(vehicle_frame), "VEHICLE FRAME TRANSFORMATION");
-    futils::PrettyPrint(robot_model->GetTransformation(rigid_body_arm_frame), "RIGID BODY ARM FRAME TRANSFORMATION");
-    //futils::PrettyPrint(robot_model->GetTransformation(rigid_body_vehicle_frame), "RIGID BODY VEHICLE FRAME TRANSFORMATION");
     ///MAP TESTING
     //std::map<std::string, Eigen::MatrixXd> testMap;
     //std::string ID1="ID1";
@@ -214,5 +145,72 @@ int main()
     //    std::cout << "Matrix\n" << iter->second << std::endl;
     //}
 
+
+    ////ROBOT MODEL TEST
+    std::string arm_id = "TestArm";
+    auto arm_model = std::make_shared<rml::TwoLinksArmModel>(rml::TwoLinksArmModel(arm_id));
+    std::string vehicle_id("vehicleTest");
+    Eigen::TransfMatrix vTb;
+    vTb(0, 0) = -1;
+    vTb(0, 1) = 0;
+    vTb(0, 2) = 0;
+    vTb(0, 3) = 0.85;
+    vTb(1, 0) = 0;
+    vTb(1, 1) = -1;
+    vTb(1, 2) = 0;
+    vTb(1, 3) = 0;
+    vTb(2, 0) = 0;
+    vTb(2, 1) = 0;
+    vTb(2, 2) = 1;
+    vTb(2, 3) = 0.42;
+    vTb(3, 0) = 0;
+    vTb(3, 1) = 0;
+    vTb(3, 2) = 0;
+    vTb(3, 3) = 1;
+    auto vehicle_model = std::make_shared<rml::VehicleModel>(rml::VehicleModel(vehicle_id));
+    vehicle_model->SetJacobian(Eigen::MatrixXd::Identity(6, 6));
+    auto robot_model = std::make_shared<rml::RobotModel>(rml::RobotModel());
+    robot_model->LoadArm(arm_model,vTb);
+    robot_model->LoadVehicle(vehicle_model);
+    Eigen::VectorXd initial_tool_pos(arm_model->GetNumJoints());
+    initial_tool_pos <<  0.011, 0.11;// -1.4, -0.11, 1.57;//, -1.4, -0.11, 1.57;
+    arm_model->SetJointsPosition(initial_tool_pos);
+    std::string rigid_body_frame_id("CameraFrame");
+    Eigen::TransfMatrix T;
+    T.SetTransl(Eigen::Vector3d(0.2, 0.0, 0.2));
+    arm_model->SetRigidBodyFrame(rigid_body_frame_id, arm_model->GetNumJoints() - 1, T);
+    vehicle_model->AddRigidBodyFrame(rigid_body_frame_id, T);
+    std::string joint_one_frame =arm_model->GetID() + rml::FrameID::Joint + "1";
+    std::string tool_frame = arm_model->GetID() + rml::FrameID::Tool;
+    std::string vehicle_frame = vehicle_model->GetID();
+    std::string rigid_body_arm_frame =  arm_model->GetID() + rml::FrameID::Body + rigid_body_frame_id;
+    std::string rigid_body_vehicle_frame = vehicle_model->GetID() + rml::FrameID::Body + rigid_body_frame_id;
+    rml::JacobianObserver obsVehicle=rml::VehicleFrame;
+    rml::JacobianObserver obsInertial=rml::InertialFrame;
+    std::cout << "-- FRAMES ADDED --" << std::endl;
+
+    Eigen::VectorXd control;
+    control.setZero(8);
+    robot_model->SetRobotControl(control);
+    futils::PrettyPrint(robot_model->GetRobotControl(vehicle_id), "TEST GET ROBOT CONTROL VEHICLE");
+    futils::PrettyPrint(robot_model->GetRobotControl(arm_id), "TEST GET ROBOT CONTROL ARM");
+    futils::PrettyPrint(robot_model->GetCartesianJacobian(joint_one_frame,obsVehicle), "JACOBIAN JOINT FRAME VEHICLE OBSERVER");
+    futils::PrettyPrint(robot_model->GetCartesianJacobian(joint_one_frame,obsInertial), "JACOBIAN JOINT FRAME INERTIAL OBSERVER");
+    futils::PrettyPrint(robot_model->GetJointSpaceJacobian(arm_id), "JACOBIAN JOINT SPACE");
+    futils::PrettyPrint(robot_model->GetManipulabilityJacobian(joint_one_frame), "JACOBIAN MANIPULABILITY ");
+    futils::PrettyPrint(arm_model->GetManipulability(joint_one_frame), "MU");
+    futils::PrettyPrint(robot_model->GetManipulabilityJacobian(rigid_body_arm_frame), "JACOBIAN MANIPULABILITY ");
+    futils::PrettyPrint(robot_model->GetCartesianJacobian(vehicle_frame,obsInertial), "JACOBIAN VEHICLE");
+    futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_arm_frame,obsVehicle), "JACOBIAN ARM RIGID BODY FRAME JACOBIAN OBS VEHICLE");
+    futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_arm_frame,obsInertial), "JACOBIAN ARM RIGID BODY FRAME JACOBIAN OBS INERTIAL");
+    futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_vehicle_frame,obsInertial), "JACOBIAN VEHICLE RIGID BODY FRAME JACOBIAN");
+    futils::PrettyPrint(robot_model->GetTransformation(joint_one_frame), "JOINT FRAME TRANSFORMATION ");
+    futils::PrettyPrint(robot_model->GetTransformation(vehicle_frame), "VEHICLE FRAME TRANSFORMATION");
+    futils::PrettyPrint(robot_model->GetTransformation(rigid_body_arm_frame), "RIGID BODY ARM FRAME TRANSFORMATION");
+    futils::PrettyPrint(robot_model->GetTransformation(rigid_body_vehicle_frame), "RIGID BODY VEHICLE FRAME TRANSFORMATION");
+    futils::PrettyPrint(robot_model->GetTransformationFrames(joint_one_frame,rigid_body_vehicle_frame),"TRANSF MATRIX FROM JOINT ONE TO VEHICLE RIGID BODY");
+    futils::PrettyPrint(robot_model->GetTransformationFrames(rigid_body_arm_frame, rigid_body_vehicle_frame),"RIGID BODY ARM RIGID BODY VEHICLE");
+    futils::PrettyPrint(arm_model->GetTransformationFrames(rigid_body_arm_frame, joint_one_frame), "RIGID BODY TO JOINT ONE ARM");
+    futils::PrettyPrint(vehicle_model->GetTransformationFrames(rigid_body_vehicle_frame, vehicle_id), "FRAMES VEHICLE");
     return 0;
 }

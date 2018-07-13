@@ -37,7 +37,7 @@ ArmModel::ArmModel(std::string id)
     , numberOfJoints_(0)
     , modelReadFromFile_(false)
     , id_(id)
-    , mu_(0.0)
+
 {
 }
 
@@ -112,13 +112,13 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
             transformation_.insert(std::make_pair(id, EvaluateRigidBodyTransf(id)));
             jacobians_.insert(std::make_pair(id, EvaluateRigidBodyJacobian(id)));
         }
-        EvaluateManipulability();
         isMapInitialized_ = true;
     } else {
         // transformation_.find((id_ + FrameID::Tool))->second = bTt_;
         jacobians_.find((id_ + FrameID::Tool))->second = bJt_;
         //updating the joint jacobians
         for (int i = 0; i < numberOfJoints_; i++) {
+
             transformation_.find(id_ + FrameID::Joint + std::to_string(i))->second = baseTei_.at(i);
             jacobians_.find(id_ + FrameID::Joint + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
         }
@@ -130,8 +130,9 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
             transformation_.find(id)->second = EvaluateRigidBodyTransf(id);
             jacobians_.find(id)->second = EvaluateRigidBodyJacobian(id);
         }
-        EvaluateManipulability();
     }
+    manipulability_.erase(manipulability_.begin(), manipulability_.end());
+    manipulabilityJacobians_.erase(manipulabilityJacobians_.begin(), manipulabilityJacobians_.end());
 }
 
 void ArmModel::SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::exception)
@@ -258,54 +259,50 @@ void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber)
     //h_[jointNumber - 1].PrintMtx("h");
 }
 
-void ArmModel::EvaluateManipulability()
+Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string frameID)
 {
-    Eigen::MatrixXd Jmu;
-    Jmu.resize(1, numberOfJoints_);
+    Eigen::MatrixXd J = GetJacobian(frameID);
+    int n = J.cols();
+    if (n > numberOfJoints_) {
+        //THROW EXCEPITON
+    }
+    Eigen::MatrixXd Jmu, Jpinv;
+
+    Jmu.resize(1, n);
     Jmu.setZero();
 
     RegularizationData mySVD;
-
-    if (numberOfJoints_ < 6) {
+    if (n < 6) {
         //TODO change svd data
         mySVD.params.lambda = 0.0;
         mySVD.params.threshold = 0.00;
         /// For defective manipulators
-        //std::cout << "nrow: " << dJdq_[0].rows() << " ncol:" << dJdq_[0].cols() << std::endl;
-        Jpinv_ = rml::RegularizedPseudoInverse((Eigen::MatrixXd)bJt_.transpose(), mySVD);
-        //Jpinv_ = .RegPseudoInverse(, );
-        for (int k = 0; k < numberOfJoints_; k++) {
+        Jpinv = rml::RegularizedPseudoInverse((Eigen::MatrixXd)J.transpose(), mySVD);
+        for (int k = 0; k < n; k++) {
             Jmu(k) = 0;
-            djdqJpinv_ = dJdq_[k].transpose() * Jpinv_;
+            djdqJpinv_ = dJdq_[k].transpose() * Jpinv;
 
-            for (int i = 0; i < numberOfJoints_; i++)
+            for (int i = 0; i < n; i++)
                 Jmu(k) += djdqJpinv_(i, i);
 
             Jmu(k) *= mySVD.results.mu;
         }
-        //std::cout<<"mu "<<mySVD.results.mu<<std::endl;
-
-        //mu.PrintMtx("mu");
     } else {
         mySVD.params.lambda = 0.01;
         mySVD.params.threshold = 0.01;
-        Jpinv_ = rml::RegularizedPseudoInverse(bJt_, mySVD);
+        Jpinv = rml::RegularizedPseudoInverse(J, mySVD);
 
-        for (int k = 0; k < numberOfJoints_; k++) {
+        for (int k = 0; k < n; k++) {
             Jmu(k) = 0;
-            djdqJpinv_ = dJdq_[k] * Jpinv_;
+            djdqJpinv_ = dJdq_[k] * Jpinv;
             for (int i = 0; i < 6; i++)
                 Jmu(k) += djdqJpinv_(i, i);
             Jmu(k) *= mySVD.results.mu;
         }
     }
 
-    mu_ = mySVD.results.mu;
-    if (isMapInitialized_) {
-        jacobians_.find(id_ + FrameID::Manipulability)->second = Jmu;
-    } else {
-        jacobians_.insert(std::make_pair(id_ + FrameID::Manipulability, Jmu));
-    }
+    manipulability_.insert(std::make_pair(frameID, mySVD.results.mu));
+    return Jmu;
 }
 
 void ArmModel::EvaluatedJdqNumeric()
@@ -396,63 +393,62 @@ void ArmModel::SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
     }
 }
 
-Eigen::TransfMatrix ArmModel::GetRigidBodyFrame(std::string& ID) throw(std::exception)
-{
-    if (rigidBodyFrames_.find(ID) == rigidBodyFrames_.end()) {
-        ArmModelWrongLabelException armModelWrongLabel;
-        armModelWrongLabel.SetID("GetAttachedBodyFrame");
-        throw(armModelWrongLabel);
-    }
-    return rigidBodyFrames_.at(ID).second;
-}
-
-Eigen::TransfMatrix ArmModel::EvaluateRigidBodyTransf(std::string& ID)
+Eigen::TransfMatrix ArmModel::EvaluateRigidBodyTransf(const std::string& frameID)
 {
 
-    int jointIndex = rigidBodyFrames_.at(ID).first;
-    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(ID).second;
+    int jointIndex = rigidBodyFrames_.at(frameID).first;
+    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(frameID).second;
 
     return transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)) * TMat;
 }
 
-Eigen::MatrixXd ArmModel::EvaluateRigidBodyJacobian(std::string& ID)
+Eigen::MatrixXd ArmModel::EvaluateRigidBodyJacobian(const std::string& frameID)
 {
 
-    int jointIndex = rigidBodyFrames_.at(ID).first;
-    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(ID).second;
+    int jointIndex = rigidBodyFrames_.at(frameID).first;
+    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(frameID).second;
     Eigen::Vector3d projectedTransl = transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)).GetRotMatrix() * TMat.GetTransl();
     return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(id_ + FrameID::Joint + std::to_string(jointIndex));
 }
 
-Eigen::TransfMatrix ArmModel::GetTransformationMatrix(const std::string matrixId) throw(std::exception)
+Eigen::TransfMatrix ArmModel::GetTransformation(const std::string& frameID) throw(std::exception)
 {
     //// TODO: GIVE INFO ON THE FACT THE INDEX IS OUT OF RANGE IF GREATER THAN NUMJOINTS
-    if (transformation_.find(matrixId) == transformation_.end()) {
+    if (transformation_.find(frameID) == transformation_.end()) {
         ArmModelWrongLabelException armModelWrongLabel;
         armModelWrongLabel.SetID("GetTransformationMatrix");
         throw(armModelWrongLabel);
     }
-    return transformation_.at(matrixId);
+    return transformation_.at(frameID);
 }
 
-Eigen::MatrixXd ArmModel::GetJacobian(const std::string jacobianID) throw(std::exception)
+Eigen::TransfMatrix ArmModel::GetTransformationFrames(const std::string& frameID_j, const std::string& frameID_k)
 {
-    if (jacobians_.find(jacobianID) == jacobians_.end()) {
+    Eigen::TransfMatrix out;
+    Eigen::TransfMatrix bTj, bTk;
+    bTj = GetTransformation(frameID_j);
+    bTk = GetTransformation(frameID_k);
+    out = bTj.transpose() * bTk;
+    return out;
+}
+
+Eigen::MatrixXd ArmModel::GetJacobian(const std::string& frameID) throw(std::exception)
+{
+    if (jacobians_.find(frameID) == jacobians_.end()) {
         ArmModelWrongLabelException armModelWrongLabel;
         armModelWrongLabel.SetID("GetJacobian");
         throw(armModelWrongLabel);
     }
-    return jacobians_.at(jacobianID);
+    return jacobians_.at(frameID);
 }
 
-/*void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
-
-	modelReadFromFile_ = true;
-	modelInitialized_ = true;
-	std::cout << "[ReadModelMatricesFromFile] Not implemented yet" << std::endl;
-	exit(0);
-
-}*/
+Eigen::MatrixXd ArmModel::GetManipulabilityJacobian(const std::string& frameID) throw(std::exception)
+{
+    if (manipulabilityJacobians_.find(frameID) == manipulabilityJacobians_.end()) {
+        manipulabilityJacobians_.insert(std::make_pair(frameID, EvaluateManipulability(frameID)));
+    }
+    return (manipulabilityJacobians_.at(frameID));
+}
 
 int ArmModel::GetNumJoints() const
 {
@@ -496,9 +492,12 @@ void ArmModel::SetControlVector(const Eigen::VectorXd& controlRef) throw(std::ex
     }
 }
 
-double ArmModel::GetManipulability()
+double ArmModel::GetManipulability(std::string frameID)
 {
-    return mu_;
+    if (manipulability_.find(frameID) == manipulability_.end()) {
+        //trow exception
+    }
+    return manipulability_.at(frameID);
 }
 
 std::string ArmModel::GetID()
@@ -550,5 +549,24 @@ void ArmModel::SetID(std::string id)
 /*const Eigen::TransfMatrix& ArmModel::GetCurrentLinkTransf(int ji)
 {
     return biTei_.at(ji);
+}
+*/
+/*void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
+
+    modelReadFromFile_ = true;
+    modelInitialized_ = true;
+    std::cout << "[ReadModelMatricesFromFile] Not implemented yet" << std::endl;
+    exit(0);
+
+}*/
+
+/*Eigen::TransfMatrix ArmModel::GetRigidBodyFrame(const std::string& frameID) throw(std::exception)
+{
+    if (rigidBodyFrames_.find(frameID) == rigidBodyFrames_.end()) {
+        ArmModelWrongLabelException armModelWrongLabel;
+        armModelWrongLabel.SetID("GetAttachedBodyFrame");
+        throw(armModelWrongLabel);
+    }
+    return rigidBodyFrames_.at(frameID).second;
 }
 */
