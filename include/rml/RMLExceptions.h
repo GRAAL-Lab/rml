@@ -26,111 +26,73 @@ public:
     {
         return method_.c_str();
     }
+
 private:
     std::string ID_;
     std::string method_;
 };
 
+class ExceptionWithHow: public std::exception
+{
+public:
+
+    void SetHow(std::string how)
+    {
+        how_ = how;
+    }
+    const char* how() const throw ()
+    {
+        return how_.c_str();
+    }
+
+private:
+    std::string how_;
+};
+
 /// ROBOT MODEL
 /**
- * @brief Exception to be thrown when the joint index out of bounds
+ * @brief Exception to be thrown in robot model when dealing with the arm model
  */
-class RobotModelArmException : public std::exception {
+class RobotModelArmException : public ExceptionWithHow{
     virtual const char* what() const throw()
     {
-        return "[RobotModel] Error: Not existing arm model";
+        return "[RobotModel] Error: Arm model exception";
     }
 };
 
+
 /**
- * @brief Exception to be thrown when vehicle is not present
+ * @brief Exception to be thrown in robot model when dealing with the vehicle model
  */
-class RobotModelVehicleException : public std::exception {
+class RobotModelVehicleException : public ExceptionWithHow {
     virtual const char* what() const throw()
     {
-        return "[RobotModel] Error: No vehicle!!!";
+        return "[RobotModel] Error: Vehicle Exception";
     }
 };
 
-/**
- * @brief Exception to be thrown when  the matrix label is wrong
- */
-class RobotModelWrongLabelException : public std::exception {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: wrong label for getJacobian";
-    }
-};
 
 /**
- * @brief Exception to be thrown when load a not initialized arm model
- */
-class RobotModelNotInitializedArmModelException : public std::exception {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: loaded a not initialized arm model";
-    }
-};
-
-/**
- * @brief Exception to be thrown when load a not initialized arm model
- */
-class RobotModelConflictingArmModelIDException : public ExceptionWithIDandMethod {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: existing arm model with same id ";
-    }
-};
-
-/**
- * @brief Exception to be thrown when load a not initialized vehicle model
- */
-class RobotModelNotInitializedVehicleModelException : public std::exception {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: loaded a not initialized vehicle model";
-    }
-};
-
-/**
- * @brief Exception to be thrown when load a not initialized vehicle model
- */
-class RobotModelVehicleModelAlreadyLoadedException : public std::exception {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: vehicle model already loaded ";
-    }
-};
-
-/**
- * @brief Exception to be thrown when load a not initialized vehicle model
+ * @brief Exception to be thrown when trying to set a wrong control vector
  */
 class RobotModelWrongControlSizeVectorException : public std::exception {
     virtual const char* what() const throw()
     {
-        return "[RobotModel] Error: wrong input size vector in SetControl ";
+        return "[RobotModel] Error: wrong input size vector";
     }
 };
 
+
 /**
- * @brief Exception to be thrown when load a not initialized vehicle model
+ * @brief Exception to be thrown in robot model when dealing with wrong frame id's
  */
-class RobotModelNotExistingPartException : public ExceptionWithIDandMethod {
+class RobotModelWrongFrameException : public ExceptionWithHow {
     virtual const char* what() const throw()
     {
-        return "[RobotModel] Error: asking no existing part ";
+        return "[RobotModel] Error: wrong frame id";
     }
 };
 
-/**
- * @brief Exception to be thrown when load a not initialized vehicle model
- */
-class RobotModelWrongFrameFormat : public ExceptionWithIDandMethod {
-    virtual const char* what() const throw()
-    {
-        return "[RobotModel] Error: wrong frame id format, the part id and the frame id must be separated by '_' always but if asking the vehicle frame which is named after the vehicle itself ";
-    }
-};
 
 ///ARM MODEL
 /**
