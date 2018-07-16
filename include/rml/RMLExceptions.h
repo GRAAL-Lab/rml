@@ -6,11 +6,11 @@
 namespace rml
 {
 
-class ExceptionWithID: public std::exception
+class ExceptionWithIDandMethod: public std::exception
 {
 public:
 
-    void SetID(std::string ID)
+    void SetWho(std::string ID)
     {
         ID_ = ID;
     }
@@ -18,18 +18,27 @@ public:
     {
         return ID_.c_str();
     }
+    void SetWhere(std::string method)
+    {
+        method_ = method;
+    }
+    const char* where() const throw ()
+    {
+        return method_.c_str();
+    }
 private:
     std::string ID_;
+    std::string method_;
 };
 
 /// ROBOT MODEL
 /**
  * @brief Exception to be thrown when the joint index out of bounds
  */
-class RobotModelArmException : public ExceptionWithID {
+class RobotModelArmException : public std::exception {
     virtual const char* what() const throw()
     {
-        return "[RobotModel] Error: Not existing arm model !!!";
+        return "[RobotModel] Error: Not existing arm model";
     }
 };
 
@@ -66,7 +75,7 @@ class RobotModelNotInitializedArmModelException : public std::exception {
 /**
  * @brief Exception to be thrown when load a not initialized arm model
  */
-class RobotModelConflictingArmModelIDException : public ExceptionWithID {
+class RobotModelConflictingArmModelIDException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
         return "[RobotModel] Error: existing arm model with same id ";
@@ -83,11 +92,41 @@ class RobotModelNotInitializedVehicleModelException : public std::exception {
     }
 };
 
+/**
+ * @brief Exception to be thrown when load a not initialized vehicle model
+ */
+class RobotModelVehicleModelAlreadyLoadedException : public std::exception {
+    virtual const char* what() const throw()
+    {
+        return "[RobotModel] Error: vehicle model already loaded ";
+    }
+};
+
+/**
+ * @brief Exception to be thrown when load a not initialized vehicle model
+ */
+class RobotModelWrongControlSizeVectorException : public std::exception {
+    virtual const char* what() const throw()
+    {
+        return "[RobotModel] Error: wrong input size vector in SetControl ";
+    }
+};
+
+/**
+ * @brief Exception to be thrown when load a not initialized vehicle model
+ */
+class RobotModelNotExistingPartException : public ExceptionWithIDandMethod {
+    virtual const char* what() const throw()
+    {
+        return "[RobotModel] Error: asking no existing part ";
+    }
+};
+
 ///ARM MODEL
 /**
  * @brief Exception to be thrown when setting joint variable on a not initialized arm model
  */
-class ArmModelNotInitializedException : public ExceptionWithID {
+class ArmModelNotInitializedException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
         return "[ArmModel] Error: setting variable on a not initialized model ";
@@ -97,7 +136,7 @@ class ArmModelNotInitializedException : public ExceptionWithID {
 /**
  * @brief Exception to be thrown when setting joint variable of wrong size
  */
-class ArmModelWrongJointSizeException : public ExceptionWithID {
+class ArmModelWrongJointSizeException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
         return "[ArmModel] Error: setting joint variable of wrong size ";
@@ -107,7 +146,7 @@ class ArmModelWrongJointSizeException : public ExceptionWithID {
 /**
  * @brief Exception to be thrown when trying to access a not existing joint
  */
-class ArmModelNotExistingJointException : public ExceptionWithID {
+class ArmModelNotExistingJointException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
         return "[ArmModel] Error: trying to acess a not existing joint";
@@ -117,7 +156,7 @@ class ArmModelNotExistingJointException : public ExceptionWithID {
 /**
  * @brief Exception to be thrown when trying to access a not existing joint
  */
-class LabelAlreadyUsedException : public ExceptionWithID {
+class LabelAlreadyUsedException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
         return "[ArmModel] Error: Label for frame already associated to another joint";
@@ -128,10 +167,10 @@ class LabelAlreadyUsedException : public ExceptionWithID {
 /**
  * @brief Exception to be thrown when wrong label in input
  */
-class ArmModelWrongLabelException : public ExceptionWithID {
+class ArmModelWrongLabelException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
-        return "[ArmModel] Error: wrong format input string";
+        return "[ArmModel] Error: The frame does not exist";
     }
 };
 
@@ -139,7 +178,7 @@ class ArmModelWrongLabelException : public ExceptionWithID {
 /**
  * @brief Exception to be thrown when wrong label in input
  */
-class VehicleModelWrongLabelException : public ExceptionWithID {
+class VehicleModelWrongLabelException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
         return "[VehicleModel] Error: wrong format input string";

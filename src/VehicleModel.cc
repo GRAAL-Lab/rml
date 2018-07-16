@@ -99,7 +99,7 @@ Eigen::TransfMatrix VehicleModel::GetTransformation(const std::string frameID) t
 {
     if (transformation_.find(frameID) == transformation_.end()) {
         VehicleModelWrongLabelException vehicleModelWrongLabel;
-        vehicleModelWrongLabel.SetID("GetTransfMatrix");
+        vehicleModelWrongLabel.SetWho("GetTransfMatrix");
         throw(vehicleModelWrongLabel);
     }
     return transformation_.at(frameID);
@@ -119,7 +119,7 @@ Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID) throw(std::excep
 {
     if (jacobians_.find(ID) == jacobians_.end()) {
         VehicleModelWrongLabelException vehicleModelWrongLabel;
-        vehicleModelWrongLabel.SetID("GetJacobian");
+        vehicleModelWrongLabel.SetWho("GetJacobian");
         throw(vehicleModelWrongLabel);
     }
     return jacobians_.at(ID);

@@ -131,13 +131,7 @@ public:
      */
     void SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception);
 
-    /**
-     * @brief Method returning the attached body frame wrt to the joint it is attached to.
-     * @param ID frame ID.
-     * @return transformation matrix.
-     */
-    //TODO ELIMINATE
-    //Eigen::TransfMatrix GetRigidBodyFrame(const std::string& frameID) throw(std::exception);
+
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.
      * @param frameId frame id
@@ -163,7 +157,7 @@ public:
      * @param frameId frame id
      * @return frameID the string identificator for the frame
      */
-    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID) throw(std::exception);
+    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID);
     /**
      * @brief Method returning the arm number of joints
      * @return  arm number of joints
@@ -185,7 +179,7 @@ public:
     /**
      * @brief Method returning true if the model is initialized false otherwise.
      */
-    //TODO DELETE
+
     bool IsModelInitialized() const;
 
     /**
@@ -216,11 +210,7 @@ public:
      */
     void SetID(std::string id);
 
-    /**
-     * @brief Method returning the base to tool jacobian
-     * @return base to tool jacobian
-     */
-    //const Eigen::MatrixXd& GetBase2ToolJacobian() const;
+
 
 protected:
     /**
@@ -277,11 +267,7 @@ protected:
      * @param endEffectorIndex
      */
     void BackwardDirectGeometry(int jointNumber, int endEffectorIndex);
-    /**
-     * @brief Backward direct geometry from the input joint number to the tool frame
-     * @param jointNumber
-     */
-    void BackwardDirectGeometryToolFrame(int jointNumber);
+
 
     bool modelInitialized_; //!< boolean stating whether the model is initialized.
     bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized.
@@ -305,7 +291,7 @@ protected:
     std::vector<Eigen::MatrixXd> dJdq_; //!< dJdq evaluated numerically.
     //Eigen::MatrixXd Jpinv_; //!< jacobian pseudoinverse.
     Eigen::MatrixXd djdqJpinv_; //!< djdq * jacobian pseudoinverse.
-    Eigen::MatrixXd bJt_; //!< base to tool jacobian matrix.
+    //Eigen::MatrixXd bJt_; //!< base to tool jacobian matrix.
     Eigen::RotMatrix I3_; //!< identity matrix
     Eigen::VectorXd ZeroQ_; //!< zero vector
     bool modelReadFromFile_; //!< boolean stating whether the model is read from file.
@@ -330,5 +316,24 @@ protected:
  * @param ji joint number
  * @return  transformation matrix
  */
-const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji);
+//const Eigen::TransfMatrix& GetCurrentLinkTransf(int ji);
+/**
+ * @brief Backward direct geometry from the input joint number to the tool frame
+ * @param jointNumber
+ */
+//void BackwardDirectGeometryToolFrame(int jointNumber);
+
+/**
+ * @brief Method returning the attached body frame wrt to the joint it is attached to.
+ * @param ID frame ID.
+ * @return transformation matrix.
+ */
+//TODO ELIMINATE
+//Eigen::TransfMatrix GetRigidBodyFrame(const std::string& frameID) throw(std::exception);
+
+/**
+ * @brief Method returning the base to tool jacobian
+ * @return base to tool jacobian
+ */
+//const Eigen::MatrixXd& GetBase2ToolJacobian() const;
 #endif /* __ARMMODEL_H__ */
