@@ -32,7 +32,7 @@ class RobotModel {
 
     std::shared_ptr<VehicleModel> vehicle_;
     std::map<std::string, std::shared_ptr<ArmModel> > armsModel_;
-    std::unordered_map<std::string, Eigen::TransfMatrix> vehicleToBase_;
+    std::unordered_map<std::string, Eigen::TransfMatrix> robotframeToArm_;
     std::string vehicleID_;
     /**
      * @brief Method returning the isolated arm jacobian for the input framID.
@@ -85,10 +85,10 @@ public:
      * is meant to be loaded, it identifies the transformation in between the robot base and the robot
      * common frame.
      * @param arm		The arm model
-     * @param vTb		The vehicle-to-base trasnformation matrix
+     * @param robotframeToArm		The vehicle-to-base trasnformation matrix
      * @return			True if the arm has been loaded false otherwise
      */
-    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& vTb) throw(std::exception);
+    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& robotframeToArm) throw(std::exception);
 
     /**
      * Checks that the given armIndex is within the allowed range (i.e. less or equal than

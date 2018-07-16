@@ -267,9 +267,7 @@ Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string frameID)
 {
     Eigen::MatrixXd J = GetJacobian(frameID);
     long n = J.cols();
-    if (n > totalNumJoints_) {
-        //THROW EXCEPITON
-    }
+
     Eigen::MatrixXd Jmu, Jpinv;
 
     Jmu.resize(1, n);
