@@ -122,6 +122,16 @@ class RobotModelNotExistingPartException : public ExceptionWithIDandMethod {
     }
 };
 
+/**
+ * @brief Exception to be thrown when load a not initialized vehicle model
+ */
+class RobotModelWrongFrameFormat : public ExceptionWithIDandMethod {
+    virtual const char* what() const throw()
+    {
+        return "[RobotModel] Error: wrong frame id format, the part id and the frame id must be separated by '_' always but if asking the vehicle frame which is named after the vehicle itself ";
+    }
+};
+
 ///ARM MODEL
 /**
  * @brief Exception to be thrown when setting joint variable on a not initialized arm model
@@ -181,7 +191,7 @@ class ArmModelWrongLabelException : public ExceptionWithIDandMethod {
 class VehicleModelWrongLabelException : public ExceptionWithIDandMethod {
     virtual const char* what() const throw()
     {
-        return "[VehicleModel] Error: wrong format input string";
+        return "[VehicleModel] Error: The frame does not exist";
     }
 };
 

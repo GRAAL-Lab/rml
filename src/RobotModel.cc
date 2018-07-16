@@ -195,6 +195,14 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
     Eigen::TransfMatrix T;
+    if(partIDIndex==std::string::npos && frameID!=vehicleID_)
+    {
+        RobotModelWrongFrameFormat robotModelWrongFrameFormat;
+        robotModelWrongFrameFormat.SetWhere("GetTransformation");
+        robotModelWrongFrameFormat.SetWho(frameID);
+        throw (robotModelWrongFrameFormat);
+    }
+
 
     if (partID == vehicleID_ || frameID == vehicleID_) {
         return vehicle_->GetTransformation(frameID);
@@ -235,6 +243,13 @@ Eigen::MatrixXd RobotModel::GetCartesianJacobian(const std::string& frameID, Jac
 
     std::string modelID = frameID.substr(0, frameID.find_first_of("_"));
     Eigen::MatrixXd totJac, tempJ;
+    if(frameID.find_first_of("_")==std::string::npos && frameID!=vehicleID_ )
+    {
+        RobotModelWrongFrameFormat robotModelWrongFrameFormat;
+        robotModelWrongFrameFormat.SetWhere("GetCartesianJacobian");
+        robotModelWrongFrameFormat.SetWho(frameID);
+        throw(robotModelWrongFrameFormat);
+    }
 
     if ((frameID == vehicleID_ || modelID == vehicleID_)) {
         if (jacobianObserver == InertialFrame) {
@@ -309,6 +324,12 @@ Eigen::MatrixXd RobotModel::GetManipulabilityJacobian(const std::string& frameID
 
     Eigen::MatrixXd totJac, tempJ;
     std::string armID = frameID.substr(0, frameID.find_first_of("_"));
+    if(frameID.find_first_of("_")==std::string::npos)
+    {
+        RobotModelWrongFrameFormat robotModelWrongFrameFormat;
+        robotModelWrongFrameFormat.SetWhere("GetCartesianJacobian");
+        robotModelWrongFrameFormat.SetWho(frameID);
+    }
     if (CheckArm(armID)) {
         if (vehicle_) {
 
