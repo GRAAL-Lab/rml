@@ -34,7 +34,7 @@ namespace rml {
 ArmModel::ArmModel(std::string id)
     : modelInitialized_(false)
     , isMapInitialized_(false)
-    , numberOfJoints_(0)
+    , totalNumJoints_(0)
     , modelReadFromFile_(false)
     , id_(id)
 
@@ -45,11 +45,41 @@ ArmModel::~ArmModel()
 {
 }
 
-void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax)
+void ArmModel::AddJointLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax)
 {
 
     links_.push_back(RobotLink(type, axis, baseTransf, jointLimMin, joinLimMax));
-    numberOfJoints_ = links_.size();
+    movingJoints_.push_back(totalNumJoints_ - 1);
+
+    totalNumJoints_ = links_.size();
+    movingNumJoints_ = movingJoints_.size();
+
+    //	cout << numberOfJoints_ << " - ";
+    //	futils::PrettyPrint(links_.back().baseTransf_, "baseTransf");
+    baseTei_.push_back(Eigen::TransfMatrix());
+    biTei_.push_back(Eigen::TransfMatrix());
+    h_.push_back(Eigen::Vector6d());
+    dJdq_.push_back(Eigen::MatrixXd());
+    for (auto&& i : dJdq_) { // access by forwarding reference, the type of i is auto&
+        i.resize(6, totalNumJoints_);
+    }
+
+    q_total_ = Eigen::VectorXd::Zero(totalNumJoints_);
+
+    q_moving_ = Eigen::VectorXd::Zero(movingNumJoints_);
+    q_dot_moving_ = Eigen::VectorXd::Zero(movingNumJoints_);
+    q_ddot_moving_ = Eigen::VectorXd::Zero(movingNumJoints_);
+    controlRef_ = Eigen::VectorXd::Zero(movingNumJoints_);
+
+    modelInitialized_ = true;
+    isMapInitialized_ = false;
+    SetJointsPosition(Eigen::VectorXd::Zero(totalNumJoints_));
+}
+
+void ArmModel::AddFixedLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf)
+{
+    links_.push_back(RobotLink(type, axis, baseTransf, 0, 0));
+    totalNumJoints_ = links_.size();
 
     //	cout << numberOfJoints_ << " - ";
     //	futils::PrettyPrint(links_.back().baseTransf_, "baseTransf");
@@ -58,21 +88,16 @@ void ArmModel::AddLink(JointType type, const Eigen::Vector3d& axis, const Eigen:
     h_.push_back(Eigen::Vector6d());
     dJdq_.push_back(Eigen::MatrixXd());
     for (auto&& i : dJdq_) // access by forwarding reference, the type of i is auto&
-        i.resize(6, numberOfJoints_);
+        i.resize(6, totalNumJoints_);
 
-    // bJt_.resize(6, numberOfJoints_);
-    ZeroQ_ = Eigen::VectorXd::Zero(numberOfJoints_);
-    q_ = ZeroQ_;
-    q_dot_ = ZeroQ_;
-    q_ddot_ = ZeroQ_;
-    controlRef_ = ZeroQ_;
+    q_total_ = Eigen::VectorXd::Zero(totalNumJoints_);
 
     modelInitialized_ = true;
     isMapInitialized_ = false;
-    SetJointsPosition(ZeroQ_);
+    SetJointsPosition(Eigen::VectorXd::Zero(totalNumJoints_));
 }
 
-void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
+void ArmModel::SetJointsPosition(const Eigen::VectorXd& fbk) throw(std::exception)
 {
 
     if (!modelInitialized_) {
@@ -81,24 +106,26 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
         throw(armModelNotIntialized);
     }
 
-    if (q_.size() != q.size()) {
+    if (fbk.size() != movingNumJoints_) {
         ArmModelWrongJointSizeException armModelWrongJointSize;
         armModelWrongJointSize.SetWhere("SetJointPosition");
         throw(armModelWrongJointSize);
     }
-    q_ = q;
 
-    //EvaluatebTt();
-    //EvaluatebJt();
-    EvaluateTotalForwardGeometry();
+    for (size_t i = 0; i < movingNumJoints_; i++) {
+        q_total_(movingJoints_.at(i)) = fbk(i);
+    }
+    q_moving_ = fbk;
+
     //EvaluateBase2JointJacobian(numberOfJoints_ - 1);
     EvaluatedJdqNumeric();
+    EvaluateTotalForwardGeometry();
 
     if (!isMapInitialized_) {
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
         //updating the joint jacobians
-        for (int i = 0; i < numberOfJoints_; i++) {
+        for (int i = 0; i < totalNumJoints_; i++) {
             transformation_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), baseTei_.at(i)));
             jacobians_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), EvaluateBase2JointJacobian(i)));
         }
@@ -115,7 +142,7 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception)
         // transformation_.find((id_ + FrameID::Tool))->second = bTt_;
         // jacobians_.find((id_ + FrameID::Tool))->second = bJt_;
         //updating the joint jacobians
-        for (int i = 0; i < numberOfJoints_; i++) {
+        for (int i = 0; i < totalNumJoints_; i++) {
 
             transformation_.find(id_ + FrameID::Joint + std::to_string(i))->second = baseTei_.at(i);
             jacobians_.find(id_ + FrameID::Joint + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
@@ -141,12 +168,12 @@ void ArmModel::SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::excepti
         armModelNotIntialized.SetWhere("SetJointVelocity");
         throw(armModelNotIntialized);
     }
-    if (qdot.size() != q_dot_.size()) {
+    if (qdot.size() != q_dot_moving_.size()) {
         ArmModelWrongJointSizeException armModelWrongJointSize;
         armModelWrongJointSize.SetWhere("SetJointVelocity");
         throw(armModelWrongJointSize);
     }
-    q_dot_ = qdot;
+    q_dot_moving_ = qdot;
 }
 
 void ArmModel::SetJointsAcceleration(const Eigen::VectorXd& qddot) throw(std::exception)
@@ -157,32 +184,32 @@ void ArmModel::SetJointsAcceleration(const Eigen::VectorXd& qddot) throw(std::ex
         armModelNotIntialized.SetWhere("SetJointAcceleration");
         throw(armModelNotIntialized);
     }
-    if (qddot.size() != q_ddot_.size()) {
+    if (qddot.size() != q_ddot_moving_.size()) {
         ArmModelWrongJointSizeException armModelWrongJointSize;
         armModelWrongJointSize.SetWhere("SetJointAcceleration");
         throw(armModelWrongJointSize);
     }
-    q_ddot_ = qddot;
+    q_ddot_moving_ = qddot;
 }
 
 const Eigen::VectorXd& ArmModel::GetJointsPosition() const
 {
-    return q_;
+    return q_moving_;
 }
 
 const Eigen::VectorXd& ArmModel::GetJointsVelocity() const
 {
-    return q_dot_;
+    return q_dot_moving_;
 }
 
 const Eigen::VectorXd& ArmModel::GetJointsAcceleration() const
 {
-    return q_ddot_;
+    return q_ddot_moving_;
 }
 
 void ArmModel::EvaluateTotalForwardGeometry()
 {
-    for (int jointNumber = 0; jointNumber < numberOfJoints_; jointNumber++) {
+    for (int jointNumber = 0; jointNumber < totalNumJoints_; jointNumber++) {
         ForwardDirectGeometry(jointNumber);
     }
 }
@@ -206,10 +233,10 @@ void ArmModel::ForwardDirectGeometry(int jointNumber)
     // biTei = biTri * Tz(qi)
 
     if (links_.at(jointNumber).Type() == JointType::Revolute) {
-        Eigen::AngleAxisd rot = Eigen::AngleAxisd(q_(jointNumber), links_.at(jointNumber).Axis());
+        Eigen::AngleAxisd rot = Eigen::AngleAxisd(q_total_(jointNumber), links_.at(jointNumber).Axis());
         Tz_.SetRotMatrix(rot.toRotationMatrix());
     } else if (links_.at(jointNumber).Type() == JointType::Prismatic) {
-        Eigen::Vector3d transl = q_(jointNumber) * links_.at(jointNumber).Axis();
+        Eigen::Vector3d transl = q_total_(jointNumber) * links_.at(jointNumber).Axis();
         Tz_.SetTransl(transl);
     } else if (links_.at(jointNumber).Type() == JointType::Fixed) {
         Tz_.setIdentity();
@@ -219,13 +246,9 @@ void ArmModel::ForwardDirectGeometry(int jointNumber)
 
     biTei_[jointNumber] = links_.at(jointNumber).BaseTransf() * Tz_;
 
-    // wTei is the transformation between the end-effector of joint <i> and world frame <w>
-    // wTei = wTbi * biTei
+    // baseTei_ is the transformation between the end-effector of joint <i> and base frame <b>
+    // baseTei_ = wTbi * biTei
     baseTei_[jointNumber] = baseTbi_ * biTei_[jointNumber];
-    //cout << "forward index = " << jointNumber << endl;
-    //biTri_[jointNumber - 1].PrintMtx("biTri");
-    //Tz_.PrintMtx("Tz");
-    //wTei_[jointNumber - 1].PrintMtx("wTei");
 }
 
 void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex)
@@ -243,8 +266,8 @@ void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex)
 Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string frameID)
 {
     Eigen::MatrixXd J = GetJacobian(frameID);
-    int n = J.cols();
-    if (n > numberOfJoints_) {
+    long n = J.cols();
+    if (n > totalNumJoints_) {
         //THROW EXCEPITON
     }
     Eigen::MatrixXd Jmu, Jpinv;
@@ -292,29 +315,34 @@ void ArmModel::EvaluatedJdqNumeric()
     Eigen::MatrixXd bJt_0, bJt_dQ;
     Eigen::MatrixXd dQ, qVar, q_orig;
     double delta_q = 1E-6;
-    q_orig = q_;
+    q_orig = q_total_;
     //bJt_0 = bJt_;
-    bJt_0 = EvaluateBase2JointJacobian(numberOfJoints_ - 1);
+    EvaluateTotalForwardGeometry();
+    bJt_0 = EvaluateBase2JointJacobian(totalNumJoints_ - 1);
     //futils::PrettyPrint(wJt_0,"wJt_0");
 
     /// Here we iterate till "numJoints - 1" since the last joint will not influence
     /// on the Jacobian since nothing is connected to it.
-    for (int i = 0; i < numberOfJoints_ - 1; ++i) {
+    for (int i = 0; i < totalNumJoints_ - 1; ++i) {
         /// Computing the single q variation vector dQ.
-        dQ = ZeroQ_; // Initialising a zero vector
-        dQ(i) = delta_q; // Getting the q variation
+        dQ = Eigen::VectorXd::Zero(totalNumJoints_); // Initialising a zero vector.
+
+        if (links_.at(i).Type() != JointType::Fixed) {
+            dQ(i) = delta_q; // Getting the q variation
+        }
+
         qVar = q_orig + dQ; // Computing the new single q variation based on previous state
 
         /// Computing scalar delta_q (the denominator of the numerical integration).
-        q_ = qVar;
+        q_total_ = qVar;
 
         EvaluateTotalForwardGeometry();
         //EvaluateBase2JointJacobian(numberOfJoints_ - 1);
         //bJt_dQ = bJt_;
-        bJt_dQ = EvaluateBase2JointJacobian(numberOfJoints_ - 1);
+        bJt_dQ = EvaluateBase2JointJacobian(totalNumJoints_ - 1);
         //futils::PrettyPrint(wJt_dQ,"wJt_dQ");
         for (int iJrow = 0; iJrow < 6; ++iJrow) {
-            for (int iJcol = 0; iJcol < numberOfJoints_; ++iJcol) {
+            for (int iJcol = 0; iJcol < totalNumJoints_; ++iJcol) {
                 //std::cout << "(i,j) = " << iJrow << "," << iJcol << std::endl;
                 //futils::PrettyPrint(dJdq_[i],"dJdq[i]");
                 dJdq_.at(i)(iJrow, iJcol) = (bJt_dQ(iJrow, iJcol) - bJt_0(iJrow, iJcol)) / delta_q;
@@ -323,10 +351,7 @@ void ArmModel::EvaluatedJdqNumeric()
             }
         }
     }
-    q_ = q_orig;
-
-    EvaluateTotalForwardGeometry();
-    //EvaluateBase2JointJacobian(numberOfJoints_ - 1);
+    q_total_ = q_orig;
 }
 
 Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
@@ -336,12 +361,12 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
         BackwardDirectGeometry(jointNumber, jointIndex);
 
     //Then we set all the remainings columns to zero
-    for (int i = jointIndex + 1; i < numberOfJoints_; i++) {
+    for (int i = jointIndex + 1; i < totalNumJoints_; i++) {
         h_[i].setZero();
     }
 
     Eigen::MatrixXd bJj; // = (h_[0]);
-    for (int i = 0; i < numberOfJoints_; i++) {
+    for (int i = 0; i < totalNumJoints_; i++) {
         bJj = RightJuxtapose(bJj, h_[i]);
     }
     return bJj;
@@ -349,7 +374,7 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
 
 void ArmModel::SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception)
 {
-    if (jointIndex >= numberOfJoints_) {
+    if (jointIndex >= totalNumJoints_) {
         ArmModelNotExistingJointException armModelNotExistingJoint;
         armModelNotExistingJoint.SetWhere("AddRigidBodyFrame");
         throw(armModelNotExistingJoint);
@@ -468,7 +493,7 @@ const Eigen::VectorXd& ArmModel::GetControlVector() const
 
 void ArmModel::SetControlVector(const Eigen::VectorXd& controlRef) throw(std::exception)
 {
-    if (controlRef.rows() == numberOfJoints_) {
+    if (controlRef.rows() == totalNumJoints_) {
         controlRef_ = controlRef;
     } else {
         ArmModelWrongJointSizeException armModelWrongJointSize;
@@ -495,81 +520,3 @@ void ArmModel::SetID(std::string id)
     id_ = id;
 }
 }
-
-//TODO ELIMINATE
-/*Eigen::TransfMatrix ArmModel::GetBase2JointTransf(int jointIndex)
-{
-    return baseTei_[jointIndex];
-}
-*/
-
-/*const Eigen::TransfMatrix& ArmModel::GetBaseTransf()
-{
-    return baseTb0_; ;
-}*/
-
-/*void ArmModel::SetBaseTransf(const Eigen::TransfMatrix& baseTb0)
-{
-    baseTb0_ = baseTb0;
-}*/
-
-/*const Eigen::MatrixXd& ArmModel::GetBase2ToolJacobian() const
-{
-    return bJt_;
-}
-*/
-
-/*void ArmModel::EvaluatebJt()
-{
-
-
-    for (int jointNumber = numberOfJoints_ - 1; jointNumber >= 0; jointNumber--)
-        BackwardDirectGeometryToolFrame(jointNumber);
-    bJt_ = (h_[0]);
-    for (int i = 1; i < numberOfJoints_; i++) {
-        bJt_ = RightJuxtapose(bJt_, h_[i]);
-    }
-}*/
-
-/*const Eigen::TransfMatrix& ArmModel::GetCurrentLinkTransf(int ji)
-{
-    return biTei_.at(ji);
-}
-*/
-/*void ArmModel::ReadModelMatricesFromFile(std::string folder_path) {
-
-    modelReadFromFile_ = true;
-    modelInitialized_ = true;
-    std::cout << "[ReadModelMatricesFromFile] Not implemented yet" << std::endl;
-    exit(0);
-
-}*/
-
-/*Eigen::TransfMatrix ArmModel::GetRigidBodyFrame(const std::string& frameID) throw(std::exception)
-{
-    if (rigidBodyFrames_.find(frameID) == rigidBodyFrames_.end()) {
-        ArmModelWrongLabelException armModelWrongLabel;
-        armModelWrongLabel.SetID("GetAttachedBodyFrame");
-        throw(armModelWrongLabel);
-    }
-    return rigidBodyFrames_.at(frameID).second;
-}
-*/
-
-/*void ArmModel::BackwardDirectGeometryToolFrame(int jointNumber)
-{
-    // Calcolo w_ki
-    // Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione
-    // ogni giunto ruota lungo z si ha che ri_ki = ei_ki = [ 0 0 1 ]'
-    // Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
-    base_ki_ = baseTei_.at(jointNumber).block(0, 2, 3, 1); //GetSubMatrix(1, 3, 3, 3));
-
-    h_[jointNumber].SetFirstVect3(base_ki_);
-    h_[jointNumber].SetSecondVect3(base_ki_.cross(baseTei_[numberOfJoints_ - 1].GetTransl() - baseTei_[jointNumber].GetTransl()));
-
-    //cout << "backward index = " << jointNumber << endl;
-    //wTei_[jointNumber - 1].PrintMtx("wTei");
-    //w_ki_.PrintMtx("wki");
-    //h_[jointNumber - 1].PrintMtx("h");
-}
-*/

@@ -35,7 +35,7 @@ TwoLinksArmModel::TwoLinksArmModel(std::string id) : ArmModel(id)
 
 	for (int i = 0; i < numJoints; ++i) {
 		//std::cout << "Adding link " << i << std::endl;
-		AddLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), biTri.at(i), min[i], max[i]);
+		AddJointLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), biTri.at(i), min[i], max[i]);
 	}
 /*
 	eTt_(0,0) = 1; eTt_(0,1) = 0;  eTt_(0,2) = 0;  eTt_(0,3) = 0;
