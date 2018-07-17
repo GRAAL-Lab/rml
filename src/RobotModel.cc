@@ -15,6 +15,7 @@ namespace rml {
 
 RobotModel::RobotModel()
 {
+    robotFrameID_=FrameID::RobotFrameID;
 }
 
 RobotModel::~RobotModel()
@@ -40,13 +41,14 @@ bool RobotModel::LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) throw(
     if (vehicle->IsModelInitialized()) {
         if (vehicle_) {
             std::string how;
-            how = "Vehicle Model already loaded with id "+vehicleID_;
+            how = "Vehicle Model already loaded with id "+robotFrameID_;
             RobotModelVehicleException vehicleModelAlreadyLoadedException;
             vehicleModelAlreadyLoadedException.SetHow(how);
             throw(vehicleModelAlreadyLoadedException);
         } else {
             vehicle_ = vehicle;
-            vehicleID_ = vehicle->GetID();
+            robotFrameID_ = vehicle->GetID();
+            vehicleFrameID_=vehicle->GetID();
             return true;
         }
     } else {
@@ -84,6 +86,15 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::Trans
     }
 }
 
+void RobotModel::SetRobotFrame(Eigen::TransfMatrix robotFrame){
+
+    robotFrame_=robotFrame;
+}
+
+std::string RobotModel::GetRobotFrameID(){
+    return robotFrameID_;
+}
+
 bool RobotModel::CheckArm(const std::string armID) const
 {
     if (armsModel_.find(armID) != armsModel_.end()) {
@@ -112,6 +123,10 @@ Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForFrame(const std::string& fr
     if (CheckArm(partID)) {
         bJt = armsModel_.at(partID)->GetJacobian(frameID);
         Eigen::RotMatrix vRb = robotframeToArm_.at(partID).GetRotMatrix();
+        if(!vehicle_)
+        {
+            vRb=robotFrame_.GetRotMatrix()*vRb;
+        }
         bJt = vRb.GetCartesianRotationMatrix() * bJt;
         return bJt;
     } else {
@@ -131,7 +146,7 @@ Eigen::Matrix6d RobotModel::GetIsolatedVehicleJacobianForFrame(const std::string
 
     if (vehicle_) {
         if (CheckArm(partID)) {
-            vJv = vehicle_->GetJacobian(vehicleID_);
+            vJv = vehicle_->GetJacobian(vehicleFrameID_);
             Eigen::TransfMatrix bTj = armsModel_.at(partID)->GetTransformation(frameID);
             Eigen::TransfMatrix vTj = robotframeToArm_.at(partID) * bTj;
 
@@ -189,7 +204,7 @@ Eigen::VectorXd RobotModel::GetRobotControl(std::string partID) throw(std::excep
 {
     Eigen::VectorXd y;
 
-    if (partID == vehicleID_ && vehicle_) {
+    if (partID == vehicleFrameID_) {
         return vehicle_->GetControlVector();
     } else if (CheckArm(partID)) {
         return (armsModel_.at(partID)->GetControlVector());
@@ -208,7 +223,7 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
     Eigen::TransfMatrix T;
-    if(partIDIndex==std::string::npos && frameID!=vehicleID_)
+    if(partIDIndex==std::string::npos && frameID!=robotFrameID_ && frameID!=vehicleFrameID_)
     {   std::string how;
         how = "wrong string format: "+frameID;
         RobotModelWrongFrameException robotModelWrongFrameFormat;
@@ -217,16 +232,21 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     }
 
 
-    if (partID == vehicleID_ || frameID == vehicleID_) {
-        return vehicle_->GetTransformation(frameID);
+    if (partID == vehicleFrameID_ || frameID == robotFrameID_) {
+        if(vehicle_){
+            return vehicle_->GetTransformation(frameID);
+        }
+        else {
+            return robotFrame_;
+        }
     } else if (CheckArm(partID)) {
         //check arm
         T = armsModel_.at(partID)->GetTransformation(frameID);
         if (vehicle_) {
-            T = vehicle_->GetTransformation(vehicleID_) * robotframeToArm_.at(partID) * T;
+            T = vehicle_->GetTransformation(vehicleFrameID_) * robotframeToArm_.at(partID) * T;
         } else {
             //if there is no vehicle, the inertial frame wrt all is expressed is the vehicle to base.
-            T = robotframeToArm_.at(partID) * T;
+            T = robotFrame_*robotframeToArm_.at(partID) * T;
         }
         return T;
     }
@@ -257,7 +277,7 @@ Eigen::MatrixXd RobotModel::GetCartesianJacobian(const std::string& frameID, Jac
 
     std::string modelID = frameID.substr(0, frameID.find_first_of("_"));
     Eigen::MatrixXd totJac, tempJ;
-    if(frameID.find_first_of("_")==std::string::npos && frameID!=vehicleID_ )
+    if(frameID.find_first_of("_")==std::string::npos && frameID!=vehicleFrameID_ )
     {
         std::string how ;
         how = "Wrong format frame id: "+ frameID;
@@ -266,7 +286,7 @@ Eigen::MatrixXd RobotModel::GetCartesianJacobian(const std::string& frameID, Jac
         throw(robotModelWrongFrameFormat);
     }
 
-    if ((frameID == vehicleID_ || modelID == vehicleID_)) {
+    if ((frameID == vehicleFrameID_ || modelID == vehicleFrameID_)) {
         if (jacobianObserver == InertialFrame) {
             totJac = RightJuxtapose(totJac, vehicle_->GetJacobian(frameID));
         } else if (jacobianObserver == VehicleFrame) {
@@ -372,6 +392,27 @@ Eigen::MatrixXd RobotModel::GetManipulabilityJacobian(const std::string& frameID
     RobotModelWrongFrameException notExistingPartExc;
     notExistingPartExc.SetHow(how);
     throw(notExistingPartExc);
+}
+
+double RobotModel::GetManipulability(const std::string& frameID) throw (std::exception){
+    double out;
+    std::string armID = frameID.substr(0,frameID.find_first_of("_"));
+    if(frameID.find_first_of("_")==std::string::npos){
+        std::string how;
+        how = "Wrong format frame id: "+ frameID;
+        RobotModelWrongFrameException robotModelWrongFrameFormat;
+        robotModelWrongFrameFormat.SetHow(how);
+        throw (robotModelWrongFrameFormat);
+    }
+    if(CheckArm(armID)){
+        out = armsModel_.at(armID)->GetManipulability(frameID);
+        return out;
+    }
+    RobotModelArmException notExistingArm;
+    std::string how;
+    how = "Asking a not existing arm: "+armID;
+    notExistingArm.SetHow(how);
+    throw(notExistingArm);
 }
 
 const std::shared_ptr<ArmModel> RobotModel::GetArm(std::string ID) const throw(std::exception)

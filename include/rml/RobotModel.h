@@ -33,7 +33,9 @@ class RobotModel {
     std::shared_ptr<VehicleModel> vehicle_;
     std::map<std::string, std::shared_ptr<ArmModel> > armsModel_;
     std::unordered_map<std::string, Eigen::TransfMatrix> robotframeToArm_;
-    std::string vehicleID_;
+    std::string robotFrameID_;
+    Eigen::TransfMatrix robotFrame_;
+    std::string vehicleFrameID_;
     /**
      * @brief Method returning the isolated arm jacobian for the input framID.
      * @param[in] ID frame id
@@ -89,6 +91,22 @@ public:
      * @return			True if the arm has been loaded false otherwise
      */
     bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& robotframeToArm) throw(std::exception);
+    /**
+     * @brief SetRobotFrame Method to set the robot frame.
+     * @details Method to set the robot frame, hence the frame common to all the arms.
+     * If the vehicle is loaded it is the vehicle frame itslef.
+     * By default it is equal to identity.
+     * @param robotFrame
+     */
+    void SetRobotFrame(Eigen::TransfMatrix robotFrame);
+    /**
+     * @brief GetRobotFrameID method to get the robot frame id.
+     * @details Method to get the id for the robot frame, hence the frame common to all the arms.
+     * If the vehicle is loaded, it is the vehicle frame itself.
+     * By default it is eaul to identity.
+     * @return robot frame id
+     */
+    std::string GetRobotFrameID();
 
     /**
      * Checks that the given armIndex is within the allowed range (i.e. less or equal than
@@ -120,7 +138,13 @@ public:
      * @param ID armID
      * @return Jacobian
      */
-    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& armID) throw(std::exception);
+    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID) throw(std::exception);
+    /**
+     * @brief GetManipulability method returning the manipulabity value for the jacobian related to the input frameID
+     * @param frameID
+     * @return manipulability
+     */
+    double GetManipulability(const std::string& frameID) throw (std::exception);
     /**
      * @brief Method returing a transformation matrix of the robot model.\n
      * @details The methods returns a transformation matrix depending on the input string framID.\n

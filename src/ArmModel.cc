@@ -49,9 +49,10 @@ void ArmModel::AddJointLink(JointType type, const Eigen::Vector3d& axis, const E
 {
 
     links_.push_back(RobotLink(type, axis, baseTransf, jointLimMin, joinLimMax));
-    movingJoints_.push_back(totalNumJoints_ - 1);
+
 
     totalNumJoints_ = links_.size();
+    movingJoints_.push_back(totalNumJoints_ - 1);
     movingNumJoints_ = movingJoints_.size();
 
     //	cout << numberOfJoints_ << " - ";
@@ -111,8 +112,8 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& fbk) throw(std::exceptio
         armModelWrongJointSize.SetWhere("SetJointPosition");
         throw(armModelWrongJointSize);
     }
-
     for (size_t i = 0; i < movingNumJoints_; i++) {
+
         q_total_(movingJoints_.at(i)) = fbk(i);
     }
     q_moving_ = fbk;
