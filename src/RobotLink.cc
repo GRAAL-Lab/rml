@@ -15,7 +15,7 @@ namespace rml
 {
 
 RobotLink::RobotLink() :
-		type_(JointType::Fixed), mass_(0), jointLimitMin_(0), jointLimitMAX_(0)
+        type_(JointType::Fixed), jointLimitMin_(0), jointLimitMAX_(0), mass_(0)
 {
 	axis_.setZero();
 	sizeVect_.setZero();

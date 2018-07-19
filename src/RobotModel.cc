@@ -123,9 +123,12 @@ Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForFrame(const std::string& fr
     if (CheckArm(partID)) {
         bJt = armsModel_.at(partID)->GetJacobian(frameID);
         Eigen::RotMatrix vRb = robotframeToArm_.at(partID).GetRotMatrix();
+        //futils::PrettyPrint(vRb, "vRb");
+        //futils::PrettyPrint(bJt, "bJt");
         if(!vehicle_)
         {
             vRb=robotFrame_.GetRotMatrix()*vRb;
+
         }
         bJt = vRb.GetCartesianRotationMatrix() * bJt;
         return bJt;
@@ -220,6 +223,7 @@ Eigen::VectorXd RobotModel::GetRobotControl(std::string partID) throw(std::excep
 Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) throw(std::exception)
 {
 
+
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
     Eigen::TransfMatrix T;
@@ -240,6 +244,8 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
             return robotFrame_;
         }
     } else if (CheckArm(partID)) {
+        //futils::PrettyPrint(armsModel_.at(partID)->GetJointsPosition(),"JOINTS POSITION IN GET TRANSF");
+        //futils::PrettyPrint(armsModel_.at(partID)->GetTransformation(frameID), "TRANSF OF ARM MODEL ");
         //check arm
         T = armsModel_.at(partID)->GetTransformation(frameID);
         if (vehicle_) {
