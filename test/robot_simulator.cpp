@@ -43,7 +43,7 @@ void single_arm_sim(const state_type& q, state_type& dqdt, double t)
         /// COMPUTE REFERENCE
 
         rml::RegularizationData regData;
-        Eigen::MatrixXd JPinv = rml::RegularizedPseudoInverse(armModel->GetBase2ToolJacobian(), regData);
+        Eigen::MatrixXd JPinv = rml::RegularizedPseudoInverse(armModel->GetJacobian(""), regData);
         //multiArmCtrl->ComputeControl();
         //qdotcontrol_single = multiArmCtrl->GetJointControl();
 

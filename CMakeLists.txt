@@ -90,11 +90,11 @@ if(BUILD_TESTS)
         test/youbot_vehiclemodel.cc
         test/twolinks_armmodel.cc)
 
-    add_executable(robot_simulator test/robot_simulator.cpp
-        test/youbot_armmodel.cc
-        test/youbot_vehiclemodel.cc
-       test/twolinks_armmodel.cc
-       test/OdeIntSimulator.cpp)
+   # add_executable(robot_simulator test/robot_simulator.cpp
+   #     test/youbot_armmodel.cc
+   #     test/youbot_vehiclemodel.cc
+   #    test/twolinks_armmodel.cc
+   #    test/OdeIntSimulator.cpp)
 
     target_link_libraries(rml_test rml)
     target_link_libraries(rml_test_model rml)

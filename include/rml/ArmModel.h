@@ -93,7 +93,7 @@ public:
    * \param jointLimMin Minimum excursion for the joint
    * \param jointLimMax Maximum excursion for the joint
    */
-    void AddFixedLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf);
+    void AddFixedLink(const Eigen::TransfMatrix& baseTransf);
 
     /**
 	 * \brief Set the joint position

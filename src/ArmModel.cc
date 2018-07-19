@@ -78,9 +78,9 @@ void ArmModel::AddJointLink(JointType type, const Eigen::Vector3d& axis, const E
     SetJointsPosition(Eigen::VectorXd::Zero(totalNumJoints_));
 }
 
-void ArmModel::AddFixedLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf)
+void ArmModel::AddFixedLink(const Eigen::TransfMatrix& baseTransf)
 {
-    links_.push_back(RobotLink(type, axis, baseTransf, 0, 0));
+    links_.push_back(RobotLink(JointType::Fixed, Eigen::Vector3d::UnitZ(), baseTransf, 0, 0));
     totalNumJoints_ = links_.size();
 
     //	cout << numberOfJoints_ << " - ";
@@ -224,7 +224,6 @@ void ArmModel::EvaluateTotalForwardGeometry()
 
 void ArmModel::ForwardDirectGeometry(int jointNumber)
 {
-    ///TODO !!!! Check baseTbi for link 0!
     // wTbi is the transformation between the base of joint <jointNumber> and the base frame <b>
     if (jointNumber == 0) {
         baseTbi_ = Eigen::TransfMatrix();
@@ -316,11 +315,14 @@ Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string frameID)
     }
 
     manipulability_.insert(std::make_pair(frameID, mySVD.results.mu));
+
+
     return Jmu;
 }
 
 void ArmModel::EvaluatedJdqNumeric()
 {
+ // std::cout << "BEFORE" << std::endl;
 
     Eigen::MatrixXd bJt_0, bJt_dQ;
     Eigen::MatrixXd dQ, qVar, q_orig;
@@ -328,7 +330,7 @@ void ArmModel::EvaluatedJdqNumeric()
     q_orig = q_total_;
     //bJt_0 = bJt_;
     EvaluateTotalForwardGeometry();
-    bJt_0 = EvaluateBase2JointJacobian(totalNumJoints_ - 1);
+    bJt_0 = EvaluateBase2JointJacobian(movingJoints_.back());
     //futils::PrettyPrint(wJt_0,"wJt_0");
 
     /// Here we iterate till "numJoints - 1" since the last joint will not influence
@@ -349,10 +351,10 @@ void ArmModel::EvaluatedJdqNumeric()
         EvaluateTotalForwardGeometry();
         //EvaluateBase2JointJacobian(numberOfJoints_ - 1);
         //bJt_dQ = bJt_;
-        bJt_dQ = EvaluateBase2JointJacobian(totalNumJoints_ - 1);
+        bJt_dQ = EvaluateBase2JointJacobian(movingJoints_.back());
         //futils::PrettyPrint(wJt_dQ,"wJt_dQ");
         for (int iJrow = 0; iJrow < 6; ++iJrow) {
-            for (int iJcol = 0; iJcol < totalNumJoints_; ++iJcol) {
+            for (int iJcol = 0; iJcol < movingNumJoints_; ++iJcol) {
                 //std::cout << "(i,j) = " << iJrow << "," << iJcol << std::endl;
                 //futils::PrettyPrint(dJdq_[i],"dJdq[i]");
                 dJdq_.at(i)(iJrow, iJcol) = (bJt_dQ(iJrow, iJcol) - bJt_0(iJrow, iJcol)) / delta_q;
@@ -362,6 +364,8 @@ void ArmModel::EvaluatedJdqNumeric()
         }
     }
     q_total_ = q_orig;
+
+    //std::cout << "AFTER" << std::endl;
 }
 
 Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
@@ -376,8 +380,8 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
     }
 
     Eigen::MatrixXd bJj; // = (h_[0]);
-    for (int i = 0; i < totalNumJoints_; i++) {
-        bJj = RightJuxtapose(bJj, h_.at(i));
+    for (int i = 0; i < movingNumJoints_; i++) {
+        bJj = RightJuxtapose(bJj, h_.at(movingJoints_.at(i)));
     }
 
     //futils::PrettyPrint(bJj, "bJj");

@@ -116,7 +116,7 @@ bool RobotModel::CheckVehicle() const
 
 Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForFrame(const std::string& frameID) const throw(std::exception)
 {
-    Eigen::MatrixXd bJt;
+    Eigen::MatrixXd bJt, vJt;
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
 
@@ -130,8 +130,8 @@ Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForFrame(const std::string& fr
             vRb=robotFrame_.GetRotMatrix()*vRb;
 
         }
-        bJt = vRb.GetCartesianRotationMatrix() * bJt;
-        return bJt;
+        vJt = vRb.GetCartesianRotationMatrix() * bJt;
+        return vJt;
     } else {
         std::string how;
         how= "Not existing arm: "+partID;
