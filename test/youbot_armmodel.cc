@@ -15,7 +15,7 @@ using std::endl;
 
 namespace rml {
 
-YouBotArmModel::YouBotArmModel(std::string id): ArmModel(id)
+YouBotArmModel::YouBotArmModel(const std::string id): ArmModel(id)
 {
 	int numJoints = 5;
 	std::vector<Eigen::TransfMatrix> biTri(numJoints);

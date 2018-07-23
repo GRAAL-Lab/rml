@@ -14,7 +14,7 @@ using std::endl;
 
 namespace rml {
 
-YouBotVehicleModel::YouBotVehicleModel(const std::string id) : ArmModel(id)
+YouBotVehicleModel::YouBotVehicleModel(const std::string id) : VehicleModel(id)
 {
 	Eigen::Matrix6d vJac;
 	vJac.setZero();

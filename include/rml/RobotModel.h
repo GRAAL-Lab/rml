@@ -75,7 +75,7 @@ public:
      * @param vehicle		The vehicle model
      * @return				true on success, false otherwise
      */
-    bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) throw(std::exception);
+    bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) throw(ExceptionWithHow);
 
     /**
      * @brief Loads an arm in the robot model
@@ -90,7 +90,7 @@ public:
      * @param robotframeToArm		The vehicle-to-base trasnformation matrix
      * @return			True if the arm has been loaded false otherwise
      */
-    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& robotframeToArm) throw(std::exception);
+    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& robotframeToArm) throw(ExceptionWithHow);
     /**
      * @brief SetRobotFrame Method to set the robot frame.
      * @details Method to set the robot frame, hence the frame common to all the arms.

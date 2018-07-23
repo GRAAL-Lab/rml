@@ -25,8 +25,8 @@ int main(int argc, char* argv[])
 	int numJoints(0);
 	double elapsed_Timer(0);
 
-	std::shared_ptr<rml::YouBotArmModel> armModel = std::make_shared<rml::YouBotArmModel>();
-	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
+  std::shared_ptr<rml::YouBotArmModel> armModel = std::make_shared<rml::YouBotArmModel>("youbotArm");
+  std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>("youbotVeh");
 	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
 
 	numJoints = armModel->GetNumJoints();
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 	for (int i = 0; i < numJoints - 1; ++i) {
 		linkDim.at(i) = armModel->GetLink(i + 1).BaseTransf().GetTransl();
 	}
-	linkDim.at(numJoints - 1) = armModel->GeteTt().GetTransl();
+  linkDim.at(numJoints - 1) = armModel->GetTransformation("youbotArm_Joint_4").GetTransl();
 
 	/// Populating Link Physical Properties
 	for (int i = 0; i < numJoints; ++i) {

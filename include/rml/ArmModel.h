@@ -65,7 +65,7 @@ public:
 	 * \brief Default constructor
      * @param[in] id Arm id.
 	 */
-    ArmModel(std::string id);
+    ArmModel(const std::string id) throw(std::exception);
 
     /**
 	 * \brief Default destructor

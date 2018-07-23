@@ -31,14 +31,20 @@ using std::endl;
 
 namespace rml {
 
-ArmModel::ArmModel(std::string id)
+ArmModel::ArmModel(const std::string id) throw(std::exception)
     : modelInitialized_(false)
     , isMapInitialized_(false)
     , totalNumJoints_(0)
     , modelReadFromFile_(false)
-    , id_(id)
-
 {
+    std::size_t underscorepos = id.find_first_of("_");
+    if (underscorepos == std::string::npos) {
+        id_ = id;
+    } else {
+      LabelSyntaxException labelException;
+      labelException.SetHow("ArmModel() constructor: Underscores '_' not allowed in ID");
+      throw(labelException);
+    }
 }
 
 ArmModel::~ArmModel()
@@ -123,7 +129,6 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& fbk) throw(std::exceptio
     //futils::PrettyPrint(q_moving_, "q_moving");
     //futils::PrettyPrint(q_total_, "q_total_");
 
-    //EvaluateBase2JointJacobian(numberOfJoints_ - 1);
     EvaluatedJdqNumeric();
     EvaluateTotalForwardGeometry();
 
@@ -147,8 +152,6 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& fbk) throw(std::exceptio
         }
         isMapInitialized_ = true;
     } else {
-        // transformation_.find((id_ + FrameID::Tool))->second = bTt_;
-        // jacobians_.find((id_ + FrameID::Tool))->second = bJt_;
         //updating the joint jacobians
         for (int i = 0; i < totalNumJoints_; i++) {
 
@@ -316,13 +319,12 @@ Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string frameID)
 
     manipulability_.insert(std::make_pair(frameID, mySVD.results.mu));
 
-
     return Jmu;
 }
 
 void ArmModel::EvaluatedJdqNumeric()
 {
- // std::cout << "BEFORE" << std::endl;
+    // std::cout << "BEFORE" << std::endl;
 
     Eigen::MatrixXd bJt_0, bJt_dQ;
     Eigen::MatrixXd dQ, qVar, q_orig;

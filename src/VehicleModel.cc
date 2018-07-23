@@ -22,13 +22,21 @@ namespace rml {
 VehicleModel::VehicleModel(const std::string id)
     : modelInitialized_(false)
     , isMapInitialized_(false)
-    , id_(id)
 {
     fbkPosition_.setZero();
     velocityOnVehicle_.setZero();
     accelerationOnVehicle_.setZero();
     controlRef_.setZero();
     transformation_.insert(std::make_pair(id_, fbkPosition_.ToTransfMatrix()));
+
+    std::size_t underscorepos = id.find_first_of("_");
+    if (underscorepos != std::string::npos) {
+        id_ = id;
+    } else {
+      LabelSyntaxException labelException;
+      labelException.SetHow("VehicleModel() constructor: Underscores '_' not allowed in ID");
+      throw(labelException);
+    }
 }
 
 VehicleModel::~VehicleModel()

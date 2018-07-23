@@ -49,7 +49,16 @@ private:
     std::string how_;
 };
 
-/// ROBOT MODEL
+// GENERAL
+class LabelSyntaxException : public ExceptionWithHow{
+    virtual const char* what() const throw()
+    {
+        return "[RML] Label Syntax Error! (check how())";
+    }
+};
+
+
+// ROBOT MODEL
 /**
  * @brief Exception to be thrown in robot model when dealing with the arm model
  */
@@ -94,7 +103,7 @@ class RobotModelWrongFrameException : public ExceptionWithHow {
 };
 
 
-///ARM MODEL
+// ARM MODEL
 /**
  * @brief Exception to be thrown when setting joint variable on a not initialized arm model
  */

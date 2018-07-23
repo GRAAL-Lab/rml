@@ -10,21 +10,18 @@
 #ifndef __TWOLINKS_ARMMODEL_H__
 #define __TWOLINKS_ARMMODEL_H__
 
-
-#include <vector>
-#include <algorithm>	// for std::copy
+#include <algorithm> // for std::copy
 #include <rml/RML.h>
+#include <vector>
 
 namespace rml {
 
-class TwoLinksArmModel : public ArmModel
-{
+class TwoLinksArmModel : public ArmModel {
 
 public:
     TwoLinksArmModel(std::string id);
-	virtual ~TwoLinksArmModel();
+    virtual ~TwoLinksArmModel();
 };
-
 }
 
 #endif /* __TWOLINKS_ARMMODEL_H__ */
