@@ -67,7 +67,7 @@ public:
      * @param ID Id of the frame.
      * @param TMat Transformation matrix of the frame.
      */
-    void AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat);
+    void SetRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat);
 
     /**
      * @brief Method returning the transformation matrix related to the frame id in input.
@@ -138,7 +138,7 @@ public:
 protected:
     bool modelInitialized_; //!< boolean stating whether the model is initialized.
     bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized.
-    std::unordered_map<std::string, Eigen::TransfMatrix> attachedBodyFrames_; //!< map of the attached body frames.
+    std::unordered_map<std::string, Eigen::TransfMatrix> rigidBodyFrames_; //!< map of the attached body frames.
     Eigen::Vector6d fbkPosition_; //!< vehicle position.
     Eigen::Vector6d velocityOnVehicle_; //!< vehicle velocity.
     Eigen::Vector6d accelerationOnVehicle_; //!< vehicle acceleration.

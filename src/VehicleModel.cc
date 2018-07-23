@@ -33,9 +33,9 @@ VehicleModel::VehicleModel(const std::string id)
     if (underscorepos != std::string::npos) {
         id_ = id;
     } else {
-      LabelSyntaxException labelException;
-      labelException.SetHow("VehicleModel() constructor: Underscores '_' not allowed in ID");
-      throw(labelException);
+        LabelSyntaxException labelException;
+        labelException.SetHow("VehicleModel() constructor: Underscores '_' not allowed in ID");
+        throw(labelException);
     }
 }
 
@@ -56,8 +56,8 @@ void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos)
         transformation_.insert(std::make_pair(id_, fbkPosition_.ToTransfMatrix()));
         jacobians_.insert(std::make_pair(id_, vJv_));
         // Updating rigid frame transformation matrix
-        for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = attachedBodyFrames_.begin();
-             iter != attachedBodyFrames_.end();
+        for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = rigidBodyFrames_.begin();
+             iter != rigidBodyFrames_.end();
              ++iter) {
             std::string id = iter->first;
             transformation_.insert(std::make_pair(id, fbkPosition_.ToTransfMatrix() * iter->second));
@@ -68,8 +68,8 @@ void VehicleModel::SetPositionOnInertial(const Eigen::Vector6d& fbkPos)
         transformation_.find(id_)->second = fbkPosition_.ToTransfMatrix();
         jacobians_.find(id_)->second = vJv_;
         //updating rigid frame transformation matrix
-        for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = attachedBodyFrames_.begin();
-             iter != attachedBodyFrames_.end();
+        for (std::unordered_map<std::string, Eigen::TransfMatrix>::iterator iter = rigidBodyFrames_.begin();
+             iter != rigidBodyFrames_.end();
              ++iter) {
             std::string id = iter->first;
             transformation_.find(id)->second = fbkPosition_.ToTransfMatrix() * iter->second;
@@ -96,11 +96,22 @@ void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian)
     isMapInitialized_ = false;
 }
 
-void VehicleModel::AddRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat)
+void VehicleModel::SetRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat)
 {
-    attachedBodyFrames_.insert(std::make_pair(id_ + ID, TMat));
-    transformation_.insert(std::make_pair(id_ + FrameID::Body + ID, transformation_.at(id_) * TMat));
-    jacobians_.insert(std::make_pair(id_ + FrameID::Body + ID, GetRigidBodyMatrix(TMat.GetTransl()) * jacobians_.at(id_)));
+    std::string idRigidFrame = id_ + FrameID::Body + ID;
+
+    // Check if rigid body is already present
+    if (rigidBodyFrames_.find(idRigidFrame) != rigidBodyFrames_.end()) {
+        // Check if the associated joint is the same otherwise throw exception
+
+        rigidBodyFrames_.at(idRigidFrame) = TMat;
+        transformation_.at(idRigidFrame) = transformation_.at(id_) * TMat; //EvaluateRigidBodyTransf(idRigidFrame);
+        jacobians_.at(idRigidFrame) = GetRigidBodyMatrix(TMat.GetTransl()) * jacobians_.at(id_);
+    } else {
+        rigidBodyFrames_.insert(std::make_pair(idRigidFrame, TMat));
+        transformation_.insert(std::make_pair(idRigidFrame, transformation_.at(id_) * TMat));
+        jacobians_.insert(std::make_pair(idRigidFrame, GetRigidBodyMatrix(TMat.GetTransl()) * jacobians_.at(id_)));
+    }
 }
 
 Eigen::TransfMatrix VehicleModel::GetTransformation(const std::string frameID) throw(std::exception)
@@ -114,14 +125,14 @@ Eigen::TransfMatrix VehicleModel::GetTransformation(const std::string frameID) t
     return transformation_.at(frameID);
 }
 
-Eigen::TransfMatrix VehicleModel::GetTransformationFrames(const std::string& frameID_j,const std::string& frameID_k){
+Eigen::TransfMatrix VehicleModel::GetTransformationFrames(const std::string& frameID_j, const std::string& frameID_k)
+{
     Eigen::TransfMatrix out;
     Eigen::TransfMatrix wTj, wTk;
-    wTj=GetTransformation(frameID_j);
-    wTk=GetTransformation(frameID_k);
-    out = wTj.transpose()*wTk;
+    wTj = GetTransformation(frameID_j);
+    wTk = GetTransformation(frameID_k);
+    out = wTj.transpose() * wTk;
     return out;
-
 }
 
 Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID) throw(std::exception)
