@@ -82,7 +82,7 @@ public:
      * @param[in] framID_k second frame;
      * @return Transformation Matrix jTk.
      */
-    Eigen::TransfMatrix GetTransformationFrames(const std::string& frameID_j,const std::string& frameID_k);
+    Eigen::TransfMatrix GetTransformationFrames(const std::string& frameID_j, const std::string& frameID_k);
     /**
      * @brief Method returning the jacobian related to the frame id in input.
      * @param ID frame id.

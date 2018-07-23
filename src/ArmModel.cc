@@ -41,9 +41,9 @@ ArmModel::ArmModel(const std::string id) throw(std::exception)
     if (underscorepos == std::string::npos) {
         id_ = id;
     } else {
-      LabelSyntaxException labelException;
-      labelException.SetHow("ArmModel() constructor: Underscores '_' not allowed in ID");
-      throw(labelException);
+        LabelSyntaxException labelException;
+        labelException.SetHow("ArmModel() constructor: Underscores '_' not allowed in ID");
+        throw(labelException);
     }
 }
 
@@ -479,11 +479,13 @@ Eigen::MatrixXd ArmModel::GetManipulabilityJacobian(const std::string& frameID)
     return (manipulabilityJacobians_.at(frameID));
 }
 
+//TODO
 int ArmModel::GetNumJoints() const
 {
     //std::cout << "linksSize " << links_.size() << std::endl;
     //std::cout << "Moving Joits " << movingNumJoints_ << std::endl;
-    return links_.size();
+    //return links_.size();
+    return movingNumJoints_;
 }
 
 const std::vector<Eigen::MatrixXd>& ArmModel::GetdJdq() const
@@ -514,7 +516,7 @@ const Eigen::VectorXd& ArmModel::GetControlVector() const
 
 void ArmModel::SetControlVector(const Eigen::VectorXd& controlRef) throw(std::exception)
 {
-    if (controlRef.rows() == totalNumJoints_) {
+    if (controlRef.rows() == movingNumJoints_) {
         controlRef_ = controlRef;
     } else {
         ArmModelWrongJointSizeException armModelWrongJointSize;

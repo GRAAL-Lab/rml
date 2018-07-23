@@ -4,10 +4,6 @@
 #include <string>
 
 namespace rml {
-
-enum JacobianObserver { VehicleFrame,
-    InertialFrame };
-
 namespace FrameID {
     const std::string Joint = "_Joint_";
     const std::string Body = "_Body_";

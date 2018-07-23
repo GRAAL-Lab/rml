@@ -276,7 +276,6 @@ protected:
      */
     void BackwardDirectGeometry(int jointNumber, int endEffectorIndex);
 
-
     bool modelInitialized_; //!< boolean stating whether the model is initialized.
     bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized.
     int totalNumJoints_; //<! joints number

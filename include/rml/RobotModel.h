@@ -35,7 +35,8 @@ class RobotModel {
     std::unordered_map<std::string, Eigen::TransfMatrix> robotframeToArm_;
     std::string robotFrameID_;
     Eigen::TransfMatrix robotFrame_;
-    std::string vehicleFrameID_;
+    // std::string vehicleFrameID_;
+    bool isVehicle_;
     /**
      * @brief Method returning the isolated arm jacobian for the input framID.
      * @param[in] ID frame id
@@ -53,7 +54,11 @@ public:
     /**
      * @brief Default constructor
      */
-    RobotModel();
+    RobotModel(Eigen::TransfMatrix robotFrame, std::string frameID);
+    /**
+     * @brief Default constructor
+     */
+    RobotModel(Eigen::TransfMatrix robotFrame, std::string frameID, Eigen::MatrixXd JRobotFrame);
     /**
      * @brief Default deconstructor
      */
@@ -65,18 +70,6 @@ public:
      * @return	The total number of DOFs (vehicle + arms)
      */
     int GetTotalDOFs();
-
-    /**
-     * @brief Loads a vehicle in the robot model
-     *
-     * Loads a vehicle in the robot model, only one vehicle is allowed. The VehicleModel
-     * must be initialized before loading, otherwise is not accepted.
-     *
-     * @param vehicle		The vehicle model
-     * @return				true on success, false otherwise
-     */
-    bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) throw(ExceptionWithHow);
-
     /**
      * @brief Loads an arm in the robot model
      *
@@ -92,14 +85,6 @@ public:
      */
     bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& robotframeToArm) throw(ExceptionWithHow);
     /**
-     * @brief SetRobotFrame Method to set the robot frame.
-     * @details Method to set the robot frame, hence the frame common to all the arms.
-     * If the vehicle is loaded it is the vehicle frame itslef.
-     * By default it is equal to identity.
-     * @param robotFrame
-     */
-    void SetRobotFrame(Eigen::TransfMatrix robotFrame);
-    /**
      * @brief GetRobotFrameID method to get the robot frame id.
      * @details Method to get the id for the robot frame, hence the frame common to all the arms.
      * If the vehicle is loaded, it is the vehicle frame itself.
@@ -107,6 +92,17 @@ public:
      * @return robot frame id
      */
     std::string GetRobotFrameID();
+    /**
+     * @brief SetRobotFramePosition method to set the new robot frame position
+     * @param robotFrame robot frame position wrt to the world frame
+     */
+    void SetRobotFramePosition(Eigen::TransfMatrix robotFrame);
+    /**
+     * @brief Method adding a rigid body frame to the vehicle.
+     * @param ID Id of the frame.
+     * @param TMat Transformation matrix of the frame.
+     */
+    void SetRigidBodyFrameToRobotFrame(const std::string ID, const Eigen::TransfMatrix TMat);
 
     /**
      * Checks that the given armIndex is within the allowed range (i.e. less or equal than
@@ -126,7 +122,7 @@ public:
      * @param ID frameID
      * @return Jacobian
      */
-    Eigen::MatrixXd GetCartesianJacobian(const std::string& frameID, JacobianObserver jacobianObserver) throw(std::exception);
+    Eigen::MatrixXd GetCartesianJacobian(const std::string& frameID) throw(std::exception);
     /**
      * @brief Method computing the identity jacobian of the input arm ID
      * @param ID armID
@@ -144,7 +140,7 @@ public:
      * @param frameID
      * @return manipulability
      */
-    double GetManipulability(const std::string& frameID) throw (std::exception);
+    double GetManipulability(const std::string& frameID) throw(std::exception);
     /**
      * @brief Method returing a transformation matrix of the robot model.\n
      * @details The methods returns a transformation matrix depending on the input string framID.\n
@@ -158,7 +154,7 @@ public:
      * @param[in] framID_k second frame;
      * @return Transformation Matrix aTb.
      */
-    Eigen::TransfMatrix GetTransformationFrames(const std::string& frameID_j,const std::string& frameID_k);
+    Eigen::TransfMatrix GetTransformationFrames(const std::string& frameID_j, const std::string& frameID_k);
     /**
      * @brief Method returning shared pointer to one of the loaded arm.
      * @param ID arm id.
@@ -216,5 +212,16 @@ public:
 // * @return Jacobian
 // */
 //Eigen::MatrixXd GetJacobian_Vehicle(std::string ID);
+/*
+ *     /**
+     * @brief Loads a vehicle in the robot model
+     *
+     * Loads a vehicle in the robot model, only one vehicle is allowed. The VehicleModel
+     * must be initialized before loading, otherwise is not accepted.
+     *
+     * @param vehicle		The vehicle model
+     * @return				true on success, false otherwise
+    bool LoadVehicle(const std::shared_ptr<VehicleModel> vehicle) throw(ExceptionWithHow);
+    */
 
 #endif /* INCLUDE_RML_ROBOTMODEL_H_ */

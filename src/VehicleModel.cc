@@ -28,9 +28,8 @@ VehicleModel::VehicleModel(const std::string id)
     accelerationOnVehicle_.setZero();
     controlRef_.setZero();
     transformation_.insert(std::make_pair(id_, fbkPosition_.ToTransfMatrix()));
-
     std::size_t underscorepos = id.find_first_of("_");
-    if (underscorepos != std::string::npos) {
+    if (underscorepos == std::string::npos) {
         id_ = id;
     } else {
         LabelSyntaxException labelException;
@@ -99,7 +98,6 @@ void VehicleModel::SetJacobian(Eigen::Matrix6d vehicleJacobian)
 void VehicleModel::SetRigidBodyFrame(const std::string ID, const Eigen::TransfMatrix TMat)
 {
     std::string idRigidFrame = id_ + FrameID::Body + ID;
-
     // Check if rigid body is already present
     if (rigidBodyFrames_.find(idRigidFrame) != rigidBodyFrames_.end()) {
         // Check if the associated joint is the same otherwise throw exception
@@ -116,6 +114,7 @@ void VehicleModel::SetRigidBodyFrame(const std::string ID, const Eigen::TransfMa
 
 Eigen::TransfMatrix VehicleModel::GetTransformation(const std::string frameID) throw(std::exception)
 {
+
     if (transformation_.find(frameID) == transformation_.end()) {
         VehicleModelWrongLabelException vehicleModelWrongLabel;
         vehicleModelWrongLabel.SetWho(frameID);
