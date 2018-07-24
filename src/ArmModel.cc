@@ -391,19 +391,14 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
     return bJj;
 }
 
-void ArmModel::SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception)
+void ArmModel::SetRigidBodyFrame(std::string ID, std::string frameID, Eigen::TransfMatrix TMat) throw(std::exception)
 {
-    if (jointIndex >= totalNumJoints_) {
-        ArmModelNotExistingJointException armModelNotExistingJoint;
-        armModelNotExistingJoint.SetWhere("AddRigidBodyFrame");
-        throw(armModelNotExistingJoint);
-    }
-    std::string idRigidFrame = id_ + FrameID::Body + ID;
 
+    std::string idRigidFrame = id_ + FrameID::Body + ID;
     // Check if rigid body is already present
     if (rigidBodyFrames_.find(idRigidFrame) != rigidBodyFrames_.end()) {
         // Check if the associated joint is the same otherwise throw exception
-        if (rigidBodyFrames_.at(idRigidFrame).first == jointIndex) {
+        if (rigidBodyFrames_.at(idRigidFrame).first == frameID) {
             rigidBodyFrames_.at(idRigidFrame).second = TMat;
             transformation_.at(idRigidFrame) = EvaluateRigidBodyTransf(idRigidFrame);
             jacobians_.at(idRigidFrame) = EvaluateRigidBodyJacobian(idRigidFrame);
@@ -413,7 +408,7 @@ void ArmModel::SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
             throw(except);
         }
     } else {
-        IndexedTMat myMat(jointIndex, TMat);
+        IndexedTMat myMat(frameID, TMat);
         rigidBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
         transformation_.insert(std::make_pair(idRigidFrame, EvaluateRigidBodyTransf(idRigidFrame)));
         jacobians_.insert(std::make_pair(idRigidFrame, EvaluateRigidBodyJacobian(idRigidFrame)));
@@ -423,19 +418,19 @@ void ArmModel::SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMa
 Eigen::TransfMatrix ArmModel::EvaluateRigidBodyTransf(const std::string& frameID)
 {
 
-    int jointIndex = rigidBodyFrames_.at(frameID).first;
+    std::string frameAttachedID = rigidBodyFrames_.at(frameID).first;
     Eigen::TransfMatrix TMat = rigidBodyFrames_.at(frameID).second;
 
-    return transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)) * TMat;
+    return transformation_.at(frameAttachedID) * TMat;
 }
 
 Eigen::MatrixXd ArmModel::EvaluateRigidBodyJacobian(const std::string& frameID)
 {
 
-    int jointIndex = rigidBodyFrames_.at(frameID).first;
+    std::string attachedFrame = rigidBodyFrames_.at(frameID).first;
     Eigen::TransfMatrix TMat = rigidBodyFrames_.at(frameID).second;
-    Eigen::Vector3d projectedTransl = transformation_.at(id_ + FrameID::Joint + std::to_string(jointIndex)).GetRotMatrix() * TMat.GetTransl();
-    return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(id_ + FrameID::Joint + std::to_string(jointIndex));
+    Eigen::Vector3d projectedTransl = transformation_.at(attachedFrame).GetRotMatrix() * TMat.GetTransl();
+    return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(attachedFrame);
 }
 
 Eigen::TransfMatrix ArmModel::GetTransformation(const std::string& frameID) throw(std::exception)
@@ -479,12 +474,8 @@ Eigen::MatrixXd ArmModel::GetManipulabilityJacobian(const std::string& frameID)
     return (manipulabilityJacobians_.at(frameID));
 }
 
-//TODO
 int ArmModel::GetNumJoints() const
 {
-    //std::cout << "linksSize " << links_.size() << std::endl;
-    //std::cout << "Moving Joits " << movingNumJoints_ << std::endl;
-    //return links_.size();
     return movingNumJoints_;
 }
 

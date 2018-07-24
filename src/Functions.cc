@@ -127,7 +127,7 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
     return Eigen::Vector6d(angular, linear);
 }
 
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw (std::exception)
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(std::exception)
 {
     if (xmax < xmin) {
         throw(FunctionBellShapeParameterException());
@@ -226,6 +226,16 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t)
     return t_hat;
 }
 
+Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd Jobserver, Eigen::Vector3d CartesianError)
+{
+
+    Eigen::MatrixXd out;
+
+    out.resize(J.rows(), J.cols());
+    out = J - GetRigidBodyMatrix(CartesianError) * Jobserver;
+
+    return out;
+}
 Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl)
 {
     Eigen::Matrix6d S;

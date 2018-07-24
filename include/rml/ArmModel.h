@@ -18,7 +18,9 @@
 
 namespace rml {
 
-typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
+//typedef std::pair<int, Eigen::TransfMatrix> IndexedTMat;
+typedef std::pair<std::string, Eigen::TransfMatrix> IndexedTMat;
+
 /**
  * \class ArmModel
  *
@@ -141,7 +143,7 @@ public:
      * @param jointIndex index of the joint to which the frame is attached.
      * @param TMat Transformation ,atrix of the frame.
      */
-    void SetRigidBodyFrame(std::string ID, int jointIndex, Eigen::TransfMatrix TMat) throw(std::exception);
+    void SetRigidBodyFrame(std::string ID, std::string frameID, Eigen::TransfMatrix TMat) throw(std::exception);
 
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.

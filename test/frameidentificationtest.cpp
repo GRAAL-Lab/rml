@@ -13,6 +13,7 @@ int main()
     std::string joint_one_frame = arm_id + rml::FrameID::Joint + "1";
     std::string rigid_body_frame_id = robot_frame_id + rml::FrameID::Body + "cameraFrame";
     std::string frame_ID = "cameraFrame";
+    std::string rigid_body_frame_id_arm= arm_id+ rml::FrameID::Body+frame_ID;
     Eigen::TransfMatrix T;
     T.SetTransl(Eigen::Vector3d(0.2, 0.0, 0.2));
     Eigen::TransfMatrix TrobotFrame;
@@ -44,8 +45,10 @@ int main()
     initial_tool_pos << 0.011, 0.11; // -1.4, -0.11, 1.57;//, -1.4, -0.11, 1.57;
     robot_model->GetArm(arm_id)->SetJointsPosition(initial_tool_pos);
     robot_model_with_vehicle->GetArm(arm_id)->SetJointsPosition(initial_tool_pos);
-    robot_model->SetRigidBodyFrameToRobotFrame(frame_ID, T);
-    robot_model_with_vehicle->SetRigidBodyFrameToRobotFrame(frame_ID, T);
+    robot_model->SetRigidBodyFrame(frame_ID,T,robot_frame_id);
+    robot_model->SetRigidBodyFrame(frame_ID, T, joint_one_frame);
+    robot_model_with_vehicle->SetRigidBodyFrame(frame_ID,T,robot_frame_id);
+    robot_model_with_vehicle->SetRigidBodyFrame(frame_ID,T,joint_one_frame);
     robot_model->SetRobotFramePosition(TrobotFrame);
     robot_model_with_vehicle->SetRobotFramePosition(TrobotFrame);
     Eigen::Vector2d control_no_vehicle(0.1, 0.2);
@@ -59,14 +62,22 @@ int main()
     futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(joint_one_frame), "JOINT ONE CARTESIAN JACOBIAN WITH VEHICLE");
     futils::PrettyPrint(robot_model_with_vehicle->GetTransformation(robot_frame_id), "ROBOT FRAME WITH WITH VEHICLE");
     futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(robot_frame_id), "ROBOT FRAME JACOBIAN WITH VEHICLE");
-    futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(rigid_body_frame_id), "RIGID BODY JACOBIAN WITH VEHICLE");
 
+    futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(rigid_body_frame_id), "RIGID BODY JACOBIAN WITH VEHICLE");
+    futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(rigid_body_frame_id_arm),"RIGID BODY FRAME ID WITH VEHICLE ARM ");
     futils::PrettyPrint(robot_model->GetRobotControl(arm_id), "robot control arm ");
     //futils::PrettyPrint(robot_model->GetRobotControl(robot_frame_id),"robot control arm ");
     futils::PrettyPrint(robot_model->GetCartesianJacobian(joint_one_frame), "JOINT ONE CARTESIAN JACOBIAN WITH NO VEHICLE");
     futils::PrettyPrint(robot_model->GetTransformation(robot_frame_id), "ROBOT FRAME WITH NO VEHICLE");
     futils::PrettyPrint(robot_model->GetCartesianJacobian(robot_frame_id), "ROBOT FRAME JACOBIAN WITH NO VEHICLE");
     futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_frame_id), "RIGID BODY JACOBIAN WITH WITH VEHICLE");
+    futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_frame_id_arm),"RIGID BODY FRAME ID NO VEHICLE ");
+    //Test change jacobian observer  from inertial to vehicle for joint 5
+    Eigen::Vector3d Error= rml::CartesianError(Eigen::TransfMatrix(),robot_model_with_vehicle->GetTransformation(joint_one_frame)).GetSecondVect3();
+    Eigen::MatrixXd J = robot_model_with_vehicle->GetCartesianJacobian(joint_one_frame);
+    Eigen::MatrixXd Jobs= robot_model_with_vehicle->GetCartesianJacobian(robot_frame_id);
+    futils::PrettyPrint(J, "JACOBIAN BEFORE CHANGING OBSERVER") ;
+    futils::PrettyPrint(rml::ChangeJacobianObserver(J,Jobs,Error), "CHANGE OF OBSERVER ");
 
     return 0;
 }

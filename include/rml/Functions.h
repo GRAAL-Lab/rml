@@ -224,6 +224,15 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
  * @return the rigid body matrix
  */
 Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl);
+/**
+ * @brief ChangeJacobianObserver Method implementing change of observer for a cartesian Jacobian. \n
+ * @details \f$ J^{v}_{error}=J^{o}_{error}-S_{e/o}J^{o}_{v}  \f$
+ * @param J error jacobian wrt to the inertial frame
+ * @param Jobserver jacobian of the observer wrt to the inertial frame
+ * @param CartesianError error
+ * @return Jacobian of the error observed by the input observer
+ */
+Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd Jobserver, Eigen::Vector3d CartesianError);
 
 /**
  * @brief A norm comparing function (is "a < b" ?) to be binded to STL algorithms.

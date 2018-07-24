@@ -46,7 +46,8 @@ TwoLinksArmModel::TwoLinksArmModel(std::string id) : ArmModel(id)
     eTt(2,0) = 0; eTt(2,1) = 1;  eTt(2,2) = 0;  eTt(2,3) = 0;
     eTt(3,0) = 0; eTt(3,1) = 0;  eTt(3,2) = 0;  eTt(3,3) = 1;
 
-    SetRigidBodyFrame("eTt", numJoints - 1, eTt);
+    std::string Tool=id+rml::FrameID::Joint + std::to_string(numJoints-1);
+    SetRigidBodyFrame("eTt", Tool, eTt);
 
 }
 
