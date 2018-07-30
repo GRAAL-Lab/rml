@@ -10,7 +10,7 @@
 
 #include "RobotLink.h"
 #include "Types.h"
-#include <RMLExceptions.h>
+#include "RMLExceptions.h"
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
 #include <unordered_map>
