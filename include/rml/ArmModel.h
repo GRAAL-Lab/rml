@@ -8,13 +8,13 @@
 #ifndef __ARMMODEL_H__
 #define __ARMMODEL_H__
 
+#include "RobotLink.h"
+#include "Types.h"
+#include <RMLExceptions.h>
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
 #include <unordered_map>
 #include <vector>
-
-#include "RobotLink.h"
-#include "Types.h"
 
 namespace rml {
 
@@ -128,7 +128,7 @@ public:
      * @param attachedFrameID ID of the frame to attach
      * @param TMat Transformation matrix of the frame.
      */
-    void SetRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransfMatrix TMat) throw(std::exception);
+    void SetRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransfMatrix TMat) throw(ExceptionWithHow);
 
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.
@@ -136,7 +136,7 @@ public:
      * @return  transformation matrix
      */
 
-    Eigen::TransfMatrix GetTransformation(const std::string& frameID) throw(std::exception);
+    Eigen::TransfMatrix GetTransformation(const std::string& frameID) throw(ExceptionWithHow);
     /**
      * @brief Method returing a transformation matrix from frameID_j to frameID_k, i.e. jTk.\n
      * @param[in] frameID_j first frame;
@@ -150,7 +150,7 @@ public:
      * @param frameId frame id
      * @return jacobian matrix
      */
-    Eigen::MatrixXd GetJacobian(const std::string& frameID) throw(std::exception);
+    Eigen::MatrixXd GetJacobian(const std::string& frameID) throw(ExceptionWithHow);
 
     /**
      * @brief Method returning the manipulability jacobian related to the input frameID wrt to the arm base.

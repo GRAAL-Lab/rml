@@ -90,7 +90,7 @@ void RobotModel::SetRigidBodyFrame(const std::string frameID, const Eigen::Trans
     if (partIDIndex == std::string::npos && frameToAttachID != robotFrameID_) {
         std::string how;
         how = "wrong string format: " + frameToAttachID;
-        RobotModelWrongFrameException robotModelWrongFrameFormat;
+        WrongFrameException robotModelWrongFrameFormat;
         robotModelWrongFrameFormat.SetHow(how);
         throw(robotModelWrongFrameFormat);
     } else if (frameToAttachID == robotFrameID_ || partID == robotFrameID_) {
@@ -99,8 +99,8 @@ void RobotModel::SetRigidBodyFrame(const std::string frameID, const Eigen::Trans
         armsModel_.at(partID)->SetRigidBodyFrame(frameID, frameToAttachID, TMat);
     } else {
         std::string how;
-        how = "Asking a not existing part: " + partID;
-        RobotModelWrongFrameException robotModelNotExistingPartExc;
+        how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+        WrongFrameException robotModelNotExistingPartExc;
         robotModelNotExistingPartExc.SetHow(how);
         throw(robotModelNotExistingPartExc);
     }
@@ -185,8 +185,8 @@ Eigen::VectorXd RobotModel::GetRobotControl(std::string partID) throw(ExceptionW
         return (armsModel_.at(partID)->GetControlVector());
     } else {
         std::string how;
-        how = "Asking a not existing part: " + partID;
-        RobotModelWrongFrameException robotNotExistingPartException;
+        how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+        WrongFrameException robotNotExistingPartException;
         robotNotExistingPartException.SetHow(how);
         throw(robotNotExistingPartException);
     }
@@ -200,8 +200,8 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     Eigen::TransfMatrix T;
     if (partIDIndex == std::string::npos && frameID != robotFrameID_) {
         std::string how;
-        how = "wrong string format: " + frameID;
-        RobotModelWrongFrameException robotModelWrongFrameFormat;
+        how = "[ROBOT MODEL] Wrong string format: " + frameID;
+        WrongFrameException robotModelWrongFrameFormat;
         robotModelWrongFrameFormat.SetHow(how);
         throw(robotModelWrongFrameFormat);
     }
@@ -215,8 +215,8 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     }
 
     std::string how;
-    how = "Asking a not existing part: " + partID;
-    RobotModelWrongFrameException robotModelNotExistingPartExc;
+    how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+    WrongFrameException robotModelNotExistingPartExc;
     robotModelNotExistingPartExc.SetHow(how);
     throw(robotModelNotExistingPartExc);
 }
@@ -265,14 +265,14 @@ Eigen::MatrixXd RobotModel::GetCartesianJacobian(const std::string& frameID) thr
         return totJac;
     } else if (frameID.find_first_of("_") == std::string::npos && frameID != robotFrameID_) {
         std::string how;
-        how = "Wrong format frame id: " + frameID;
-        RobotModelWrongFrameException robotModelWrongFrameFormat;
+        how = "[ROBOT MODEL] Wrong format frame id: " + frameID;
+        WrongFrameException robotModelWrongFrameFormat;
         robotModelWrongFrameFormat.SetHow(how);
         throw(robotModelWrongFrameFormat);
     }
     std::string how;
-    how = "Asking a not existing part: " + modelID;
-    RobotModelWrongFrameException robotModelNotExistingPartException;
+    how = "[ROBOT MODEL] Asking a not existing part: " + modelID;
+    WrongFrameException robotModelNotExistingPartException;
     robotModelNotExistingPartException.SetHow(how);
     throw(robotModelNotExistingPartException);
 }
@@ -310,8 +310,8 @@ Eigen::MatrixXd RobotModel::GetManipulabilityJacobian(const std::string& frameID
     std::string armID = frameID.substr(0, frameID.find_first_of("_"));
     if (frameID.find_first_of("_") == std::string::npos) {
         std::string how;
-        how = "Wrong format frame id: " + frameID;
-        RobotModelWrongFrameException robotModelWrongFrameFormat;
+        how = "[ROBOT MODEL] Wrong format frame id: " + frameID;
+        WrongFrameException robotModelWrongFrameFormat;
         robotModelWrongFrameFormat.SetHow(how);
         throw(robotModelWrongFrameFormat);
     }
@@ -333,8 +333,8 @@ Eigen::MatrixXd RobotModel::GetManipulabilityJacobian(const std::string& frameID
         return totJac;
     }
     std::string how;
-    how = "Asking frame for a no existing arm: " + armID;
-    RobotModelWrongFrameException notExistingPartExc;
+    how = "[ROBOT MODEL] Asking frame for a no existing arm: " + armID;
+    WrongFrameException notExistingPartExc;
     notExistingPartExc.SetHow(how);
     throw(notExistingPartExc);
 }
@@ -345,8 +345,8 @@ double RobotModel::GetManipulability(const std::string& frameID) throw(Exception
     std::string armID = frameID.substr(0, frameID.find_first_of("_"));
     if (frameID.find_first_of("_") == std::string::npos) {
         std::string how;
-        how = "Wrong format frame id: " + frameID;
-        RobotModelWrongFrameException robotModelWrongFrameFormat;
+        how = "[ROBOT MODEL] Wrong format frame id: " + frameID;
+        WrongFrameException robotModelWrongFrameFormat;
         robotModelWrongFrameFormat.SetHow(how);
         throw(robotModelWrongFrameFormat);
     }
@@ -478,8 +478,8 @@ void RobotModel::SetPositionVector(std::string partID, Eigen::VectorXd position)
         armsModel_.find(partID)->second->SetJointsPosition(position);
     } else {
         std::string how;
-        how = "Asking a not existing part: " + partID;
-        RobotModelWrongFrameException robotNotExistingPartException;
+        how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+        WrongFrameException robotNotExistingPartException;
         robotNotExistingPartException.SetHow(how);
         throw(robotNotExistingPartException);
     }
@@ -497,8 +497,8 @@ Eigen::VectorXd RobotModel::GetPositionVector(std::string partID) throw(Exceptio
         return out;
     }
     std::string how;
-    how = "Asking a not existing part: " + partID;
-    RobotModelWrongFrameException robotNotExistingPartException;
+    how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+    WrongFrameException robotNotExistingPartException;
     robotNotExistingPartException.SetHow(how);
     throw(robotNotExistingPartException);
 }
@@ -511,8 +511,8 @@ void RobotModel::SetVelocityVector(std::string partID, Eigen::VectorXd velocity)
         armsModel_.find(partID)->second->SetJointsVelocity(velocity);
     } else {
         std::string how;
-        how = "Asking a not existing part: " + partID;
-        RobotModelWrongFrameException robotNotExistingPartException;
+        how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+        WrongFrameException robotNotExistingPartException;
         robotNotExistingPartException.SetHow(how);
         throw(robotNotExistingPartException);
     }
@@ -530,8 +530,8 @@ Eigen::VectorXd RobotModel::GetVelocityVector(std::string partID) throw(Exceptio
         return out;
     }
     std::string how;
-    how = "Asking a not existing part: " + partID;
-    RobotModelWrongFrameException robotNotExistingPartException;
+    how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+    WrongFrameException robotNotExistingPartException;
     robotNotExistingPartException.SetHow(how);
     throw(robotNotExistingPartException);
 }
@@ -544,8 +544,8 @@ void RobotModel::SetAccelerationVector(std::string partID, Eigen::VectorXd accel
         armsModel_.find(partID)->second->SetJointsAcceleration(acceleration);
     } else {
         std::string how;
-        how = "Asking a not existing part: " + partID;
-        RobotModelWrongFrameException robotNotExistingPartException;
+        how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+        WrongFrameException robotNotExistingPartException;
         robotNotExistingPartException.SetHow(how);
         throw(robotNotExistingPartException);
     }
@@ -563,8 +563,8 @@ Eigen::VectorXd RobotModel::GetAccelerationVector(std::string partID) throw(Exce
         return out;
     }
     std::string how;
-    how = "Asking a not existing part: " + partID;
-    RobotModelWrongFrameException robotNotExistingPartException;
+    how = "[ROBOT MODEL] Asking a not existing part: " + partID;
+    WrongFrameException robotNotExistingPartException;
     robotNotExistingPartException.SetHow(how);
     throw(robotNotExistingPartException);
 }

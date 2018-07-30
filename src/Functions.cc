@@ -127,13 +127,19 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
     return Eigen::Vector6d(angular, linear);
 }
 
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(std::exception)
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow)
 {
     if (xmax < xmin) {
-        throw(FunctionBellShapeParameterException());
+        BellShapeParameterException bellShapeException;
+        std::string how = " xmax < xmin in decreasing bell shaped function";
+        bellShapeException.SetHow(how);
+        throw(bellShapeException);
     }
     if (ymax < ymin) {
-        throw(FunctionBellShapeYException());
+        BellShapeParameterException bellShapeException;
+        std::string how = " ymax < ymin in decreasing bell shaped function";
+        bellShapeException.SetHow(how);
+        throw(bellShapeException);
     }
     if (x <= xmin) {
         return ymax;
@@ -147,14 +153,19 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
     return (ymax - ymin) * (0.5 * cos(cosarg) + 0.5) + ymin;
 }
 
-double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(std::exception)
+double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow)
 {
     if (xmax < xmin) {
-        throw(FunctionBellShapeParameterException());
+        BellShapeParameterException bellShapeException;
+        std::string how = " xmax < xmin in increasing bell shaped function";
+        bellShapeException.SetHow(how);
+        throw(bellShapeException);
     }
-
     if (ymax < ymin) {
-        throw(FunctionBellShapeYException());
+        BellShapeParameterException bellShapeException;
+        std::string how = " ymax < ymin in increasing bell shaped function";
+        bellShapeException.SetHow(how);
+        throw(bellShapeException);
     }
 
     if (x <= xmin) {

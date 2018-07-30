@@ -112,13 +112,13 @@ void ArmModel::SetJointsPosition(const Eigen::VectorXd& fbk) throw(std::exceptio
 
     if (!modelInitialized_) {
         ArmModelNotInitializedException armModelNotIntialized;
-        armModelNotIntialized.SetWhere("SetJointPosition");
+
         throw(armModelNotIntialized);
     }
 
     if (fbk.size() != movingNumJoints_) {
-        ArmModelWrongJointSizeException armModelWrongJointSize;
-        armModelWrongJointSize.SetWhere("SetJointPosition");
+        ArmModelJointException armModelWrongJointSize;
+
         throw(armModelWrongJointSize);
     }
     for (int i = 0; i < static_cast<int>(movingJoints_.size()); i++) {
@@ -176,12 +176,12 @@ void ArmModel::SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::excepti
 
     if (!modelInitialized_) {
         ArmModelNotInitializedException armModelNotIntialized;
-        armModelNotIntialized.SetWhere("SetJointVelocity");
         throw(armModelNotIntialized);
     }
     if (qdot.size() != q_dot_moving_.size()) {
-        ArmModelWrongJointSizeException armModelWrongJointSize;
-        armModelWrongJointSize.SetWhere("SetJointVelocity");
+        ArmModelJointException armModelWrongJointSize;
+        std::string how = "Wrong input size vector in set joints velocity ";
+        armModelWrongJointSize.SetHow(how);
         throw(armModelWrongJointSize);
     }
     q_dot_moving_ = qdot;
@@ -192,12 +192,12 @@ void ArmModel::SetJointsAcceleration(const Eigen::VectorXd& qddot) throw(std::ex
 
     if (!modelInitialized_) {
         ArmModelNotInitializedException armModelNotIntialized;
-        armModelNotIntialized.SetWhere("SetJointAcceleration");
         throw(armModelNotIntialized);
     }
     if (qddot.size() != q_ddot_moving_.size()) {
-        ArmModelWrongJointSizeException armModelWrongJointSize;
-        armModelWrongJointSize.SetWhere("SetJointAcceleration");
+        ArmModelJointException armModelWrongJointSize;
+        std::string how = "Wrong input size vector in set joints acceleration";
+        armModelWrongJointSize.SetHow(how);
         throw(armModelWrongJointSize);
     }
     q_ddot_moving_ = qddot;
@@ -391,7 +391,7 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
     return bJj;
 }
 
-void ArmModel::SetRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransfMatrix TMat) throw(std::exception)
+void ArmModel::SetRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransfMatrix TMat) throw(ExceptionWithHow)
 {
 
     std::string idRigidFrame = id_ + FrameID::Body + frameID;
@@ -403,8 +403,9 @@ void ArmModel::SetRigidBodyFrame(std::string frameID, std::string attachedFrameI
             transformation_.at(idRigidFrame) = EvaluateRigidBodyTransf(idRigidFrame);
             jacobians_.at(idRigidFrame) = EvaluateRigidBodyJacobian(idRigidFrame);
         } else {
-            LabelAlreadyUsedException except;
-            except.SetWhere("SetRigidBodyFrame");
+            WrongFrameException except;
+            std::string how = "[ARM MODEL] Trying to change attached frame for a rigid body " + frameID;
+            except.SetHow(how);
             throw(except);
         }
     } else {
@@ -433,13 +434,13 @@ Eigen::MatrixXd ArmModel::EvaluateRigidBodyJacobian(const std::string& frameID)
     return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(attachedFrame);
 }
 
-Eigen::TransfMatrix ArmModel::GetTransformation(const std::string& frameID) throw(std::exception)
+Eigen::TransfMatrix ArmModel::GetTransformation(const std::string& frameID) throw(ExceptionWithHow)
 {
 
     if (transformation_.find(frameID) == transformation_.end()) {
-        ArmModelWrongLabelException armModelWrongLabel;
-        armModelWrongLabel.SetWhere("GetTransformationMatrix");
-        armModelWrongLabel.SetWho(frameID);
+        WrongFrameException armModelWrongLabel;
+        std::string how = "[ARM MODEL] The frame does not exist " + frameID;
+        armModelWrongLabel.SetHow(how);
         throw(armModelWrongLabel);
     }
     return transformation_.at(frameID);
@@ -455,12 +456,12 @@ Eigen::TransfMatrix ArmModel::GetTransformationFrames(const std::string& frameID
     return out;
 }
 
-Eigen::MatrixXd ArmModel::GetJacobian(const std::string& frameID) throw(std::exception)
+Eigen::MatrixXd ArmModel::GetJacobian(const std::string& frameID) throw(ExceptionWithHow)
 {
     if (jacobians_.find(frameID) == jacobians_.end()) {
-        ArmModelWrongLabelException armModelWrongLabel;
-        armModelWrongLabel.SetWhere("GetJacobian");
-        armModelWrongLabel.SetWho(frameID);
+        WrongFrameException armModelWrongLabel;
+        std::string how = "[ARM MODEL] The frame does not exist " + frameID;
+        armModelWrongLabel.SetHow(how);
         throw(armModelWrongLabel);
     }
     return jacobians_.at(frameID);
@@ -489,8 +490,9 @@ RobotLink& ArmModel::GetLink(int jointIndex) throw(std::exception)
     if (jointIndex < links_.size())
         return links_.at(jointIndex);
     else {
-        ArmModelNotExistingJointException armModelNotExistingJoint;
-        armModelNotExistingJoint.SetWhere("GetLink");
+        ArmModelJointException armModelNotExistingJoint;
+        std::string how = "Trying to acess a not existing joint in get link ";
+        armModelNotExistingJoint.SetHow(how);
         throw(armModelNotExistingJoint);
     }
 }
@@ -510,8 +512,9 @@ void ArmModel::SetControlVector(const Eigen::VectorXd& controlRef) throw(std::ex
     if (controlRef.rows() == movingNumJoints_) {
         controlRef_ = controlRef;
     } else {
-        ArmModelWrongJointSizeException armModelWrongJointSize;
-        armModelWrongJointSize.SetWhere("SetControlVector");
+        ArmModelJointException armModelWrongJointSize;
+        std::string how = "Wrong size vector in Set control vector ";
+        armModelWrongJointSize.SetHow(how);
         throw(armModelWrongJointSize);
     }
 }

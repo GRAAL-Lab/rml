@@ -112,13 +112,13 @@ void VehicleModel::SetRigidBodyFrame(const std::string ID, const Eigen::TransfMa
     }
 }
 
-Eigen::TransfMatrix VehicleModel::GetTransformation(const std::string frameID) throw(std::exception)
+Eigen::TransfMatrix VehicleModel::GetTransformation(const std::string frameID) throw(ExceptionWithHow)
 {
 
     if (transformation_.find(frameID) == transformation_.end()) {
-        VehicleModelWrongLabelException vehicleModelWrongLabel;
-        vehicleModelWrongLabel.SetWho(frameID);
-        vehicleModelWrongLabel.SetWhere("GetTransformation");
+        WrongFrameException vehicleModelWrongLabel;
+        std::string how = "[VEHICLE MODEL] The frame does not exist " + frameID;
+        vehicleModelWrongLabel.SetHow(how);
         throw(vehicleModelWrongLabel);
     }
     return transformation_.at(frameID);
@@ -134,12 +134,12 @@ Eigen::TransfMatrix VehicleModel::GetTransformationFrames(const std::string& fra
     return out;
 }
 
-Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID) throw(std::exception)
+Eigen::MatrixXd VehicleModel::GetJacobian(const std::string ID) throw(ExceptionWithHow)
 {
     if (jacobians_.find(ID) == jacobians_.end()) {
-        VehicleModelWrongLabelException vehicleModelWrongLabel;
-        vehicleModelWrongLabel.SetWho(ID);
-        vehicleModelWrongLabel.SetWhere("GetJacobian");
+        WrongFrameException vehicleModelWrongLabel;
+        std::string how = "[VEHICLE MODEL] The frame does not exist " + ID;
+        vehicleModelWrongLabel.SetHow(how);
         throw(vehicleModelWrongLabel);
     }
     return jacobians_.at(ID);
