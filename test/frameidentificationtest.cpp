@@ -73,9 +73,9 @@ int main()
     futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_frame_id), "RIGID BODY JACOBIAN WITH WITH VEHICLE");
     futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_frame_id_arm),"RIGID BODY FRAME ID NO VEHICLE ");
     //Test change jacobian observer  from inertial to vehicle for joint 5
-    Eigen::Vector3d Error= rml::CartesianError(Eigen::TransfMatrix(),robot_model_with_vehicle->GetTransformation(joint_one_frame)).GetSecondVect3();
-    Eigen::MatrixXd J = robot_model_with_vehicle->GetCartesianJacobian(joint_one_frame);
-    Eigen::MatrixXd Jobs= robot_model_with_vehicle->GetCartesianJacobian(robot_frame_id);
+    Eigen::Vector3d Error= rml::CartesianError(Eigen::TransfMatrix(),robot_model_with_vehicle->GetTransformation(joint_one_frame)).GetFirstVect3();
+    Eigen::MatrixXd J = robot_model_with_vehicle->GetCartesianJacobian(joint_one_frame).block(0,0,3,robot_model_with_vehicle->GetTotalDOFs());
+    Eigen::MatrixXd Jobs= robot_model_with_vehicle->GetCartesianJacobian(robot_frame_id).block(0,0,3,robot_model_with_vehicle->GetTotalDOFs());
     futils::PrettyPrint(J, "JACOBIAN BEFORE CHANGING OBSERVER") ;
     futils::PrettyPrint(rml::ChangeJacobianObserver(J,Jobs,Error), "CHANGE OF OBSERVER ");
 

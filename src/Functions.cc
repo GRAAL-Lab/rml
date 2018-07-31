@@ -237,13 +237,13 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t)
     return t_hat;
 }
 
-Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd Jobserver, Eigen::Vector3d CartesianError)
+Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd JAngularobserver, Eigen::Vector3d CartesianError)
 {
 
     Eigen::MatrixXd out;
 
     out.resize(J.rows(), J.cols());
-    out = J - GetRigidBodyMatrix(CartesianError) * Jobserver;
+    out = J + Vect3ToSkew(CartesianError).transpose() * JAngularobserver;
 
     return out;
 }
