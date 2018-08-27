@@ -45,12 +45,12 @@ int main()
     initial_tool_pos << 0.011, 0.11; // -1.4, -0.11, 1.57;//, -1.4, -0.11, 1.57;
     robot_model->GetArm(arm_id)->SetJointsPosition(initial_tool_pos);
     robot_model_with_vehicle->GetArm(arm_id)->SetJointsPosition(initial_tool_pos);
-    robot_model->SetRigidBodyFrame(frame_ID,T,robot_frame_id);
-    robot_model->SetRigidBodyFrame(frame_ID, T, joint_one_frame);
-    robot_model_with_vehicle->SetRigidBodyFrame(frame_ID,T,robot_frame_id);
-    robot_model_with_vehicle->SetRigidBodyFrame(frame_ID,T,joint_one_frame);
-    robot_model->SetRobotFramePosition(TrobotFrame);
-    robot_model_with_vehicle->SetRobotFramePosition(TrobotFrame);
+    robot_model->SetAttachedRigidBodyFrame(frame_ID,T,robot_frame_id);
+    robot_model->SetAttachedRigidBodyFrame(frame_ID, T, joint_one_frame);
+    robot_model_with_vehicle->SetAttachedRigidBodyFrame(frame_ID,T,robot_frame_id);
+    robot_model_with_vehicle->SetAttachedRigidBodyFrame(frame_ID,T,joint_one_frame);
+    robot_model->SetBodyFramePosition(TrobotFrame);
+    robot_model_with_vehicle->SetBodyFramePosition(TrobotFrame);
     Eigen::Vector2d control_no_vehicle(0.1, 0.2);
     robot_model->SetRobotControl(control_no_vehicle);
     Eigen::VectorXd control(8);

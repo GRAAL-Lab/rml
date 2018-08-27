@@ -13,26 +13,26 @@
 
 namespace rml {
 
-RobotModel::RobotModel(Eigen::TransfMatrix robotFrame, std::string frameID)
-    : robotFrameID_(frameID)
-    , robotFrame_(robotFrame)
+RobotModel::RobotModel(Eigen::TransfMatrix bodyFrame, std::string frameID)
+    : bodyFrameID_(frameID)
+    , bodyFrame_(bodyFrame)
     , DoF_(0)
     , isMobileRobot_(false)
 {
     robotBase_ = std::make_shared<rml::VehicleModel>(rml::VehicleModel(frameID));
     robotBase_->SetJacobian(Eigen::MatrixXd::Zero(6, 6));
-    robotBase_->SetPositionOnInertial(robotFrame.GetRPYXYZ());
+    robotBase_->SetPositionOnInertial(bodyFrame.GetRPYXYZ());
 }
 
-RobotModel::RobotModel(Eigen::TransfMatrix robotFrame, std::string frameID, Eigen::MatrixXd JRobotFrame)
-    : robotFrameID_(frameID)
-    , robotFrame_(robotFrame)
+RobotModel::RobotModel(Eigen::TransfMatrix bodyFrame, std::string frameID, Eigen::MatrixXd JRobotFrame)
+    : bodyFrameID_(frameID)
+    , bodyFrame_(bodyFrame)
     , isMobileRobot_(true)
 {
     robotBase_ = std::make_shared<rml::VehicleModel>(rml::VehicleModel(frameID));
     robotBase_->SetJacobian(JRobotFrame);
-    robotFrameID_ = frameID;
-    robotBase_->SetPositionOnInertial(robotFrame.GetRPYXYZ());
+    bodyFrameID_ = frameID;
+    robotBase_->SetPositionOnInertial(bodyFrame.GetRPYXYZ());
     DoF_ = 6;
 }
 
@@ -46,7 +46,7 @@ int RobotModel::GetTotalDOFs()
     return DoF_;
 }
 
-bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& robotframeToArm) throw(ExceptionWithHow)
+bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& bodyframeToArm) throw(ExceptionWithHow)
 {
     if (arm->IsModelInitialized()) {
         if (CheckArm(arm->GetID())) {
@@ -57,7 +57,7 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::Trans
             throw(conflictingArmModelException);
         }
         armsModel_.insert(std::make_pair(arm->GetID(), arm));
-        robotframeToArm_.insert(std::make_pair(arm->GetID(), robotframeToArm));
+        bodyFrameToArm_.insert(std::make_pair(arm->GetID(), bodyframeToArm));
         DoF_ += arm->GetNumJoints();
         return true;
 
@@ -70,30 +70,30 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::Trans
     }
 }
 
-std::string RobotModel::GetRobotFrameID()
+std::string RobotModel::GetBodyFrameID()
 {
-    return robotFrameID_;
+    return bodyFrameID_;
 }
 
-void RobotModel::SetRobotFramePosition(Eigen::TransfMatrix robotFrame)
+void RobotModel::SetBodyFramePosition(Eigen::TransfMatrix bodyFrame)
 {
-    robotBase_->SetPositionOnInertial(robotFrame.GetRPYXYZ());
-    robotFrame_ = robotFrame;
+    robotBase_->SetPositionOnInertial(bodyFrame.GetRPYXYZ());
+    bodyFrame_ = bodyFrame;
 }
 
-void RobotModel::SetRigidBodyFrame(const std::string frameID, const Eigen::TransfMatrix TMat, const std::string frameToAttachID) throw(ExceptionWithHow)
+void RobotModel::SetAttachedRigidBodyFrame(const std::string frameID, const Eigen::TransfMatrix TMat, const std::string frameToAttachID) throw(ExceptionWithHow)
 {
     std::size_t partIDIndex = frameToAttachID.find_first_of("_");
     std::string partID = frameToAttachID.substr(0, partIDIndex);
     Eigen::TransfMatrix T;
 
-    if (partIDIndex == std::string::npos && frameToAttachID != robotFrameID_) {
+    if (partIDIndex == std::string::npos && frameToAttachID != bodyFrameID_) {
         std::string how;
         how = "wrong string format: " + frameToAttachID;
         WrongFrameException robotModelWrongFrameFormat;
         robotModelWrongFrameFormat.SetHow(how);
         throw(robotModelWrongFrameFormat);
-    } else if (frameToAttachID == robotFrameID_ || partID == robotFrameID_) {
+    } else if (frameToAttachID == bodyFrameID_ || partID == bodyFrameID_) {
         robotBase_->SetRigidBodyFrame(frameID, TMat);
     } else if (CheckArm(partID)) {
         armsModel_.at(partID)->SetRigidBodyFrame(frameID, frameToAttachID, TMat);
@@ -128,7 +128,7 @@ Eigen::MatrixXd RobotModel::GetIsolatedArmJacobianForFrame(const std::string& fr
 
     if (CheckArm(partID)) {
         bJt = armsModel_.at(partID)->GetJacobian(frameID);
-        Eigen::RotMatrix rRb = robotframeToArm_.at(partID).GetRotMatrix();
+        Eigen::RotMatrix rRb = bodyFrameToArm_.at(partID).GetRotMatrix();
         rJt = rRb.GetCartesianRotationMatrix() * bJt;
         return rJt;
     } else {
@@ -148,9 +148,9 @@ Eigen::Matrix6d RobotModel::GetIsolatedRobotFrameJacobianForFrame(const std::str
 
     if (isMobileRobot_) {
         if (CheckArm(partID)) {
-            vJv = robotBase_->GetJacobian(robotFrameID_);
+            vJv = robotBase_->GetJacobian(bodyFrameID_);
             Eigen::TransfMatrix bTj = armsModel_.at(partID)->GetTransformation(frameID);
-            Eigen::TransfMatrix vTj = robotframeToArm_.at(partID) * bTj;
+            Eigen::TransfMatrix vTj = bodyFrameToArm_.at(partID) * bTj;
             vJv = GetRigidBodyMatrix(vTj.GetTransl()) * vJv;
         }
     }
@@ -179,7 +179,7 @@ Eigen::VectorXd RobotModel::GetRobotControl(std::string partID) throw(ExceptionW
 {
     Eigen::VectorXd y;
 
-    if (partID == robotFrameID_ && isMobileRobot_) {
+    if (partID == bodyFrameID_ && isMobileRobot_) {
         return robotBase_->GetControlVector();
     } else if (CheckArm(partID)) {
         return (armsModel_.at(partID)->GetControlVector());
@@ -198,19 +198,19 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
     Eigen::TransfMatrix T;
-    if (partIDIndex == std::string::npos && frameID != robotFrameID_) {
+    if (partIDIndex == std::string::npos && frameID != bodyFrameID_) {
         std::string how;
         how = "[ROBOT MODEL] Wrong string format: " + frameID;
         WrongFrameException robotModelWrongFrameFormat;
         robotModelWrongFrameFormat.SetHow(how);
         throw(robotModelWrongFrameFormat);
     }
-    if (frameID == robotFrameID_ || partID == robotFrameID_) {
+    if (frameID == bodyFrameID_ || partID == bodyFrameID_) {
 
         return robotBase_->GetTransformation(frameID);
     } else if (CheckArm(partID)) {
         T = armsModel_.at(partID)->GetTransformation(frameID);
-        T = robotFrame_ * robotframeToArm_.at(partID) * T;
+        T = bodyFrame_ * bodyFrameToArm_.at(partID) * T;
         return T;
     }
 
@@ -240,7 +240,7 @@ Eigen::MatrixXd RobotModel::GetCartesianJacobian(const std::string& frameID) thr
 
     std::string modelID = frameID.substr(0, frameID.find_first_of("_"));
     Eigen::MatrixXd totJac, tempJ;
-    if (frameID == robotFrameID_ || modelID == robotFrameID_) {
+    if (frameID == bodyFrameID_ || modelID == bodyFrameID_) {
         if (isMobileRobot_) {
             totJac = RightJuxtapose(totJac, robotBase_->GetJacobian(frameID));
             totJac = RightJuxtapose(totJac, Eigen::MatrixXd::Zero(6, DoF_ - 6));
@@ -263,7 +263,7 @@ Eigen::MatrixXd RobotModel::GetCartesianJacobian(const std::string& frameID) thr
             totJac = RightJuxtapose(totJac, tempJ);
         }
         return totJac;
-    } else if (frameID.find_first_of("_") == std::string::npos && frameID != robotFrameID_) {
+    } else if (frameID.find_first_of("_") == std::string::npos && frameID != bodyFrameID_) {
         std::string how;
         how = "[ROBOT MODEL] Wrong format frame id: " + frameID;
         WrongFrameException robotModelWrongFrameFormat;
@@ -472,7 +472,7 @@ void RobotModel::SetSystemAccelerationVector(Eigen::VectorXd acceleration) throw
 void RobotModel::SetPositionVector(std::string partID, Eigen::VectorXd position) throw(ExceptionWithHow)
 {
 
-    if (partID == robotFrameID_ & isMobileRobot_) {
+    if (partID == bodyFrameID_ & isMobileRobot_) {
         robotBase_->SetPositionOnInertial(position);
     } else if (CheckArm(partID)) {
         armsModel_.find(partID)->second->SetJointsPosition(position);
@@ -489,7 +489,7 @@ Eigen::VectorXd RobotModel::GetPositionVector(std::string partID) throw(Exceptio
 {
     Eigen::VectorXd out;
 
-    if (partID == robotFrameID_ & isMobileRobot_) {
+    if (partID == bodyFrameID_ & isMobileRobot_) {
         out = robotBase_->GetPositionOnInertial();
         return out;
     } else if (CheckArm(partID)) {
@@ -505,7 +505,7 @@ Eigen::VectorXd RobotModel::GetPositionVector(std::string partID) throw(Exceptio
 
 void RobotModel::SetVelocityVector(std::string partID, Eigen::VectorXd velocity) throw(ExceptionWithHow)
 {
-    if (partID == robotFrameID_ & isMobileRobot_) {
+    if (partID == bodyFrameID_ & isMobileRobot_) {
         robotBase_->SetVelocityOnVehicle(velocity);
     } else if (CheckArm(partID)) {
         armsModel_.find(partID)->second->SetJointsVelocity(velocity);
@@ -522,7 +522,7 @@ Eigen::VectorXd RobotModel::GetVelocityVector(std::string partID) throw(Exceptio
 {
     Eigen::VectorXd out;
 
-    if (partID == robotFrameID_ & isMobileRobot_) {
+    if (partID == bodyFrameID_ & isMobileRobot_) {
         out = robotBase_->GetVelocityOnVehicle();
         return out;
     } else if (CheckArm(partID)) {
@@ -538,7 +538,7 @@ Eigen::VectorXd RobotModel::GetVelocityVector(std::string partID) throw(Exceptio
 
 void RobotModel::SetAccelerationVector(std::string partID, Eigen::VectorXd acceleration) throw(ExceptionWithHow)
 {
-    if (partID == robotFrameID_ & isMobileRobot_) {
+    if (partID == bodyFrameID_ & isMobileRobot_) {
         robotBase_->SetAccelerationOnVehicle(acceleration);
     } else if (CheckArm(partID)) {
         armsModel_.find(partID)->second->SetJointsAcceleration(acceleration);
@@ -555,7 +555,7 @@ Eigen::VectorXd RobotModel::GetAccelerationVector(std::string partID) throw(Exce
 {
     Eigen::VectorXd out;
 
-    if (partID == robotFrameID_ & isMobileRobot_) {
+    if (partID == bodyFrameID_ & isMobileRobot_) {
         out = robotBase_->GetAccelerationOnVehicle();
         return out;
     } else if (CheckArm(partID)) {

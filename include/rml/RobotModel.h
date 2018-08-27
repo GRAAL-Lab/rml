@@ -25,27 +25,27 @@ namespace rml {
  *
  * \details This class provides a container for storing a multi-arm mobile or fixed manipulator model,
  * including a series of model related functions. The robot could either be mobile one (hence characterized by a\n
- * moving robot frame) or a static one (hence with a constant robot frame) depending on the constructor used (hence whether a Jacobian\n
- * for the robot frame is provided).\n
+ * moving body Frame) or a static one (hence with a constant body Frame) depending on the constructor used (hence whether a Jacobian\n
+ * for the body Frame is provided).\n
  * In order to add arm tp the robot the method LoadArm() is provided.\n
- * It is in addition possible to add rigid body frames to the each robot frame by using the method SetRigidBodyFrame.
+ * It is in addition possible to add rigid body frames to the each body Frame by using the method SetRigidBodyFrame.
  *
  */
 class RobotModel {
 public:
     /**
      * @brief Constructor for fixed robot model
-     * @param[in] robotFrame transformation matrix from the world frame to robot frame.
-     * @param[in] frameID id of the robot frame
+     * @param[in] bodyFrame transformation matrix from the world frame to body Frame.
+     * @param[in] frameID id of the body Frame
      */
-    RobotModel(Eigen::TransfMatrix robotFrame, std::string frameID);
+    RobotModel(Eigen::TransfMatrix bodyFrame, std::string frameID);
     /**
      * @brief Constructor for mobile robot model
-     * @param[in] robotFrame transformation matrix from the world frame to robot frame.
-     * @param[in] frameID id of the robot frame
-     * @param[in] JRobotFrame jacobian of the robot frame
+     * @param[in] bodyFrame transformation matrix from the world frame to body Frame.
+     * @param[in] frameID id of the body Frame
+     * @param[in] JBodyFrame jacobian of the bodyFrame
      */
-    RobotModel(Eigen::TransfMatrix robotFrame, std::string frameID, Eigen::MatrixXd JRobotFrame);
+    RobotModel(Eigen::TransfMatrix bodyFrame, std::string frameID, Eigen::MatrixXd JBodyFrame);
     /**
      * @brief Default deconstructor
      */
@@ -64,27 +64,27 @@ public:
      * accepted. A <robotFrame-to-base> transformation must be specified, which tells the
      * position of the arm's base frame with respect to the robotFrame.
      * @param[in] arm		The arm model
-     * @param[in] robotframeToArm		The robotBase-to-Armbase trasnformation matrix
+     * @param[in] bodyFrameToArm		The bodyFrame-to-Armbase trasnformation matrix
      * @return			True if the arm has been loaded false otherwise
      */
-    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& robotframeToArm) throw(ExceptionWithHow);
+    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& bodyFrameToArm) throw(ExceptionWithHow);
     /**
-     * @brief GetRobotFrameID method to get the robot frame id.
-     * @details Method to get the id for the robot frame, hence the frame common to all the arms.
-     * @return robot frame id
+     * @brief GetBodyFrameID method to get the body Frame id.
+     * @details Method to get the id for the body Frame, hence the frame common to all the arms.
+     * @return body Frame id
      */
-    std::string GetRobotFrameID();
+    std::string GetBodyFrameID();
     /**
-     * @brief SetRobotFramePosition method to set the new robot frame position
-     * @param[in] robotFrame robot frame position wrt to the world frame
+     * @brief SetBodyFramePosition method to set the new body Frame position
+     * @param[in] bodyFrame body Frame position wrt to the world frame
      */
-    void SetRobotFramePosition(Eigen::TransfMatrix robotFrame);
+    void SetBodyFramePosition(Eigen::TransfMatrix bodyFrame);
     /**
      * @brief Method adding a rigid body frame attached to the input frame id .
      * @param[in] ID Id of the frame.
      * @param[in] TMat Transformation matrix of the frame.
      */
-    void SetRigidBodyFrame(const std::string frameID, const Eigen::TransfMatrix TMat, const std::string attachedFrameID) throw(ExceptionWithHow);
+    void SetAttachedRigidBodyFrame(const std::string frameID, const Eigen::TransfMatrix TMat, const std::string attachedFrameID) throw(ExceptionWithHow);
 
     /**
      * Checks whether the arm identified by the input id is present in the robot.
@@ -93,15 +93,15 @@ public:
      */
     bool CheckArm(const std::string armID) const;
     /**
-     * @brief Method checking whether the robot model has a mobile robot frame .
-     * @return true if the robot frame is mobile, false otherwise.
+     * @brief Method checking whether the robot model has a mobile body Frame .
+     * @return true if the body Frame is mobile, false otherwise.
      */
     bool IsMobile() const;
 
     /**
-     * @brief Method computing the jacobian observed by the world frame and projected on the robot frame of the input frameID
+     * @brief Method computing the jacobian observed by the world frame and projected on the body Frame of the input frameID
      * @param[in] ID frameID
-     * @return Jacobian observed by the world frame, projected on the robot frame.
+     * @return Jacobian observed by the world frame, projected on the body Frame.
      */
     Eigen::MatrixXd GetCartesianJacobian(const std::string& frameID) throw(ExceptionWithHow);
     /**
@@ -184,7 +184,7 @@ public:
     void SetSystemAccelerationVector(Eigen::VectorXd acceleration) throw(std::exception);
 
     /**
-     * @brief Method setting the position vector for a robot part (joint postion for arm and cartesian position in case of mobile robot frame).
+     * @brief Method setting the position vector for a robot part (joint postion for arm and cartesian position in case of mobile body Frame).
      * @param[in] partID .
      */
 
@@ -192,32 +192,32 @@ public:
 
     /**
      * @brief GetPositionVector Method returning the position of the input part (i.e. joint position for arm
-     * and cartesian position in case if of mobile robot frame)
+     * and cartesian position in case if of mobile body Frame)
      * @param[in] partID
      * @return position vector, either cartesian position or joint position
      */
     Eigen::VectorXd GetPositionVector(std::string partID) throw(ExceptionWithHow);
     /**
-     * @brief Method setting the velocity vector for a robot part (joint velocity for arm and cartesian velocity in case of mobile robot frame ).
+     * @brief Method setting the velocity vector for a robot part (joint velocity for arm and cartesian velocity in case of mobile body Frame ).
      * @param[in] partID .
      */
     void SetVelocityVector(std::string partID, Eigen::VectorXd velocity) throw(ExceptionWithHow);
     /**
      * @brief GetVelocityVector Method returning the velocity of the input part (i.e. joints velocity for arm
-     * and cartesian velocity in case of mobile robot frame )
+     * and cartesian velocity in case of mobile body Frame )
      * @param[in] partID
      * @return velocity vector, either cartesian velocity or joints velocity.
      */
     Eigen::VectorXd GetVelocityVector(std::string partID) throw(ExceptionWithHow);
     /**
-     * @brief Method setting the acceleration vector for a robot part (joints acceleration for arm and cartesian acceleration  in case of mobile robot frame ).
+     * @brief Method setting the acceleration vector for a robot part (joints acceleration for arm and cartesian acceleration  in case of mobile body Frame ).
      * @param[in] partID .
      */
 
     void SetAccelerationVector(std::string partID, Eigen::VectorXd acceleration) throw(ExceptionWithHow);
     /**
      * @brief GetAccelerationVector Method returning the position of the input part (i.e. joint acceleration for arm
-     * and cartesian acceleration in case of mobile robot frame)
+     * and cartesian acceleration in case of mobile body Frame)
      * @param[in] partID
      * @return position vector, either cartesian position or joint position
      */
@@ -243,17 +243,17 @@ protected:
      */
     Eigen::MatrixXd GetIsolatedArmJacobianForFrame(const std::string& frameID) const throw(ExceptionWithHow);
     /**
-     * @brief Method returning the isolated robot frame jacobian for the input frameID
+     * @brief Method returning the isolated body Frame jacobian for the input frameID
      * @param[in] ID frameID
      * @return Jacobian
      */
     Eigen::Matrix6d GetIsolatedRobotFrameJacobianForFrame(const std::string& frameID) const;
 
-    std::shared_ptr<VehicleModel> robotBase_; //!< the model of the robot frame;
+    std::shared_ptr<VehicleModel> robotBase_; //!< the model of the body Frame;
     std::map<std::string, std::shared_ptr<ArmModel> > armsModel_; //!< map of the loaded map
-    std::unordered_map<std::string, Eigen::TransfMatrix> robotframeToArm_; //!< map of the transformation matrix from the arm bases to the robot frame
-    std::string robotFrameID_; //!< ID of the robot frame
-    Eigen::TransfMatrix robotFrame_; //!< robot frame transformaion matrix
+    std::unordered_map<std::string, Eigen::TransfMatrix> bodyFrameToArm_; //!< map of the transformation matrix from the arm bases to the body Frame
+    std::string bodyFrameID_; //!< ID of the body Frame
+    Eigen::TransfMatrix bodyFrame_; //!< body Frame transformaion matrix
     int DoF_{ 0 }; //!< total degrees of freedom of the robot
     bool isMobileRobot_; //!< boolean stating wheter the robot is a mobile one.
 };
