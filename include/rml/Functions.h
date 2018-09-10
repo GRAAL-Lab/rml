@@ -36,10 +36,11 @@ struct PlaneParameters {
 };
 
 /**
+ * @brief Compute the misalignment error between two vectors. The result is the vector around which v1 has to rotate to reach v2.
  *
- * @param v1
- * @param v2
- * @return
+ * @param[in] v1 first orientation vector
+ * @param[in] v2 second orientation vector
+ * @return the axis around which v1 has to rotate to reach v2
  */
 Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
 

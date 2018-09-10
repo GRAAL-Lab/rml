@@ -91,13 +91,13 @@ int main(int, char**)
         std::cout << e.how() << std::endl;
     }
 
-    robotModel->LoadVehicle(youbotVM);
+    //robotModel->LoadVehicle(youbotVM);
 
 
     std::string vehicle_id = "vehicleID";
     std::string joint_one_frame = yb_arm1_id + rml::FrameID::Joint + "1";
 
-    PrettyPrint(robotModel->GetCartesianJacobian(joint_one_frame, rml::JacobianObserver::InertialFrame), "GetVehicleJacobianTF(1)");
+    //PrettyPrint(robotModel->GetCartesianJacobian(joint_one_frame, rml::JacobianObserver::InertialFrame), "GetVehicleJacobianTF(1)");
     //PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex1), "GetArmJacobianTF(1)");
     //PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex2), "GetArmJacobianTF(2)");
     //
