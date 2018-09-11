@@ -28,6 +28,7 @@ class RotMatrix: public Eigen::Matrix3d
 {
 public:
 	RotMatrix();
+    RotMatrix(Eigen::Quaterniond q);
 
 	// This constructor allows you to construct TransfMatrix from Eigen expressions
 	template<typename OtherDerived>

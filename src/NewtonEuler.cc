@@ -22,13 +22,13 @@ NewtonEuler::~NewtonEuler()
 	// TODO Auto-generated destructor stub
 }
 
-NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, int armIndex)
+NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, std::string armID)
 {
 	//model_ = model;
-	armModel_ = model->GetArm(armIndex);
+    armModel_ = model->GetArm(armID);
 	vehicle_ = model->GetVehicle();
 
-	numJoints_ = model->GetArm(armIndex)->GetNumJoints();
+    numJoints_ = model->GetArm(armID)->GetNumJoints();
 
 	Init();
 
@@ -133,13 +133,13 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
 	for (int i = 1; i < numJoints_; ++i) {
 		rhoVec_.at(i) = armModel_->GetCurrentLinkTransf(i).GetTransl();
 	}
-	rhoVec_.at(numJoints_) = armModel_->GeteTt().GetTransl();
+    rhoVec_.at(numJoints_) = armModel_->GeteTt().GetTransl();
 
 	R_.at(0) = armModel_->GetBaseTransf().GetRotMatrix(); // Base TODO Check
 	for (int i = 0; i < numJoints_; ++i) {
 		R_.at(i + 1) = armModel_->GetCurrentLinkTransf(i).GetRotMatrix(); // Base_i to Joint_i
 	}
-	R_.at(numJoints_ + 1) = armModel_->GeteTt().GetRotMatrix(); // Last joint to end effector
+    R_.at(numJoints_ + 1) = armModel_->GeteTt().GetRotMatrix(); // Last joint to end effector
 
 	for (int i = 0; i < numJoints_; ++i) {
 		q_ = armModel_->GetJointsPosition();

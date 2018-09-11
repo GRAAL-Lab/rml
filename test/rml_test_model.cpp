@@ -16,86 +16,95 @@ using std::cout;
 using std::endl;
 using futils::PrettyPrint;
 
-int main(int argc, char* argv[]){
+int main(int, char**)
+{
 
-	timeval t1, t2;
-	futils::Timer myTimer;
+    timeval t1, t2;
+    futils::Timer myTimer;
+    std::string yb_arm1_id = "ybArm1";
 
-	///////////////////////////////
-	//////  ARM MODEL TEST   //////
-	///////////////////////////////
+    ///////////////////////////////
+    //////  ARM MODEL TEST   //////
+    ///////////////////////////////
 
-	std::cout << std::endl << tc::yellow << "### Arm Model Test ###" << tc::none << std::endl;
+    std::cout << std::endl
+              << tc::yellow << "### Arm Model Test ###" << tc::none << std::endl;
 
-	int numJoints(0);
-	double elapsed_Timer(0);
+    int numJoints(0);
+    double elapsed_Timer(0);
 
-	//std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
-	std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
-	std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>();
+    //std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
+    std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>(yb_arm1_id);
+    std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>("ybArm2");
 
-	armModel = youbotAM;
-	numJoints = armModel->GetNumJoints();
+    armModel = youbotAM;
+    numJoints = armModel->GetNumJoints();
 
-	cout << tc::magL << "*dJdq Test*" << tc::none << std::endl;
-	cout << "numJoints=" << armModel->GetNumJoints() << endl;
-	std::vector<Eigen::MatrixXd> dJdq_NEW(numJoints, Eigen::MatrixXd::Zero(6,numJoints));
+    cout << tc::magL << "*dJdq Test*" << tc::none << std::endl;
+    cout << "numJoints=" << armModel->GetNumJoints() << endl;
+    std::vector<Eigen::MatrixXd> dJdq_NEW(numJoints, Eigen::MatrixXd::Zero(6, numJoints));
+
+    Eigen::MatrixXd zeroQ = Eigen::MatrixXd::Zero(numJoints, 1);
+    double q_0_generic[7] = { 0.0, 0.5, 1.0, 0.7, 0.3, 0.0, 0.0 }, q_0_doub[numJoints];
+
+    if (numJoints <= 7) {
+        for (int i = 0; i < 7; i++) {
+            q_0_doub[i] = q_0_generic[i];
+        }
+    } else {
+        std::cerr << "Max num joint exceeded, exiting" << std::endl;
+        exit(0);
+    }
+
+    Eigen::VectorXd q_0 = Eigen::VectorXd(numJoints, 1);
+    rml::Double2Vector(q_0_doub, numJoints, q_0);
+    PrettyPrint(q_0.transpose(), "q_0");
+
+    myTimer.Start();
+    armModel->SetJointsPosition(q_0);
+    dJdq_NEW = armModel->GetdJdq();
+    elapsed_Timer = myTimer.Lap() * 1000;
+
+    std::cout << "elapsed_Timer=" << elapsed_Timer << "ms" << std::endl;
+
+    for (int i = 0; i < numJoints - 1; ++i) {
+        cout << i << "_NEW_";
+        PrettyPrint(dJdq_NEW.at(i), "dJdq:");
+        cout << "------------------------------------------------------------" << endl;
+    }
+
+    for (int i = 0; i < youbotAM->GetNumJoints(); ++i) {
+        PrettyPrint(youbotAM->GetLink(i).JointLimitMin(), "GetJointLimitsMin()");
+        PrettyPrint(youbotAM->GetLink(i).JointLimitMax(), "GetJointLimitsMax()");
+    }
+
+    ////////////////////////////////////////////////////////////
+
+    std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>("yb_vehicle");
+    std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
+
+    int armIndex1, armIndex2;
+    armIndex1 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+    try {
+        int armIndex2 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+    } catch (rml::ExceptionWithHow& e) {
+        std::cout << e.how() << std::endl;
+    }
+
+    //robotModel->LoadVehicle(youbotVM);
 
 
-	Eigen::MatrixXd zeroQ = Eigen::MatrixXd::Zero(numJoints, 1);
-	double q_0_generic[7] = { 0.0, 0.5, 1.0, 0.7, 0.3, 0.0, 0.0 }, q_0_doub[numJoints];
+    std::string vehicle_id = "vehicleID";
+    std::string joint_one_frame = yb_arm1_id + rml::FrameID::Joint + "1";
 
-	if(numJoints <= 7){
-		for(int i=0; i<7; i++){
-			q_0_doub[i] = q_0_generic[i];
-		}
-	}else{
-		std::cerr << "Max num joint exceeded, exiting" << std::endl;
-		exit(0);
-	}
+    //PrettyPrint(robotModel->GetCartesianJacobian(joint_one_frame, rml::JacobianObserver::InertialFrame), "GetVehicleJacobianTF(1)");
+    //PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex1), "GetArmJacobianTF(1)");
+    //PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex2), "GetArmJacobianTF(2)");
+    //
+    //double mu;
+    //PrettyPrint(robotModel->GetArmJacobian_Identity(armIndex1),"GetArmJacobian_Identity()");
+    //PrettyPrint(robotModel->GetArmJacobian_Manipulability(armIndex1, mu),"GetArmJacobian_Manipulability()");
+    //PrettyPrint(robotModel->GetVehicleJacobian(),"GetVehicleJacobian()");
 
-	Eigen::VectorXd q_0 = Eigen::VectorXd(numJoints, 1);
-	rml::Double2Vector(q_0_doub, numJoints, q_0);
-	PrettyPrint(q_0.transpose(),"q_0");
-
-	myTimer.Start();
-	armModel->SetJointsPosition(q_0);
-	dJdq_NEW = armModel->GetdJdq();
-	elapsed_Timer = myTimer.Lap()*1000;
-
-	std::cout << "elapsed_Timer=" << elapsed_Timer << "ms" << std::endl;
-
-	for (int i = 0; i < numJoints - 1; ++i) {
-		cout << i << "_NEW_";
-		PrettyPrint(dJdq_NEW.at(i),"dJdq:");
-		cout << "------------------------------------------------------------" << endl;
-	}
-
-	for (int i = 0; i < youbotAM->GetNumJoints(); ++i) {
-		PrettyPrint(youbotAM->GetLink(i).JointLimitMin(),"GetJointLimitsMin()");
-		PrettyPrint(youbotAM->GetLink(i).JointLimitMax(),"GetJointLimitsMax()");
-	}
-
-	////////////////////////////////////////////////////////////
-
-	std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>();
-	std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
-
-	int armIndex1 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
-	int armIndex2 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
-	robotModel->LoadVehicle(youbotVM);
-
-	PrettyPrint(robotModel->GetVehicleJacobian_ToolFrame(armIndex1), "GetVehicleJacobianTF(1)");
-	PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex1), "GetArmJacobianTF(1)");
-	PrettyPrint(robotModel->GetArmJacobian_ToolFrame(armIndex2), "GetArmJacobianTF(2)");
-
-	double mu;
-	PrettyPrint(robotModel->GetArmJacobian_Identity(armIndex1),"GetArmJacobian_Identity()");
-	PrettyPrint(robotModel->GetArmJacobian_Manipulability(armIndex1, mu),"GetArmJacobian_Manipulability()");
-	PrettyPrint(robotModel->GetVehicleJacobian(),"GetVehicleJacobian()");
-
-	return 0;
+    return 0;
 }
-
-
-

@@ -43,7 +43,7 @@ void single_arm_sim(const state_type& q, state_type& dqdt, double t)
         /// COMPUTE REFERENCE
 
         rml::RegularizationData regData;
-        Eigen::MatrixXd JPinv = rml::RegularizedPseudoInverse(armModel->GetBase2ToolJacobian(), regData);
+        Eigen::MatrixXd JPinv = rml::RegularizedPseudoInverse(armModel->GetJacobian(""), regData);
         //multiArmCtrl->ComputeControl();
         //qdotcontrol_single = multiArmCtrl->GetJointControl();
 
@@ -93,8 +93,8 @@ int main(int, char**)
 
     goalReached = false;
 
-    std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>();
-    armModel = std::make_shared<rml::ArmModel>();
+    std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>("youbot");
+    armModel = std::make_shared<rml::ArmModel>("genericAM");
 
     armModel = youbotAM;
     numJoints = armModel->GetNumJoints();

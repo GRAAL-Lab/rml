@@ -15,10 +15,11 @@ using std::endl;
 
 namespace rml {
 
-YouBotArmModel::YouBotArmModel()
+YouBotArmModel::YouBotArmModel(const std::string id): ArmModel(id)
 {
 	int numJoints = 5;
 	std::vector<Eigen::TransfMatrix> biTri(numJoints);
+
 
 	double min[] = { -2.94, -1.13, -2.616, -1.788, -2.68 };
 	double max[] = { +2.94, +1.57, +2.54, +1.788, +2.923 };
@@ -50,14 +51,14 @@ YouBotArmModel::YouBotArmModel()
 
 	for (int i = 0; i < numJoints; ++i) {
 		//std::cout << "Adding link " << i << std::endl;
-		AddLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), biTri.at(i), min[i], max[i]);
+		AddJointLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), biTri.at(i), min[i], max[i]);
 	}
 
-	eTt_(0,0) =  1;   eTt_(0,1) =  0;   eTt_(0,2) =  0;   eTt_(0,3) = 0;
+    /*eTt_(0,0) =  1;   eTt_(0,1) =  0;   eTt_(0,2) =  0;   eTt_(0,3) = 0;
 	eTt_(1,0) =  0;   eTt_(1,1) =  1;   eTt_(1,2) =  0;   eTt_(1,3) = 0;
 	eTt_(2,0) =  0;   eTt_(2,1) =  0;   eTt_(2,2) =  1;   eTt_(2,3) = 0;
 	eTt_(3,0) =  0;   eTt_(3,1) =  0;   eTt_(3,2) =  0;   eTt_(3,3) = 1;
-
+*/
 }
 
 YouBotArmModel::~YouBotArmModel()

@@ -21,7 +21,7 @@ class YouBotArmModel : public ArmModel
 {
 
 public:
-	YouBotArmModel();
+    YouBotArmModel(const std::string id);
 	virtual ~YouBotArmModel();
 };
 

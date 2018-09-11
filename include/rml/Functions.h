@@ -8,15 +8,14 @@
 #ifndef INCLUDE_RML_FUNCTIONS_H_
 #define INCLUDE_RML_FUNCTIONS_H_
 
-
-#include <array>
-#include <vector>
+#include "EulerRPY.h"
+#include "RMLExceptions.h"
+#include "Types.h"
 #include <algorithm>
+#include <array>
 #include <iostream>
 #include <vector>
-
-#include "Types.h"
-#include "EulerRPY.h"
+#include <vector>
 
 namespace rml {
 
@@ -24,18 +23,24 @@ namespace rml {
  * @brief Using four parameters represention in the form:
  * Ax + By + Cz + D = 0;
  */
-struct PlaneParameters
-{
+struct PlaneParameters {
     double A, B, C, D;
 
-    PlaneParameters() : A(0), B(0), C(0), D(0) {}
+    PlaneParameters()
+        : A(0)
+        , B(0)
+        , C(0)
+        , D(0)
+    {
+    }
 };
 
 /**
+ * @brief Compute the misalignment error between two vectors. The result is the vector around which v1 has to rotate to reach v2.
  *
- * @param v1
- * @param v2
- * @return
+ * @param[in] v1 first orientation vector
+ * @param[in] v2 second orientation vector
+ * @return the axis around which v1 has to rotate to reach v2
  */
 Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2);
 
@@ -54,7 +59,6 @@ Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vecto
  *       that brings frame \<a\> over frame \<b\> projected on \<c\>
  */
 Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2);
-
 
 /**
  * @brief Compute the versor lemma between the two rotation matrices.
@@ -89,7 +93,7 @@ Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2);
  * @note the two transformation matrix should have a common base frame, i.e. CartesianError(wTt, wTg) brings the tool
  * 		 frame \<t\> towards a goal frame \<g\>, and returns the error projected on frame \<w\>
  */
-Eigen::Vector6d CartesianError(const Eigen::TransfMatrix&  in1, const Eigen::TransfMatrix&  in2);
+Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2);
 
 /**
  * @brief Compute the Cartesian error between two transformation matrices
@@ -126,7 +130,7 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
  *
  * @return the value of the function
  */
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x);
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow);
 
 /**
  * @brief An increasing bell shaped (sigmoid) function.
@@ -144,7 +148,7 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
  *
  * @return the value of the function
  */
-double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x);
+double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow);
 
 /**
  * @brief Saturate the scalar to a given maximum value
@@ -179,7 +183,6 @@ double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters&
  * @return	The 3d coordinates of the closest point laying on the plane
  */
 Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams);
-
 
 /**
  * \brief Computes the skew symmetric matrix form for a vector
@@ -224,6 +227,15 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
  * @return the rigid body matrix
  */
 Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl);
+/**
+ * @brief ChangeJacobianObserver Method implementing change of observer for a cartesian Jacobian. \n
+ * @details \f$ J^{v}_{error}=J^{o}_{error}-S_{e/o}J^{o}_{v}  \f$
+ * @param J error jacobian wrt to the inertial frame
+ * @param Jobserver jacobian of the observer wrt to the inertial frame
+ * @param CartesianError error
+ * @return Jacobian of the error observed by the input observer
+ */
+Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd Jobserver, Eigen::Vector3d CartesianError);
 
 /**
  * @brief A norm comparing function (is "a < b" ?) to be binded to STL algorithms.
@@ -233,8 +245,9 @@ Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl);
  * @return		true if a is smaller than b, false otherwise
  */
 template <class MatT>
-static bool eigen_norm_compare(MatT& a, MatT& b) {
-	return (a.norm() < b.norm());
+static bool eigen_norm_compare(MatT& a, MatT& b)
+{
+    return (a.norm() < b.norm());
 }
 
 /**
@@ -245,11 +258,12 @@ static bool eigen_norm_compare(MatT& a, MatT& b) {
  * @param vect3
  * @return The vector with the greatest norm among the three
  */
-template<class MatT>
-MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3){
+template <class MatT>
+MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3)
+{
 
-	std::vector<MatT> vecs = {vect1,vect2,vect3};
-	return *std::max_element(vecs.begin(), vecs.end(), eigen_norm_compare<MatT>);
+    std::vector<MatT> vecs = { vect1, vect2, vect3 };
+    return *std::max_element(vecs.begin(), vecs.end(), eigen_norm_compare<MatT>);
 }
 
 /*
@@ -266,9 +280,6 @@ Eigen::Matrix GetRigidBodyMatrix(const Eigen::TransfMatrix& toolTpoint){
 	return S_;
 
 }*/
-
 }
-
-
 
 #endif /* INCLUDE_RML_FUNCTIONS_H_ */

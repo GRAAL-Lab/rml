@@ -21,7 +21,7 @@ class BaxterLeftArmModel : public ArmModel
 {
 
 public:
-	BaxterLeftArmModel();
+  BaxterLeftArmModel(std::string id);
 	virtual ~BaxterLeftArmModel();
 
     virtual void InitMatrix();

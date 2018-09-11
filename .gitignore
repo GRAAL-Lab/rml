@@ -175,20 +175,29 @@ doxygen_sqlite3.db
 
 
 # eclipse stuff
-.project
-.cproject
+*.project
+*.cproject
 language.settings.xml
-.settings
+*.settings
+*.files
+*.includes
+*.config 
+*.creator
 
 # qcreator stuff
 CMakeLists.txt.user
+*.config 
+*.creator 
+rml.config 
+*.files
+*.includes
+
 
 srv/_*.py
 *.pcd
 *.pyc
 qtcreator-*
 *.user
-
 /planning/cfg
 /planning/docs
 /planning/src

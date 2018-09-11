@@ -138,17 +138,17 @@ int main(int, char**)
     // *Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
     // *Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX());
 
-    rml::EulerRPY rpy2(0, M_PI, M_PI);
-    futils::PrettyPrint(rpy2, "rpy2");
+    rml::EulerRPY rpy(M_PI,0, 0);
 
-    futils::PrettyPrint(wTg, "wTg");
-    futils::PrettyPrint(rpy2.ToRotMatrix(), "rpy2.toRotMatrix");
+
+    futils::PrettyPrint(rpy.ToRotMatrix(),"rpy.toRotMatrix");
 
     wTg.SetRotMatrix(Eigen::Matrix3d::Identity());
 
-    wTg.SetRotMatrix(n_rot);
+    //wTg.SetRotMatrix(n_rot);
 
-    wTg.SetRotMatrix(rpy2.ToRotMatrix());
+    wTg.SetRotMatrix(rpy.ToRotMatrix());
+    futils::PrettyPrint(wTg, "wTg");
 
     futils::PrettyPrint(rml::CartesianError(wTt, wTg), "rml::CartesianError(wTt, wTg)");
     return 0;

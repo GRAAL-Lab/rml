@@ -23,9 +23,9 @@ using std::endl;
 
 namespace rml {
 
-BaxterLeftArmModel::BaxterLeftArmModel()
+BaxterLeftArmModel::BaxterLeftArmModel(std::string id) : ArmModel(id)
 {
-	SetArmJoints(7);
+  //SetArmJoints(7);
 	InitMatrix();
 }
 
@@ -36,7 +36,7 @@ BaxterLeftArmModel::~BaxterLeftArmModel()
 
 void BaxterLeftArmModel::InitMatrix()
 {
-    ArmModel::InitMatrix();
+    /*ArmModel::InitMatrix();
 
     baseTb0_(0, 0) = 0.7081;   baseTb0_(0, 1) = -0.7061;  baseTb0_(0, 2) = -0.0037;    baseTb0_(0, 3) = 0.024;
     baseTb0_(1, 0) = 0.7061;   baseTb0_(1, 1) = 0.7081;   baseTb0_(1, 2) = -0.0015;    baseTb0_(1, 3) = 0.22;
@@ -82,7 +82,7 @@ void BaxterLeftArmModel::InitMatrix()
 	eTt_(1,0) = 0; eTt_(1,1) = 1;  eTt_(1,2) = 0; eTt_(1,3) = 0;
 	eTt_(2,0) = 0; eTt_(2,1) = 0;  eTt_(2,2) = 1; eTt_(2,3) = 0.27125; //Original 0.114;
 	eTt_(3,0) = 0; eTt_(3,1) = 0;  eTt_(3,2) = 0; eTt_(3,3) = 1;
-
+*/
 }
 
 
