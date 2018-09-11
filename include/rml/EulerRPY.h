@@ -30,7 +30,7 @@ public:
 	EulerRPY(Eigen::Vector3d vec3);
 	EulerRPY(Eigen::Quaterniond q);
 
-	virtual ~EulerRPY() {}
+  virtual ~EulerRPY();
 
 	friend std::ostream& operator <<(std::ostream& os, EulerRPY const& a)
 	{
@@ -59,7 +59,7 @@ public:
    * @param[in] omega
    * @return the derivative of this
    */
-	Eigen::Vector3d GetDerivative(Eigen::Vector3d omega) const throw (std::exception);
+  Eigen::Vector3d GetDerivative(const Eigen::Vector3d omega) const;// throw (std::exception);
 	Eigen::Quaterniond ToQuaternion() const;
 
 private:
