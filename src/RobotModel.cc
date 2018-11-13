@@ -59,6 +59,7 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::Trans
         armsModel_.insert(std::make_pair(arm->GetID(), arm));
         bodyFrameToArm_.insert(std::make_pair(arm->GetID(), bodyframeToArm));
         DoF_ += arm->GetNumJoints();
+        robotBase_->SetRigidBodyFrame(arm->GetID(),bodyframeToArm);
         return true;
 
     } else {
@@ -211,6 +212,8 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     } else if (CheckArm(partID)) {
         T = armsModel_.at(partID)->GetTransformation(frameID);
         T = bodyFrame_ * bodyFrameToArm_.at(partID) * T;
+        //Possibility to get rid of the map body frame to arm and use directlu get transformation obatining the transformation wrt to WORLD
+       // robotBase_->GetTransformation(bodyFrameID_+"_"+partID);
         return T;
     }
 
@@ -231,7 +234,7 @@ Eigen::TransfMatrix RobotModel::GetTransformationFrames(const std::string& frame
     wTj = GetTransformation(frameID_j);
     wTk = GetTransformation(frameID_k);
 
-    out = wTj.transpose() * wTk;
+    out = wTj.inverse() * wTk;
     return out;
 }
 

@@ -20,7 +20,7 @@ namespace rml {
 /**
  * @brief Vehicle Model base class
  *
- * @details This class implements a base vehicle model class.
+ * @details This class implements a base vehicle model class, it is used in the RobotModel class in order to implement the manipulators moving platform.
  */
 class VehicleModel {
 public:
@@ -136,18 +136,18 @@ public:
     const Eigen::Vector6d& GetAccelerationOnVehicle();
 
 protected:
-    bool modelInitialized_; //!< boolean stating whether the model is initialized.
-    bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized.
-    std::unordered_map<std::string, Eigen::TransfMatrix> rigidBodyFrames_; //!< map of the attached body frames.
-    Eigen::Vector6d fbkPosition_; //!< vehicle position.
-    Eigen::Vector6d velocityOnVehicle_; //!< vehicle velocity.
-    Eigen::Vector6d accelerationOnVehicle_; //!< vehicle acceleration.
-    Eigen::Vector6d controlRef_; //!< vehicle control vector.
-    std::unordered_map<std::string, Eigen::MatrixXd> jacobians_; //!< map of vehicle jacobians.
-    std::unordered_map<std::string, Eigen::TransfMatrix> transformation_; //!< map of vehicle transformations.
-    Eigen::Matrix6d vJv_; //!< vehicle jacobians.
-    Eigen::RotMatrix I3_; //!< identity matrix.
-    std::string id_; //!< vehicle id.
+    bool modelInitialized_; //!< boolean stating whether the model is initialized
+    bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized
+    std::unordered_map<std::string, Eigen::TransfMatrix> rigidBodyFrames_; //!< map of the attached body frames
+    Eigen::Vector6d fbkPosition_; //!< vehicle position
+    Eigen::Vector6d velocityOnVehicle_; //!< vehicle velocity
+    Eigen::Vector6d accelerationOnVehicle_; //!< vehicle acceleration
+    Eigen::Vector6d controlRef_; //!< vehicle control vector
+    std::unordered_map<std::string, Eigen::MatrixXd> jacobians_; //!< map of vehicle jacobians
+    std::unordered_map<std::string, Eigen::TransfMatrix> transformation_; //!< map of vehicle transformations
+    Eigen::Matrix6d vJv_; //!< vehicle jacobians
+    Eigen::RotMatrix I3_; //!< identity matrix
+    std::string id_; //!< vehicle id
 };
 }
 

@@ -23,12 +23,30 @@ namespace rml {
  * \brief Robot Model class, to evaluate either mobile or fixed manipulators total transformation
  * matrices and jacobians.
  *
- * \details This class provides a container for storing a multi-arm mobile or fixed manipulator model,
- * including a series of model related functions. The robot could either be mobile one (hence characterized by a\n
- * moving body Frame) or a static one (hence with a constant body Frame) depending on the constructor used (hence whether a Jacobian\n
- * for the body Frame is provided).\n
- * In order to add arm tp the robot the method LoadArm() is provided.\n
- * It is in addition possible to add rigid body frames to the each body Frame by using the method SetRigidBodyFrame.
+ * \details This class provides a container for storing a multi-arm mobile or fixed model,
+ * including a series of model related functions. The robot could either be mobile one (hence characterized by a
+ * moving body Frame) or a static one (hence with a fixed body Frame) depending on the constructor used (hence whether a Jacobian
+ * for the body Frame is provided as input in the constructor).\n
+ * In order to add arm to the robot the method LoadArm() is provided.\n
+ * It is in addition possible to add rigid body frames to the robot frames by using the method SetAttachedRigidBodyFrame().\n
+ * The robot model contains an internal unique representation of the whole system, hence all the information about the robot model are given by organizing the vectors in
+ * an order a priori defined, where the moving body frame, if present, corresponds to the first 6 position of the vector.\n
+ * It is possible to obtain unified information about the robot position, velocity, acceleration and control by using the given methods (e.g. GetSystemPositionVector() to know the position
+ * of the whole system) but methods to obtain information of a single part of the robot model are provided (e.g. GetPositionVector() for the position of a part of the robot method, such function takes as
+ * input the id of the desired part).\n
+ * The user must update the feedback for the arms and the mobile platform, if present, by using the methods SetSystemPositionVector() if the feedback for the whole robot are in a unique vector
+ * or SetPositionVector() if the data are separated into vectors. The before mentioned method takes as input  the id of the part and the fbk vector. Similar methods are provided
+ * also with the purpose of setting the feedback in velocity and acceleration and control. For setting uniquely the body frame position, the dedicated method SetBodyFramePosition() is provided.\n
+ * By exploiting the methods provided in the ArmModel and VehicleModel class, the robot model is able to provide the transformation matrices and the jacobians for all the frames defined in the robot.\n
+ * For this purpose the methods GetTransformation() and GetCartesianJacobian() are provided. These methods take as input the id of the frame for which computing the matrices. It is worth noticing that
+ * the transformation matrices are expressed wrt to the world frame meanwhile the jacobians are observed by the inertial frame and expressed wrt to the body frame.\n
+ * In addition the method GetTransformationFrames() is provided in order to compute the transformation matrices in between the two frames identified by the input ids.\n
+ * Furthermore the two methods GetJointSpaceJacobian() and GetManipulabilityJacobian() are provided. \n
+ * The former takes as input the armID and returns the related joint space jacobian. The latter takes as input a frame id and returns the related manipulability jacobian. In order to obtain the manipulability value for a frame the method GetManipulability() must be used\n
+ * It is worth noticing that the jacobians given by the RobotModel takes into account the degrees of freedom of the whole robot (hence of all the arms and of the moving platform, if present) in the aforementioned a priori defined order.\n
+ * >
+ *
+
  *
  */
 class RobotModel {
@@ -59,7 +77,7 @@ public:
     /**
      * @brief Loads an arm in the robot model
      *
-     * Loads a arm in the robot model, there is no limit to the number of arms that can
+     * @details Loads a arm in the robot model, there is no limit to the number of arms that can
      * be loaded. The ArmModel must be initialized before loading, otherwise is not
      * accepted. A <robotFrame-to-base> transformation must be specified, which tells the
      * position of the arm's base frame with respect to the robotFrame.
@@ -69,13 +87,13 @@ public:
      */
     bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& bodyFrameToArm) throw(ExceptionWithHow);
     /**
-     * @brief GetBodyFrameID method to get the body Frame id.
+     * @brief Method to get the body Frame id.
      * @details Method to get the id for the body Frame, hence the frame common to all the arms.
      * @return body Frame id
      */
     std::string GetBodyFrameID();
     /**
-     * @brief SetBodyFramePosition method to set the new body Frame position
+     * @brief Method to set the new body Frame position
      * @param[in] bodyFrame body Frame position wrt to the world frame
      */
     void SetBodyFramePosition(Eigen::TransfMatrix bodyFrame);
@@ -117,7 +135,7 @@ public:
      */
     Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID) throw(ExceptionWithHow);
     /**
-     * @brief GetManipulability method returning the manipulabity value for the jacobian related to the input frameID
+     * @brief Method returning the manipulabity value for the jacobian related to the input frameID
      * @param[in] frameID
      * @return manipulability
      */
@@ -191,7 +209,7 @@ public:
     void SetPositionVector(std::string partID, Eigen::VectorXd position) throw(ExceptionWithHow);
 
     /**
-     * @brief GetPositionVector Method returning the position of the input part (i.e. joint position for arm
+     * @brief Method returning the position of the input part (i.e. joint position for arm
      * and cartesian position in case if of mobile body Frame)
      * @param[in] partID
      * @return position vector, either cartesian position or joint position
@@ -216,7 +234,7 @@ public:
 
     void SetAccelerationVector(std::string partID, Eigen::VectorXd acceleration) throw(ExceptionWithHow);
     /**
-     * @brief GetAccelerationVector Method returning the position of the input part (i.e. joint acceleration for arm
+     * @brief Method returning the position of the input part (i.e. joint acceleration for arm
      * and cartesian acceleration in case of mobile body Frame)
      * @param[in] partID
      * @return position vector, either cartesian position or joint position
@@ -255,7 +273,7 @@ protected:
     std::string bodyFrameID_; //!< ID of the body Frame
     Eigen::TransfMatrix bodyFrame_; //!< body Frame transformaion matrix
     int DoF_{ 0 }; //!< total degrees of freedom of the robot
-    bool isMobileRobot_; //!< boolean stating wheter the robot is a mobile one.
+    bool isMobileRobot_; //!< boolean stating wheter the robot is a mobile one
 };
 
 } /* namespace rml */

@@ -8,9 +8,9 @@
 #ifndef __ARMMODEL_H__
 #define __ARMMODEL_H__
 
+#include "RMLExceptions.h"
 #include "RobotLink.h"
 #include "Types.h"
-#include "RMLExceptions.h"
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
 #include <unordered_map>
@@ -26,29 +26,30 @@ typedef std::pair<std::string, Eigen::TransfMatrix> IndexedTMat;
  *
  * \brief Arm Model class for serial kinematic chains (manipulators).
  *
- * \details This class implements a model for serial kinematic chains. It contains a
- * vector of RobotLink which can be added up using the AddLink() function, which attaches
+ * \details This class implements a model for serial kinematic chains, the whole structure is identified by an ID given by the user in the constructor. It contains a
+ * vector of RobotLink which can be added up using the AddFixedLink() function for fixed links and the AddJointLink() one for moving links, the two methods attach
  * each new link to the previous one. Optionally we can also add rigid bodies to each
- * link with the function AddRigidBodyFrame() which takes as input the \p frameName to identify the frame
+ * link with the function SetRigidBodyFrame() which takes as input the \p frameName to identify the frame
  * to which attach the body and a \p IDstring to identify it.\n
- * The arm model is identified by an ID given by the user in the constructor.
  *
- * Once the model has been constructed, the class
- * provides all the necessary functions to evaluate the transformation and jacobian matrices
- * for every link and rigid body added.
- * Each frame is identified by a label. The following policy is used:
- * Joint Frame : armID+ “FrameID::Joint“+ joint°
- * Rigid Body: armID+ “_Body_“+ frameID
- * In order to get the transformation matrix the GetTransformation(string) method is provided.
- * The string in input is the id of the frame asked. \n
- * All the transformation matrix are expressed wrt the robot base.\n
- * In order to get the jacobian the GetJacobian(string) method is provided.\n
- * The string in input is the frameid of the frame asked.\n
- * All the jacobian matrix are expressed wrt the robot base.
+ * Once the model has been constructed, the class provides all the necessary functions to evaluate the transformation and jacobian matrices
+ * for every link and rigid body added.\n
+ * Each frame is identified by a label. The following policy is used: \n
+ *
+ * * Joint Frame: armID + FrameID::Joint + joint°;
+ *
+ * * Rigid Body: armID + FrameID::Body + frameID
+ *
+ * In order to get the transformation matrix the GetTransformation() method is provided. The method takes as input a string which is the id of the frame asked. \n
+ * All the transformation matrices are expressed wrt the arm base.\n
+ * In order to get the jacobian the GetJacobian() method is provided. The method takes as input a string which is the id of the frame asked. \n
+ * All the jacobian matrix are expressed wrt the arm base.\n
+ * \n
  * <b>This class has been designed with two use cases in mind</b>:
- *   -# Used by itself in can be exploited to control fixed base manipulators.
- *   -# Loaded in a RobotModel, using RobotModel::LoadArm(),
- *   it can be used to control either mobile manipulators or multiple arms.
+ *
+ * * Used by itself in can be exploited to control fixed base manipulators.
+ *
+ * * Loaded in a RobotModel, using RobotModel::LoadArm(), it can be used to control either mobile manipulators or multiple arms.
  */
 class ArmModel {
 public:
@@ -68,18 +69,18 @@ public:
 	 *
      * \param type 			The JointType, whether: JointType::Revolute, JointType::Prismatic
 	 * \param axis			The axis along which the joint rotates or translates
-	 * \param baseTransf 	Transformation matrix from previous to current
-	 * \param jointLimMin Minimum excursion for the joint
-	 * \param jointLimMax Maximum excursion for the joint
+     * \param baseTransf 	Transformation matrix from previous link to current link
+     * \param jointLimMin   Minimum excursion for the joint
+     * \param jointLimMax   Maximum excursion for the joint
 	 */
     void AddJointLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin,
         double jointLimMax);
 
     /**
-   * \brief Adds a fixed link to the kinematic chain of the model
-   *
-   * \param baseTransf 	Transformation matrix from previous to current
-   */
+    * \brief Adds a fixed link to the kinematic chain of the model
+    *
+    * \param baseTransf 	Transformation matrix from previous to current
+    */
     void AddFixedLink(const Eigen::TransfMatrix& baseTransf);
 
     /**
@@ -88,7 +89,7 @@ public:
      * The method updates the internal joint position state [only the moving joints]. This method updates also the internal transformation
 	 * matrices and jacobians.
 	 *
-     * \param[in] q the joint position vector (must be an numMovingJoints x 1 vector)
+     * \param[in] q the joint position vector (must be a numMovingJoints x 1 vector)
 	 */
     void SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception);
 
@@ -100,25 +101,25 @@ public:
 
     /**
      * @brief Set the moving joints velocity
-     * @param qdot the joint velocity vector (must be a vector of dimension equal to numMovingJoints)
+     * @param qdot the joint velocity vector (must be a numMovingJoints x 1 vector)
      */
     void SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::exception);
 
     /**
      * @brief Get the moving joints velocity
-     * @return  the joints velocity vector ( vector of dimension equal to numMovingJoints)
+     * @return  the joints velocity vector (must be a numMovingJoints x 1 vector)
      */
     const Eigen::VectorXd& GetJointsVelocity() const;
 
     /**
      * @brief Set the moving joints acceleration.
-     * @param qddot the joints acceleration vector (must be a vector of dimension equal to numMovingJoints)
+     * @param qddot the joints acceleration vector (must be a numMovingJoints x 1 vector)
      */
     void SetJointsAcceleration(const Eigen::VectorXd& qddot) throw(std::exception);
 
     /**
      * @brief Get moving joints acceleration.
-     * @return  the joints acceleration vector (vector of dimension equal to numMovingJoints)
+     * @return  the joints acceleration vector (must be a numMovingJoints x 1 vector)
      */
     const Eigen::VectorXd& GetJointsAcceleration() const;
 
@@ -213,7 +214,7 @@ public:
 
 protected:
     /**
-     * @brief ArmModel::EvaluateTotalForwardGeometry
+     * @brief Method evaluating the total forward geometry for the arm
      */
     void EvaluateTotalForwardGeometry();
 
@@ -274,22 +275,22 @@ protected:
     std::unordered_map<std::string, Eigen::TransfMatrix> transformation_; //<! map of the transformations
     std::unordered_map<std::string, Eigen::MatrixXd> manipulabilityJacobians_; //!< map of the manipulability jacobians
     std::unordered_map<std::string, double> manipulability_; //!< map of the manipulability values
-    Eigen::VectorXd q_total_; //<! vector of links position.
-    Eigen::VectorXd q_moving_; //<! vector of moving joints position.
-    Eigen::VectorXd q_dot_moving_; //<! vector of moving joints velocity.
-    Eigen::VectorXd q_ddot_moving_; //<! vector of moving joints acceleration.
-    Eigen::VectorXd controlRef_; //<! control vector .
-    std::vector<Eigen::TransfMatrix> baseTei_; //<! vector of transformation matrix from base to joint.   ??
-    std::vector<Eigen::TransfMatrix> biTei_; //<! vector of transformation matrix from joint i-1 to joint i. ??
-    Eigen::TransfMatrix baseTbi_; //<! transformation matrix from base to joint i.??
-    Eigen::TransfMatrix Tz_; //!< transformation matrix for rotation or prismatic joint.
+    Eigen::VectorXd q_total_; //<! vector of links position
+    Eigen::VectorXd q_moving_; //<! vector of moving joints position
+    Eigen::VectorXd q_dot_moving_; //<! vector of moving joints velocity
+    Eigen::VectorXd q_ddot_moving_; //<! vector of moving joints acceleration
+    Eigen::VectorXd controlRef_; //<! control vector
+    std::vector<Eigen::TransfMatrix> baseTei_; //<! vector of transformation matrix from base to joint   ??
+    std::vector<Eigen::TransfMatrix> biTei_; //<! vector of transformation matrix from joint i-1 to joint i ??
+    Eigen::TransfMatrix baseTbi_; //<! transformation matrix from base to joint i ??
+    Eigen::TransfMatrix Tz_; //!< transformation matrix for rotation or prismatic joint
     Eigen::Vector3d base_ki_; //!<
     std::vector<Eigen::Vector6d> h_; //!<
-    std::vector<Eigen::MatrixXd> dJdq_; //!< dJdq evaluated numerically.
-    Eigen::MatrixXd djdqJpinv_; //!< djdq * jacobian pseudoinverse.
+    std::vector<Eigen::MatrixXd> dJdq_; //!< dJdq evaluated numerically
+    Eigen::MatrixXd djdqJpinv_; //!< djdq * jacobian pseudoinverse
     Eigen::RotMatrix I3_; //!< identity matrix
-    bool modelReadFromFile_; //!< boolean stating whether the model is read from file.
-    std::string id_; //!< arm id.
+    bool modelReadFromFile_; //!< boolean stating whether the model is read from file
+    std::string id_; //!< arm id
 };
 }
 
