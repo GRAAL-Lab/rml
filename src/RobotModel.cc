@@ -59,7 +59,7 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::Trans
         armsModel_.insert(std::make_pair(arm->GetID(), arm));
         bodyFrameToArm_.insert(std::make_pair(arm->GetID(), bodyframeToArm));
         DoF_ += arm->GetNumJoints();
-        robotBase_->SetRigidBodyFrame(arm->GetID(),bodyframeToArm);
+        robotBase_->SetRigidBodyFrame(arm->GetID(), bodyframeToArm);
         return true;
 
     } else {
@@ -213,7 +213,10 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
         T = armsModel_.at(partID)->GetTransformation(frameID);
         T = bodyFrame_ * bodyFrameToArm_.at(partID) * T;
         //Possibility to get rid of the map body frame to arm and use directlu get transformation obatining the transformation wrt to WORLD
-       // robotBase_->GetTransformation(bodyFrameID_+"_"+partID);
+        // robotBase_->GetTransformation(bodyFrameID_+"_"+partID);
+        return T;
+    } else if (frameID == rml::FrameID::WorldFrame) {
+        T.setIdentity();
         return T;
     }
 
@@ -227,14 +230,23 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
 Eigen::TransfMatrix RobotModel::GetTransformationFrames(const std::string& frameID_j, const std::string& frameID_k)
 {
     Eigen::TransfMatrix out;
-    Eigen::TransfMatrix wTj, wTk;
-    std::string partID_a = frameID_j.substr(0, frameID_j.find_first_of("_"));
-    std::string partID_b = frameID_k.substr(0, frameID_k.find_first_of("_"));
+    if (frameID_j == frameID_k) {
+        out.setIdentity();
+    } else if (frameID_j == rml::FrameID::WorldFrame) {
+        out = GetTransformation(frameID_k);
 
-    wTj = GetTransformation(frameID_j);
-    wTk = GetTransformation(frameID_k);
+    } else if (frameID_k == rml::FrameID::WorldFrame) {
+        out = GetTransformation(frameID_j).inverse();
+    } else {
+        Eigen::TransfMatrix wTj, wTk;
+        std::string partID_a = frameID_j.substr(0, frameID_j.find_first_of("_"));
+        std::string partID_b = frameID_k.substr(0, frameID_k.find_first_of("_"));
 
-    out = wTj.inverse() * wTk;
+        wTj = GetTransformation(frameID_j);
+        wTk = GetTransformation(frameID_k);
+
+        out = wTj.inverse() * wTk;
+    }
     return out;
 }
 

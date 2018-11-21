@@ -8,6 +8,7 @@ namespace FrameID {
     const std::string Joint = "_Joint_";
     const std::string Body = "_Body_";
     const std::string RobotFrameID = "RobotFrameID";
+    const std::string WorldFrame = "WorldFrame";
 }
 }
 
