@@ -21,12 +21,20 @@ Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vecto
     Eigen::Vector3d vsinth = a.cross(b);
     double costh = a.dot(b);
     double sinth = vsinth.norm();
-
     // Computing the Misalignment Vector if the two Frames are not Aligned in the
     // Lungitudinal Direction, else c is Equal to 0 since the two Directions are Alligned.
     if (sinth > VersorLemmaThreshold) {
         double theta = atan2(sinth, costh);
         c = (vsinth * (theta / sinth));
+    } else if (costh < 0.0) {
+        //if thetha is equal to PI it means that the two direction are opposite, in order hence
+        // a rotation of M_PI must be performed about any axis which is perpendicular to the lign identified by the two
+        // vectors
+        Eigen::Vector3d d = Eigen::Vector3d::Random();
+        d = d.normalized();
+        double theta = M_PI;
+        c = (a.cross(d));
+        c = c.normalized()* theta;
     } else {
         c.setZero();
     }
