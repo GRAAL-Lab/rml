@@ -60,6 +60,13 @@ public:
    * @return the derivative of this
    */
   Eigen::Vector3d GetDerivative(const Eigen::Vector3d omega) const;// throw (std::exception);
+  /**
+   * @brief GetOmega computes the angular velocity of the frame given euler rates (derivative) of 'this',
+   * Omega is projected on the frame itself (body)  and not the inertial frame.
+   * @param[in] rpyDerivatives of this
+   * @return omega
+   */
+  Eigen::Vector3d GetOmega(const Eigen::Vector3d rpyDerivarives) const;// throw (std::exception);
 	Eigen::Quaterniond ToQuaternion() const;
 
 private:
