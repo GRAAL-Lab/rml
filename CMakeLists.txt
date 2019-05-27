@@ -21,6 +21,7 @@ option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
 
 add_library(rml SHARED
     src/Vector6d.cc
+    src/Vector9d.cc
     src/RotMatrix.cc
     src/TransfMatrix.cc
     src/EulerRPY.cc

@@ -36,6 +36,7 @@ namespace Eigen
 {
 typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 typedef Eigen::Matrix<double, 6, 1> Vector6dBase;
+typedef Eigen::Matrix<double, 9, 1> Vector9dBase;
 }
 
 // Forward Declarations
@@ -43,6 +44,7 @@ namespace Eigen{
 class RotMatrix;
 class TransfMatrix;
 class Vector6d;
+class Vector9d;
 }
 
 namespace rml
@@ -53,6 +55,7 @@ class EulerRPY;
 #include "EulerRPY.h"
 #include "RotMatrix.h"
 #include "Vector6d.h"
+#include "Vector9d.h"
 #include "TransfMatrix.h"
 
 #endif /* INCLUDE_RML_TYPES_H_ */
