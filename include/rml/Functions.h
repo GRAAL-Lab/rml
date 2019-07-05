@@ -266,6 +266,9 @@ MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3
     return *std::max_element(vecs.begin(), vecs.end(), eigen_norm_compare<MatT>);
 }
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 /*
 Eigen::Matrix GetRigidBodyMatrix(const Eigen::TransfMatrix& toolTpoint){
 //

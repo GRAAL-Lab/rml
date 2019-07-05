@@ -110,6 +110,7 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
     return out;
 }
 
+
 // Computes 3-components Cartesian error with 2 EulerYPR elements as imput
 Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2)
 {
