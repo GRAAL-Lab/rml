@@ -17,7 +17,6 @@ const double VersorLemmaThreshold = 1E-9;
 Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vector3d& v2)
 {
     Eigen::Vector3d a(v1), b(v2), c;
-
     Eigen::Vector3d vsinth = a.cross(b);
     double costh = a.dot(b);
     double sinth = vsinth.norm();
@@ -38,6 +37,7 @@ Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vecto
     } else {
         c.setZero();
     }
+
 
     return c;
 }

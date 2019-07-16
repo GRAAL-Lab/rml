@@ -199,6 +199,9 @@ Eigen::TransfMatrix RobotModel::GetTransformation(const std::string& frameID) th
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
     Eigen::TransfMatrix T;
+    if(frameID == FrameID::WorldFrame){
+        return T;
+    }
     if (partIDIndex == std::string::npos && frameID != bodyFrameID_) {
         std::string how;
         how = "[ROBOT MODEL] Wrong string format: " + frameID;
