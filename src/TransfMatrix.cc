@@ -7,59 +7,37 @@
 
 #include "TransfMatrix.h"
 
-namespace Eigen
-{
+namespace Eigen {
 
-
-TransfMatrix::TransfMatrix(void) :
-		Eigen::Matrix4d()
+TransfMatrix::TransfMatrix(void)
+    : Eigen::Matrix4d()
 {
-	*this = Eigen::Matrix4d::Identity();
+    *this = Eigen::Matrix4d::Identity();
 }
 
-RotMatrix TransfMatrix::GetRotMatrix() const
+Vector6d TransfMatrix::XYZ_RPY() const
 {
-	return this->block(0, 0, 3, 3);
+    return Eigen::Vector6d{ this->Transl(), this->RotationMatrix().ToEulerRPY().ToVector() };
 }
 
-void TransfMatrix::SetRotMatrix(const Eigen::RotMatrix& rot)
+TransfMatrix TransfMatrix::Integral(const Vector6d& vin, double dt) const
 {
-    //        futils::PrettyPrint(this->block<3,3>(0, 0), "this->block(0, 0, 3, 3)");
-    //        futils::PrettyPrint(rot.block<3,3>(0, 0), "rot.block(0, 0, 3, 3)");
+    TransfMatrix temp = *this;
+    temp.RotationMatrix(RotationMatrix().StrapDown(vin.AngularVector(), dt));
+    temp.Transl(vin.LinearVector() * dt + Transl());
+    return temp;
+}
+void TransfMatrix::RotationMatrix(const Eigen::RotMatrix rot)
+{
     if (rot.cols() == 3 && rot.rows() == 3) {
-        this->block(0, 0, 3, 3) = rot.block(0, 0, 3, 3);
+        this->block(0, 0, 3, 3) = rot;
     } else {
         std::cout << "[TransfMatrix::SetRotMatrix()] WARNING: Size is not 3x3" << std::endl;
     }
 }
 
-Vector3d TransfMatrix::GetTransl() const
+Eigen::RotMatrix TransfMatrix::RotationMatrix() const
 {
-	return this->block(0, 3, 3, 1);
+    return this->block(0, 0, 3, 3);
 }
-
-void TransfMatrix::SetTransl(const Vector3d& transl)
-{
-	this->block(0, 3, 3, 1) = transl;
-}
-
-Vector6d TransfMatrix::GetRPYXYZ() const
-{
-	Vector6d a;
-	a.SetFirstVect3(this->GetRotMatrix().ToEulerRPY().ToVect3());
-	a.SetSecondVect3(this->GetTransl());
-	return a;
-}
-
-TransfMatrix TransfMatrix::Integral(const Vector6d& vin, double dt) const
-{
-	TransfMatrix temp = *this;
-	temp.SetRotMatrix(GetRotMatrix().StrapDown(vin.GetFirstVect3(), dt));
-	temp.SetTransl(vin.GetSecondVect3() * dt + GetTransl());
-	return temp;
-}
-
-
-
 } // namespace Eigen
-

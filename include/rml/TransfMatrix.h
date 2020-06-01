@@ -10,8 +10,7 @@
 
 #include "Types.h"
 
-namespace Eigen
-{
+namespace Eigen {
 
 /**
  * \class TransfMatrix
@@ -24,38 +23,36 @@ namespace Eigen
  *   parts of it separately (rot and transl parts).
  *
  */
-class TransfMatrix: public Eigen::Matrix4d
-{
+class TransfMatrix : public Eigen::Matrix4d {
 public:
-	TransfMatrix(void);
+    TransfMatrix(void);
 
-	// This constructor allows you to construct TransfMatrix from Eigen expressions
-	template<typename OtherDerived>
-	TransfMatrix(const Eigen::MatrixBase<OtherDerived>& other) :
-			Eigen::Matrix4d(other)
-	{
-	}
-	// This method allows you to assign Eigen expressions to TransfMatrix
-	template<typename OtherDerived>
-	TransfMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-	{
-		this->Eigen::Matrix4d::operator=(other);
-		return *this;
-	}
+    // This constructor allows you to construct TransfMatrix from Eigen expressions
+    template <typename OtherDerived>
+    TransfMatrix(const Eigen::MatrixBase<OtherDerived>& other)
+        : Eigen::Matrix4d(other)
+    {
+    }
+    // This method allows you to assign Eigen expressions to TransfMatrix
+    template <typename OtherDerived>
+    TransfMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
+    {
+        this->Eigen::Matrix4d::operator=(other);
+        return *this;
+    }
 
-	RotMatrix GetRotMatrix() const;
+    Eigen::RotMatrix RotationMatrix() const;
 
-    void SetRotMatrix(const Eigen::RotMatrix& rot);
+    void RotationMatrix(const Eigen::RotMatrix rot);
 
-	Vector3d GetTransl() const;
+    auto Transl() const -> const Vector3d { return this->block(0, 3, 3, 1); }
 
-	void SetTransl(const Vector3d& transl);
+    auto Transl(const Vector3d transl) -> void { this->block(0, 3, 3, 1) = transl; }
 
-	Vector6d GetRPYXYZ() const;
+    Vector6d XYZ_RPY() const;
 
-	TransfMatrix Integral(const Vector6d& vin, double dt) const;
+    TransfMatrix Integral(const Vector6d& vin, double dt) const;
 };
-
 }
 
 #endif /* INCLUDE_TRANSFMATRIX_H_ */

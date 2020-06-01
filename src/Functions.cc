@@ -33,11 +33,10 @@ Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vecto
         d = d.normalized();
         double theta = M_PI;
         c = (a.cross(d));
-        c = c.normalized()* theta;
+        c = c.normalized() * theta;
     } else {
         c.setZero();
     }
-
 
     return c;
 }
@@ -89,18 +88,10 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
             h = (r1 + r2);
 
             //Get each column of h
-            Eigen::Vector3d temp1;
-            Eigen::Vector3d temp2;
-            Eigen::Vector3d temp3;
+            Eigen::Vector3d temp = GreatestNormElement(h.col(0), h.col(1), h.col(2));
 
-            temp1 = h.col(0);
-            temp2 = h.col(1);
-            temp3 = h.col(2);
-
-            temp1 = GreatestNormElement(temp1, temp2, temp3);
-
-            if (temp1.norm() != 0.0) {
-                out = (temp1 * (M_PI / temp1.norm()));
+            if (temp.norm() != 0.0) {
+                out = temp.normalized() * M_PI;
             } else {
                 out.setZero();
             }
@@ -109,7 +100,6 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 
     return out;
 }
-
 
 // Computes 3-components Cartesian error with 2 EulerYPR elements as imput
 Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2)
@@ -120,23 +110,16 @@ Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2)
 // Computes 6-components Cartesian error with 2 Transformation matrices as input
 Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2)
 {
-
-    Eigen::Vector3d angular = VersorLemma(in1.GetRotMatrix(), in2.GetRotMatrix());
-    Eigen::Vector3d linear = in2.GetTransl() - in1.GetTransl();
-
-    return Eigen::Vector6d(angular, linear);
+    return Eigen::Vector6d{ in2.Transl() - in1.Transl(), VersorLemma(in1.RotationMatrix(), in2.RotationMatrix()) };
 }
 
 // Computes 6-components Cartesian error with 2 6-components vectors as input
 Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2)
 {
-    Eigen::Vector3d angular = VersorLemma(EulerRPY(v1.GetFirstVect3()), EulerRPY(v2.GetFirstVect3()));
-    Eigen::Vector3d linear = v2.GetSecondVect3() - v1.GetSecondVect3();
-
-    return Eigen::Vector6d(angular, linear);
+    return Eigen::Vector6d(v2.LinearVector() - v1.LinearVector(), VersorLemma(EulerRPY(v1.AngularVector()), EulerRPY(v2.AngularVector())));
 }
 
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow)
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) noexcept(false)
 {
     if (xmax < xmin) {
         BellShapeParameterException bellShapeException;
@@ -162,7 +145,7 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
     return (ymax - ymin) * (0.5 * cos(cosarg) + 0.5) + ymin;
 }
 
-double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow)
+double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) noexcept(false)
 {
     if (xmax < xmin) {
         BellShapeParameterException bellShapeException;
@@ -189,16 +172,16 @@ double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
     return (ymax - ymin) * (0.5 * cos(cosarg) + 0.5) + ymin;
 }
 
-void SaturateVector(const int vecSize, const double sat, Eigen::VectorXd& vect)
+void SaturateVector(const double sat, Eigen::VectorXd& vect)
 {
     double curr_max = 0.0;
-    for (int i = 0; i < vecSize; i++) {
+    for (int i = 0; i < vect.size(); i++) {
         if (curr_max < std::fabs(vect(i))) {
             curr_max = std::fabs(vect(i));
         }
     }
     if (curr_max > sat) {
-        for (int i = 0; i < vecSize; i++) {
+        for (int i = 0; i < vect.size(); i++) {
             vect(i) = vect(i) * (sat / curr_max);
         }
     }
@@ -214,12 +197,9 @@ void SaturateScalar(double sat, double& value)
 
 double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams)
 {
-    double numerator = std::fabs(
-        planeParams.A * point(0) + planeParams.B * point(1) + planeParams.C * point(2) + planeParams.D);
-    double denominator = std::sqrt(
-        planeParams.A * planeParams.A + planeParams.B * planeParams.B + planeParams.C * planeParams.C);
+    double numerator = std::fabs(planeParams.A * point(0) + planeParams.B * point(1) + planeParams.C * point(2) + planeParams.D);
+    double denominator = std::sqrt(planeParams.A * planeParams.A + planeParams.B * planeParams.B + planeParams.C * planeParams.C);
 
-    //cout << "n d: " << numerator << " " << denominator << "\n";
     return (numerator / denominator);
 }
 
@@ -248,14 +228,9 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t)
 
 Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd JAngularobserver, Eigen::Vector3d CartesianError)
 {
-
-    Eigen::MatrixXd out;
-
-    out.resize(J.rows(), J.cols());
-    out = J + Vect3ToSkew(CartesianError).transpose() * JAngularobserver;
-
-    return out;
+    return J + Vect3ToSkew(CartesianError).transpose() * JAngularobserver;
 }
+
 Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl)
 {
     Eigen::Matrix6d S;

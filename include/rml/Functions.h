@@ -15,7 +15,6 @@
 #include <array>
 #include <iostream>
 #include <vector>
-#include <vector>
 
 namespace rml {
 
@@ -130,7 +129,7 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
  *
  * @return the value of the function
  */
-double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow);
+double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) noexcept(false);
 
 /**
  * @brief An increasing bell shaped (sigmoid) function.
@@ -148,7 +147,7 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
  *
  * @return the value of the function
  */
-double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) throw(ExceptionWithHow);
+double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) noexcept(false);
 
 /**
  * @brief Saturate the scalar to a given maximum value
@@ -160,11 +159,10 @@ void SaturateScalar(double sat, double& value);
 /**
  * @brief Saturate the vector to a given maximum value applying normalization for preserving the vector direction
  *
- * @param[in] vecSize		size of vector, to avoid unnecessary size identifications
  * @param[in] sat 			the value of the saturation
  * @param[in,out] vector 	the vector which is saturated to the maximum value
  */
-void SaturateVector(const int vecSize, const double sat, Eigen::VectorXd& vector);
+void SaturateVector(const double sat, Eigen::VectorXd& vector);
 
 /**
  * @brief Evaluates the norm of the shortest distance vector among a point and a given plane
@@ -266,23 +264,11 @@ MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3
     return *std::max_element(vecs.begin(), vecs.end(), eigen_norm_compare<MatT>);
 }
 
-template <typename T> int sgn(T val) {
+template <typename T>
+int sgn(T val)
+{
     return (T(0) < val) - (val < T(0));
 }
-/*
-Eigen::Matrix GetRigidBodyMatrix(const Eigen::TransfMatrix& toolTpoint){
-//
-//	 Calculates the Rigid Body Matrix between tool and point
-//
-	wTt_ = armModel_->GetwTt();
-
-	skew_ = -1.0 * CMAT::Vect3(wTt_.GetRotMatrix() * toolTpoint.GetTrasl()).CrossProdMatrix();
-
-	S_ = I3x3_.RightJuxtapose(Z3x3_).UnderJuxtapose(skew_.RightJuxtapose(I3x3_));
-
-	return S_;
-
-}*/
 }
 
 #endif /* INCLUDE_RML_FUNCTIONS_H_ */

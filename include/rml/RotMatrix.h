@@ -10,8 +10,7 @@
 
 #include "Types.h"
 
-namespace Eigen
-{
+namespace Eigen {
 
 /**
  * \class RotMatrix
@@ -24,38 +23,36 @@ namespace Eigen
  * matrix, rml::EulerRPY and Eigen::Quaterniond reprensentation.
  *
  */
-class RotMatrix: public Eigen::Matrix3d
-{
+class RotMatrix : public Eigen::Matrix3d {
 public:
-	RotMatrix();
+    RotMatrix();
     RotMatrix(Eigen::Quaterniond q);
 
-	// This constructor allows you to construct TransfMatrix from Eigen expressions
-	template<typename OtherDerived>
-	RotMatrix(const Eigen::MatrixBase<OtherDerived>& other) :
-			Eigen::Matrix3d(other)
-	{
-	}
-	// This method allows you to assign Eigen expressions to TransfMatrix
-	template<typename OtherDerived>
-	RotMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
-	{
-		this->Eigen::Matrix3d::operator=(other);
-		return *this;
-	}
+    // This constructor allows you to construct TransfMatrix from Eigen expressions
+    template <typename OtherDerived>
+    RotMatrix(const Eigen::MatrixBase<OtherDerived>& other)
+        : Eigen::Matrix3d(other)
+    {
+    }
+    // This method allows you to assign Eigen expressions to TransfMatrix
+    template <typename OtherDerived>
+    RotMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
+    {
+        this->Eigen::Matrix3d::operator=(other);
+        return *this;
+    }
 
-	RotMatrix Transpose() const;
+    RotMatrix Transpose() const;
 
-	Eigen::Matrix6d GetCartesianRotationMatrix() const;
+    Eigen::Matrix6d CartesianRotationMatrix() const;
 
-	rml::EulerRPY ToEulerRPY() const;
+    rml::EulerRPY ToEulerRPY() const;
 
-	Eigen::Quaterniond ToQuaternion() const;
+    Eigen::Quaterniond ToQuaternion() const;
 
-	//Computes the integral of a rotation matrix (Out = e^[wdt^] * Rin )
-	RotMatrix StrapDown(const Vector3d& w, double dt) const;
+    //Computes the integral of a rotation matrix (Out = e^[wdt^] * Rin )
+    RotMatrix StrapDown(const Vector3d& w, double dt) const;
 };
-
 }
 
 #endif /* INCLUDE_ROTMATRIX_H_ */

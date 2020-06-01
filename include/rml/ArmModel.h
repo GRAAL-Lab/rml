@@ -57,7 +57,7 @@ public:
 	 * \brief Default constructor
      * @param[in] id Arm id.
 	 */
-    ArmModel(const std::string id) throw(std::exception);
+    ArmModel(const std::string id) noexcept(false);
 
     /**
 	 * \brief Default destructor
@@ -73,8 +73,7 @@ public:
      * \param jointLimMin   Minimum excursion for the joint
      * \param jointLimMax   Maximum excursion for the joint
 	 */
-    void AddJointLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin,
-        double jointLimMax);
+    void AddJointLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax);
 
     /**
     * \brief Adds a fixed link to the kinematic chain of the model
@@ -91,37 +90,37 @@ public:
 	 *
      * \param[in] q the joint position vector (must be a numMovingJoints x 1 vector)
 	 */
-    void SetJointsPosition(const Eigen::VectorXd& q) throw(std::exception);
+    void JointsPosition(const Eigen::VectorXd q) noexcept(false);
 
     /**
      * \brief Get the moving joint position
      * \return q the joint position vector (a numMovingJoints x 1 vector)
 	 */
-    const Eigen::VectorXd& GetJointsPosition() const;
+    auto JointsPosition() const -> const Eigen::VectorXd& { return q_moving_; }
 
     /**
      * @brief Set the moving joints velocity
      * @param qdot the joint velocity vector (must be a numMovingJoints x 1 vector)
      */
-    void SetJointsVelocity(const Eigen::VectorXd& qdot) throw(std::exception);
+    void JointsVelocity(const Eigen::VectorXd qdot) noexcept(false);
 
     /**
      * @brief Get the moving joints velocity
      * @return  the joints velocity vector (must be a numMovingJoints x 1 vector)
      */
-    const Eigen::VectorXd& GetJointsVelocity() const;
+    auto JointsVelocity() const -> const Eigen::VectorXd& { return q_dot_moving_; }
 
     /**
      * @brief Set the moving joints acceleration.
      * @param qddot the joints acceleration vector (must be a numMovingJoints x 1 vector)
      */
-    void SetJointsAcceleration(const Eigen::VectorXd& qddot) throw(std::exception);
+    void JointsAcceleration(const Eigen::VectorXd qddot) noexcept(false);
 
     /**
      * @brief Get moving joints acceleration.
      * @return  the joints acceleration vector (must be a numMovingJoints x 1 vector)
      */
-    const Eigen::VectorXd& GetJointsAcceleration() const;
+    auto JointsAcceleration() const -> const Eigen::VectorXd& { return q_ddot_moving_; }
 
     /**
      * @brief Method adding a rigid body frame to a joint.
@@ -129,7 +128,7 @@ public:
      * @param attachedFrameID ID of the frame to attach
      * @param TMat Transformation matrix of the frame.
      */
-    void SetRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransfMatrix TMat) throw(ExceptionWithHow);
+    void SetRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransfMatrix TMat) noexcept(false);
 
     /**
      * @brief Method returning the transformation matrix related to the input frameID wrt to the arm base.
@@ -137,7 +136,7 @@ public:
      * @return  transformation matrix
      */
 
-    Eigen::TransfMatrix GetTransformation(const std::string& frameID) throw(ExceptionWithHow);
+    Eigen::TransfMatrix GetTransformation(const std::string& frameID) noexcept(false);
     /**
      * @brief Method returing a transformation matrix from frameID_j to frameID_k, i.e. jTk.\n
      * @param[in] frameID_j first frame;
@@ -151,7 +150,7 @@ public:
      * @param frameId frame id
      * @return jacobian matrix
      */
-    Eigen::MatrixXd GetJacobian(const std::string& frameID) throw(ExceptionWithHow);
+    Eigen::MatrixXd Jacobian(const std::string& frameID) noexcept(false);
 
     /**
      * @brief Method returning the manipulability jacobian related to the input frameID wrt to the arm base.
@@ -159,58 +158,58 @@ public:
      * @return jacobian matrix
      */
 
-    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID);
+    Eigen::MatrixXd ManipulabilityJacobian(const std::string& frameID);
     /**
      * @brief Method returning the arm number of moving  joints
      * @return  arm number of moving joints
      */
-    int GetNumJoints() const;
+    auto NumJoints() const -> int { return movingNumJoints_; }
 
     /**
      * @brief Method returning dJdq evaluated numerically
      * @return  dJdq
      */
-    const std::vector<Eigen::MatrixXd>& GetdJdq() const;
+    auto dJdq() const -> const std::vector<Eigen::MatrixXd>& { return dJdq_; }
     /**
      * @brief Method returning the arm link
      * @param jointIndex link index
      * @return robot link
      */
-    RobotLink& GetLink(int jointIndex) throw(std::exception);
+    RobotLink& GetLink(int jointIndex) noexcept(false);
 
     /**
      * @brief Method returning true if the model is initialized false otherwise.
      */
 
-    bool IsModelInitialized() const;
+    auto IsModelInitialized() const -> bool { return modelInitialized_; }
 
     /**
      * @brief Method returning the arm control vector
      * @return Control vector
      */
-    const Eigen::VectorXd& GetControlVector() const;
+    auto ControlVector() const -> const Eigen::VectorXd& { return controlRef_; }
 
     /**
      * @brief Method setting the arm control vector
      * @param controlRef control vector
      */
-    void SetControlVector(const Eigen::VectorXd& controlRef) throw(std::exception);
+    void ControlVector(const Eigen::VectorXd controlRef) noexcept(false);
 
     /**
      * @brief Method returning the arm manipulability
      * @return  manipulability value.
      */
-    double GetManipulability(std::string frameID);
+    double Manipulability(const std::string& frameID);
     /**
      * @brief Method returning the arm id.
      * @return arm id
      */
-    std::string GetID();
+    auto ID() const -> const std::string& { return id_; }
     /**
      * @brief Method setting the arm id
      * @param id arm id.
      */
-    void SetID(std::string id);
+    auto ID() -> std::string& { return id_; }
 
 protected:
     /**
@@ -227,7 +226,7 @@ protected:
      * @brief Evaluates the manipulability measure and its Jacobian
      * This method returns the manipulability measure and its Jacobian
      */
-    Eigen::MatrixXd EvaluateManipulability(const std::string frameID);
+    Eigen::MatrixXd EvaluateManipulability(const std::string& frameID);
 
     /**
      * @brief Method returning the attached body frame wrt to the arm base.

@@ -9,27 +9,33 @@
 #define INCLUDE_RML_PSEUDOINVERSE_H_
 
 #include <eigen3/Eigen/Dense>
+#include <libconfig.h++>
 
 #include "SVD.h"
 #include "Types.h"
 
-namespace rml
-{
+namespace rml {
 
-struct RegularizationParameters
-{
-	double threshold; 	//!< The value above which the raised cosine becomes 0
-	double lambda;    	//!< The maximum value of the raised cosine
+struct RegularizationParameters {
+    double threshold; //!< The value above which the raised cosine becomes 0
+    double lambda; //!< The maximum value of the raised cosine
 
-	RegularizationParameters(): threshold(0.01), lambda(0.01) {}
+    RegularizationParameters()
+        : threshold(0.01)
+        , lambda(0.01)
+    {
+    }
 };
 
-struct RegularizationResults
-{
-	double mu;			//!< Product of singular values
-	int flag;			//!< The number of time the regularization parameter was not zero
+struct RegularizationResults {
+    double mu; //!< Product of singular values
+    int flag; //!< The number of time the regularization parameter was not zero
 
-	RegularizationResults(): mu(0.0), flag(0) {}
+    RegularizationResults()
+        : mu(0.0)
+        , flag(0)
+    {
+    }
 };
 
 /**
@@ -42,21 +48,24 @@ struct RegularizationResults
  * @note The default values assigned to the parameters are: \p threshold=0.01 and \p lamba=0.01 .
  *
  */
-struct RegularizationData
-{
-	RegularizationParameters params;
-	RegularizationResults results;
+struct RegularizationData {
+    RegularizationParameters params;
+    RegularizationResults results;
 
-	RegularizationData() = default;
+    RegularizationData() = default;
+
+    template <typename T>
+    void ConfifFromFile(T confObj)
+    {
+    }
 };
-
 
 /**
  * @internal for internal use only
  *
  * @brief Computes the SVD-based regularized matrix pseudoinversion (A = U*S*V')
  */
-void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, double lambda, double* prod, int* flag);
+void GT_RegPinv(const double* J, int m, int n, double* JPInv, double treshold, double lambda, double* prod, int* flag);
 
 /**
  * @brief Computes the SVD-based regularized matrix pseudoinversion (A = U*S*V')
@@ -76,24 +85,24 @@ void GT_RegPinv(const double *J, int m, int n, double *JPInv, double treshold, d
  * @param regData		The regularization parameters and results struct
  * @return				The pseudo-inverse matrix of \p mat
  */
-template<class MatT>
+template <class MatT>
 Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompileTime> RegularizedPseudoInverse(
-		const MatT& mat, RegularizationData& regData) // choose appropriately
+    const MatT& mat, RegularizationData& regData) // choose appropriately
 {
 
-	int m = mat.rows(), n = mat.cols();
-	double J[m * n];                // NULL pointer
-	double JPInv[n * m];
+    int m = mat.rows(), n = mat.cols();
+    double J[m * n]; // NULL pointer
+    double JPInv[n * m];
 
-	//Here we convert the input type to a double array which is the type used by the GT_RegPinv
-	Eigen::Map<MatT>(J, m, n) = mat;
+    //Here we convert the input type to a double array which is the type used by the GT_RegPinv
+    Eigen::Map<MatT>(J, m, n) = mat;
 
-	GT_RegPinv(J, m, n, JPInv, regData.params.threshold, regData.params.lambda, &(regData.results.mu), &(regData.results.flag));
+    GT_RegPinv(J, m, n, JPInv, regData.params.threshold, regData.params.lambda, &(regData.results.mu), &(regData.results.flag));
 
-	//Here the results of the GT_RegPinv algorithm are mapped back to the input type
-	MatT eigenPinv = Eigen::Map<MatT>(JPInv, n, m);
+    //Here the results of the GT_RegPinv algorithm are mapped back to the input type
+    MatT eigenPinv = Eigen::Map<MatT>(JPInv, n, m);
 
-	return eigenPinv;
+    return eigenPinv;
 }
 
 } //namespace rml

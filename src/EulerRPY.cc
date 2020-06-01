@@ -33,56 +33,35 @@ EulerRPY::EulerRPY(Eigen::Quaterniond q) { *this = Eigen::RotMatrix(q.toRotation
 
 EulerRPY::~EulerRPY() {}
 
-double EulerRPY::GetRoll() const { return roll_; }
-
-void EulerRPY::SetRoll(double roll) { this->roll_ = roll; }
-
-double EulerRPY::GetPitch() const { return pitch_; }
-
-void EulerRPY::SetPitch(double pitch) { this->pitch_ = pitch; }
-
-double EulerRPY::GetYaw() const { return yaw_; }
-
-void EulerRPY::SetYaw(double yaw) { this->yaw_ = yaw; }
-
-void EulerRPY::SetRPY(double roll, double pitch, double yaw) { *this = EulerRPY(roll, pitch, yaw); }
-
-void EulerRPY::SetRPY(Eigen::Vector3d& vec3) { *this = EulerRPY(vec3); }
-
-Eigen::Vector3d EulerRPY::ToVect3() const { return Eigen::Vector3d(roll_, pitch_, yaw_); }
-
-Eigen::Quaterniond EulerRPY::ToQuaternion() const { return this->ToRotMatrix().ToQuaternion(); }
-
 /**
  * R = Rz(yaw)*Ry(pitch)*Rx(roll)
  */
 Eigen::RotMatrix EulerRPY::ToRotMatrix() const
 {
-
-    Eigen::Matrix3d n;
-    n = Eigen::AngleAxisd(this->GetYaw(), Eigen::Vector3d::UnitZ())
-        * Eigen::AngleAxisd(this->GetPitch(), Eigen::Vector3d::UnitY())
-        * Eigen::AngleAxisd(this->GetRoll(), Eigen::Vector3d::UnitX());
-    return n;
+    return Eigen::AngleAxisd(this->Yaw(), Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(this->Pitch(), Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(this->Roll(), Eigen::Vector3d::UnitX());
 }
 
-Eigen::Vector3d EulerRPY::GetDerivative(const Eigen::Vector3d omega) const
-{ // throw (std::exception) {
+Eigen::Vector3d EulerRPY::Derivative(const Eigen::Vector3d& omega) const
+{
     Eigen::Matrix3d S;
     S << cos(yaw_) * cos(pitch_), -sin(yaw_), 0,
-            sin(yaw_) * cos(pitch_), cos(yaw_), 0,
-            -sin(pitch_), 0, 1;
+        sin(yaw_) * cos(pitch_), cos(yaw_), 0,
+        -sin(pitch_), 0, 1;
     RegularizationData mySvd;
     return RegularizedPseudoInverse(S, mySvd) * this->ToRotMatrix() * omega;
 }
 
-Eigen::Vector3d EulerRPY::GetOmega(const Eigen::Vector3d rpyDerivarives) const
+Eigen::Vector3d EulerRPY::Omega(const Eigen::Vector3d& rpyDerivarives) const
 {
     Eigen::Matrix3d S;
     S << cos(yaw_) * cos(pitch_), -sin(yaw_), 0,
-         sin(yaw_) * cos(pitch_), cos(yaw_), 0,
-         -sin(pitch_), 0, 1;
-    return this->ToRotMatrix().transpose()*S*rpyDerivarives;
+        sin(yaw_) * cos(pitch_), cos(yaw_), 0,
+        -sin(pitch_), 0, 1;
+    return this->ToRotMatrix().transpose() * S * rpyDerivarives;
+}
+Eigen::Quaterniond EulerRPY::ToQuaternion() const
+{
+    return this->ToRotMatrix().ToQuaternion();
 }
 
 } // namespace rml

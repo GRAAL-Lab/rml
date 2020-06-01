@@ -73,7 +73,7 @@ public:
      * @brief Returns the number of total degrees of fredoom of the system composed (both of the base if mobile and the arms).
      * @return The total number of DOFs (mobile base + arms)
      */
-    int GetTotalDOFs();
+    auto Dof() const -> int { return DoF_; }
     /**
      * @brief Loads an arm in the robot model
      *
@@ -85,13 +85,13 @@ public:
      * @param[in] bodyFrameToArm		The bodyFrame-to-Armbase trasnformation matrix
      * @return			True if the arm has been loaded false otherwise
      */
-    bool LoadArm(const std::shared_ptr<ArmModel> arm, const Eigen::TransfMatrix& bodyFrameToArm) throw(ExceptionWithHow);
+    bool LoadArm(const std::shared_ptr<ArmModel>& arm, const Eigen::TransfMatrix& bodyFrameToArm) noexcept(false);
     /**
      * @brief Method to get the body Frame id.
      * @details Method to get the id for the body Frame, hence the frame common to all the arms.
      * @return body Frame id
      */
-    std::string GetBodyFrameID();
+    auto BodyFrameID() const -> const std::string& { return bodyFrameID_; }
     /**
      * @brief Method to set the new body Frame position
      * @param[in] bodyFrame body Frame position wrt to the world frame
@@ -102,51 +102,50 @@ public:
      * @param[in] ID Id of the frame.
      * @param[in] TMat Transformation matrix of the frame.
      */
-    void SetAttachedRigidBodyFrame(const std::string frameID, const Eigen::TransfMatrix TMat, const std::string attachedFrameID) throw(ExceptionWithHow);
+    void SetAttachedRigidBodyFrame(const std::string& frameID, const Eigen::TransfMatrix& TMat, const std::string& attachedFrameID) noexcept(false);
 
     /**
      * Checks whether the arm identified by the input id is present in the robot.
      * @param[in] armID the arm id
      * @return true if the arm is part of the robot, false otherwise
      */
-    bool CheckArm(const std::string armID) const;
+    bool CheckArm(const std::string& armID) const;
     /**
      * @brief Method checking whether the robot model has a mobile body Frame .
      * @return true if the body Frame is mobile, false otherwise.
      */
-    bool IsMobile() const;
-
+    auto IsMobile() const -> bool { return isMobileRobot_; }
     /**
      * @brief Method computing the jacobian observed by the world frame and projected on the body Frame of the input frameID
      * @param[in] ID frameID
      * @return Jacobian observed by the world frame, projected on the body Frame.
      */
-    Eigen::MatrixXd GetCartesianJacobian(const std::string& frameID) throw(ExceptionWithHow);
+    Eigen::MatrixXd GetCartesianJacobian(const std::string& frameID) noexcept(false);
     /**
      * @brief Method computing the joint space jacobian of the input arm ID
      * @param[in] ID armID
      * @return Jacobian
      */
-    Eigen::MatrixXd GetJointSpaceJacobian(const std::string& armID) throw(ExceptionWithHow);
+    Eigen::MatrixXd GetJointSpaceJacobian(const std::string& armID) noexcept(false);
     /**
      * @brief Method computing the manipulability jacobian of the input arm ID
      * @param[in] ID armID
      * @return Jacobian
      */
-    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID) throw(ExceptionWithHow);
+    Eigen::MatrixXd GetManipulabilityJacobian(const std::string& frameID) noexcept(false);
     /**
      * @brief Method returning the manipulabity value for the jacobian related to the input frameID
      * @param[in] frameID
      * @return manipulability
      */
-    double GetManipulability(const std::string& frameID) throw(ExceptionWithHow);
+    double GetManipulability(const std::string& frameID) noexcept(false);
     /**
      * @brief Method returning a transformation matrix of the robot model.\n
      * @details The methods returns a transformation matrix depending on the input string framID.\n
      * @param[in] transformationID
      * @return Transformation Matrix.
      */
-    Eigen::TransfMatrix GetTransformation(const std::string& frameID) throw(ExceptionWithHow);
+    Eigen::TransfMatrix GetTransformation(const std::string& frameID) noexcept(false);
     /**
      * @brief Method returing a transformation matrix from frameID_j to frameID_k, i.e. jTk.\n
      * @param[in] frameID_j first frame;
@@ -159,14 +158,14 @@ public:
      * @param[in] ID arm id.
      * @return shared ptr to the arm.
      */
-    const std::shared_ptr<ArmModel> GetArm(const std::string ID) const throw(ExceptionWithHow);
+    const std::shared_ptr<ArmModel> &GetArm(const std::string &ID) const noexcept(false);
 
     /**
      * @brief Method setting the position vector of the whole robot model.
      * @param[in] position vector.
      */
 
-    void SetSystemPositionVector(Eigen::VectorXd position) throw(std::exception);
+    void SetSystemPositionVector(Eigen::VectorXd &position) noexcept(false);
 
     /**
      * @brief Method returning the position vector of the whole robot model.
@@ -179,7 +178,7 @@ public:
      * @param[in] position vector.
      */
 
-    void SetSystemVelocityVector(Eigen::VectorXd velocity) throw(std::exception);
+    void SetSystemVelocityVector(const Eigen::VectorXd &velocity) noexcept(false);
 
     /**
      * @brief Method returning the velocity vector of the whole robot model.
@@ -199,14 +198,14 @@ public:
      * @param[in] acceleration vector.
      */
 
-    void SetSystemAccelerationVector(Eigen::VectorXd acceleration) throw(std::exception);
+    void SetSystemAccelerationVector(const Eigen::VectorXd &acceleration) noexcept(false);
 
     /**
      * @brief Method setting the position vector for a robot part (joint postion for arm and cartesian position in case of mobile body Frame).
      * @param[in] partID .
      */
 
-    void SetPositionVector(std::string partID, Eigen::VectorXd position) throw(ExceptionWithHow);
+    void SetPositionVector(const std::string &partID, const Eigen::VectorXd &position) noexcept(false);
 
     /**
      * @brief Method returning the position of the input part (i.e. joint position for arm
@@ -214,25 +213,25 @@ public:
      * @param[in] partID
      * @return position vector, either cartesian position or joint position
      */
-    Eigen::VectorXd GetPositionVector(std::string partID) throw(ExceptionWithHow);
+    Eigen::VectorXd GetPositionVector(const std::string& partID) noexcept(false);
     /**
      * @brief Method setting the velocity vector for a robot part (joint velocity for arm and cartesian velocity in case of mobile body Frame ).
      * @param[in] partID .
      */
-    void SetVelocityVector(std::string partID, Eigen::VectorXd velocity) throw(ExceptionWithHow);
+    void SetVelocityVector(const std::string &partID, const Eigen::VectorXd &velocity) noexcept(false);
     /**
      * @brief GetVelocityVector Method returning the velocity of the input part (i.e. joints velocity for arm
      * and cartesian velocity in case of mobile body Frame )
      * @param[in] partID
      * @return velocity vector, either cartesian velocity or joints velocity.
      */
-    Eigen::VectorXd GetVelocityVector(std::string partID) throw(ExceptionWithHow);
+    Eigen::VectorXd GetVelocityVector(const std::string &partID) noexcept(false);
     /**
      * @brief Method setting the acceleration vector for a robot part (joints acceleration for arm and cartesian acceleration  in case of mobile body Frame ).
      * @param[in] partID .
      */
 
-    void SetAccelerationVector(std::string partID, Eigen::VectorXd acceleration) throw(ExceptionWithHow);
+    void SetAccelerationVector(const std::string &partID, const Eigen::VectorXd &acceleration) noexcept(false);
     /**
      * @brief Method returning the position of the input part (i.e. joint acceleration for arm
      * and cartesian acceleration in case of mobile body Frame)
@@ -240,18 +239,18 @@ public:
      * @return position vector, either cartesian position or joint position
      */
 
-    Eigen::VectorXd GetAccelerationVector(std::string partID) throw(ExceptionWithHow);
+    Eigen::VectorXd GetAccelerationVector(const std::string &partID) noexcept(false);
     /**
      * @brief Method setting the control vector of the whole robot model.
      * @param[in] y control vector.
      */
-    void SetRobotControl(const Eigen::VectorXd& y) throw(std::exception);
+    void SetRobotControl(const Eigen::VectorXd& y) noexcept(false);
     /**
      * @brief Method returning the control vector of the input part of robot model.
      * @param[in] partID either armModelID or robotFrameID
      * @return control vector.
      */
-    Eigen::VectorXd GetRobotControl(const std::string partID) throw(ExceptionWithHow);
+    Eigen::VectorXd GetRobotControl(const std::string& partID) noexcept(false);
 
 protected:
     /**
@@ -259,7 +258,7 @@ protected:
      * @param[in] ID frame id
      * @return  isolated jacobian
      */
-    Eigen::MatrixXd GetIsolatedArmJacobianForFrame(const std::string& frameID) const throw(ExceptionWithHow);
+    Eigen::MatrixXd GetIsolatedArmJacobianForFrame(const std::string& frameID) const noexcept(false);
     /**
      * @brief Method returning the isolated body Frame jacobian for the input frameID
      * @param[in] ID frameID
@@ -268,7 +267,7 @@ protected:
     Eigen::Matrix6d GetIsolatedRobotFrameJacobianForFrame(const std::string& frameID) const;
 
     std::shared_ptr<VehicleModel> robotBase_; //!< the model of the body Frame;
-    std::map<std::string, std::shared_ptr<ArmModel> > armsModel_; //!< map of the loaded map
+    std::map<std::string, std::shared_ptr<ArmModel>> armsModel_; //!< map of the loaded map
     std::unordered_map<std::string, Eigen::TransfMatrix> bodyFrameToArm_; //!< map of the transformation matrix from the arm bases to the body Frame
     std::string bodyFrameID_; //!< ID of the body Frame
     Eigen::TransfMatrix bodyFrame_; //!< body Frame transformaion matrix
@@ -278,10 +277,5 @@ protected:
 
 } /* namespace rml */
 
-/**
- * @brief Method returning shared pointer to one of the loaded vehicle.
- * @return shared ptr to the vehicle.
- */
-//const std::shared_ptr<VehicleModel> GetVehicle() const throw(ExceptionWithHow);
 
 #endif /* INCLUDE_RML_ROBOTMODEL_H_ */
