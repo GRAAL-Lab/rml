@@ -1,5 +1,5 @@
 /*
- * TransfMatrix.cc
+ * TransformationMatrix.cc
  *
  *  Created on: Feb 23, 2018
  *      Author: fraw
@@ -9,34 +9,34 @@
 
 namespace Eigen {
 
-TransfMatrix::TransfMatrix(void)
+TransformationMatrix::TransformationMatrix(void)
     : Eigen::Matrix4d()
 {
     *this = Eigen::Matrix4d::Identity();
 }
 
-Vector6d TransfMatrix::XYZ_RPY() const
+Vector6d TransformationMatrix::ToVector() const
 {
-    return Eigen::Vector6d{ this->Transl(), this->RotationMatrix().ToEulerRPY().ToVector() };
+    return Eigen::Vector6d{ this->TranslationVector(), this->RotationMatrix().ToEulerRPY().ToVector() };
 }
 
-TransfMatrix TransfMatrix::Integral(const Vector6d& vin, double dt) const
+TransformationMatrix TransformationMatrix::Integral(const Vector6d& InputVelocities, double dt) const
 {
-    TransfMatrix temp = *this;
-    temp.RotationMatrix(RotationMatrix().StrapDown(vin.AngularVector(), dt));
-    temp.Transl(vin.LinearVector() * dt + Transl());
+    TransformationMatrix temp = *this;
+    temp.RotationMatrix(RotationMatrix().StrapDown(InputVelocities.AngularVector(), dt));
+    temp.TranslationVector(InputVelocities.LinearVector() * dt + TranslationVector());
     return temp;
 }
-void TransfMatrix::RotationMatrix(const Eigen::RotMatrix rot)
+void TransformationMatrix::RotationMatrix(const Eigen::RotationMatrix rotationMatrix)
 {
-    if (rot.cols() == 3 && rot.rows() == 3) {
-        this->block(0, 0, 3, 3) = rot;
+    if (rotationMatrix.cols() == 3 && rotationMatrix.rows() == 3) {
+        this->block(0, 0, 3, 3) = rotationMatrix;
     } else {
-        std::cout << "[TransfMatrix::SetRotMatrix()] WARNING: Size is not 3x3" << std::endl;
+        std::cout << "[TransformationMatrix::RotationMatrix()] WARNING: Size is not 3x3" << std::endl;
     }
 }
 
-Eigen::RotMatrix TransfMatrix::RotationMatrix() const
+Eigen::RotationMatrix TransformationMatrix::RotationMatrix() const
 {
     return this->block(0, 0, 3, 3);
 }

@@ -9,24 +9,19 @@
 
 namespace Eigen {
 
-RotMatrix::RotMatrix()
+RotationMatrix::RotationMatrix()
     : Eigen::Matrix3d()
 {
     *this = Eigen::Matrix3d::Identity();
 }
 
-RotMatrix::RotMatrix(Eigen::Quaterniond q)
+RotationMatrix::RotationMatrix(Eigen::Quaterniond q)
     : Eigen::Matrix3d()
 {
     *this = q.toRotationMatrix();
 }
 
-RotMatrix RotMatrix::Transpose() const
-{
-    return this->transpose();
-}
-
-Eigen::Matrix6d RotMatrix::CartesianRotationMatrix() const
+Eigen::Matrix6d RotationMatrix::CartesianRotationMatrix() const
 {
     Eigen::Matrix6d crmat;
     crmat.block(0, 0, 3, 3) = crmat.block(3, 3, 3, 3) = *this;
@@ -34,19 +29,19 @@ Eigen::Matrix6d RotMatrix::CartesianRotationMatrix() const
     return crmat;
 }
 
-rml::EulerRPY RotMatrix::ToEulerRPY() const
+rml::EulerRPY RotationMatrix::ToEulerRPY() const
 {
     Eigen::Vector3d ypr = this->eulerAngles(2, 1, 0);
     return rml::EulerRPY(ypr(2), ypr(1), ypr(0));
 }
 
-Eigen::Quaterniond RotMatrix::ToQuaternion() const
+Eigen::Quaterniond RotationMatrix::ToQuaternion() const
 {
     return Eigen::Quaterniond(*this);
 }
 
 //Computes the integral of a rotation matrix (Out = e^[wdt^] * Rin )
-RotMatrix RotMatrix::StrapDown(const Vector3d& w, double dt) const
+RotationMatrix RotationMatrix::StrapDown(const Vector3d& w, double dt) const
 {
     Eigen::Matrix3d R;
     R = Eigen::AngleAxisd((w * dt).norm(), (w * dt));

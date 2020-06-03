@@ -25,7 +25,7 @@ RobotLink::RobotLink()
     Inertia_.setZero();
 }
 
-RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax)
+RobotLink::RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransformationMatrix& baseTransf, double jointLimMin, double jointLimMax)
     : type_(type)
     , axis_(axis)
     , baseTransf_(baseTransf)
@@ -40,7 +40,7 @@ RobotLink::~RobotLink()
     // TODO Auto-generated destructor stub
 }
 
-void RobotLink::SetKinematicProperties(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax)
+void RobotLink::SetKinematicProperties(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransformationMatrix& baseTransf, double jointLimMin, double jointLimMax)
 {
     type_ = type;
     axis_ = axis;

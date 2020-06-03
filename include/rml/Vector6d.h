@@ -50,8 +50,6 @@ public:
     auto LinearVector() const -> Vector3d { return this->block(0, 0, 3, 1); }
 
     auto AngularVector() const -> Vector3d { return this->block(3, 0, 3, 1); }
-
-    TransfMatrix ToTransfMatrix() const;
 };
 }
 

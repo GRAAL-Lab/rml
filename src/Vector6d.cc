@@ -20,13 +20,4 @@ Vector6d::Vector6d(const Vector3d linear, const Vector3d angular)
     this->LinearVector(linear);
     this->AngularVector(angular);
 }
-
-Eigen::TransfMatrix Vector6d::ToTransfMatrix() const
-{
-    Eigen::TransfMatrix TMat;
-    TMat.RotationMatrix(rml::EulerRPY(this->AngularVector()).ToRotMatrix());
-    TMat.Transl(this->LinearVector());
-    return TMat;
-}
-
 } // namespace Eigen

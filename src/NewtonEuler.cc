@@ -8,8 +8,7 @@
 #include "NewtonEuler.h"
 #include "rml_internal/Futils.h"
 
-namespace rml
-{
+namespace rml {
 
 /*NewtonEuler::NewtonEuler() :
  numJoints_(0)
@@ -19,171 +18,168 @@ namespace rml
 
 NewtonEuler::~NewtonEuler()
 {
-	// TODO Auto-generated destructor stub
+    // TODO Auto-generated destructor stub
 }
 
 NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, std::string armID)
 {
-	//model_ = model;
-    armModel_ = model->GetArm(armID);
-	vehicle_ = model->GetVehicle();
+    armModel_ = model->Arm(armID);
+    //	vehicle_ = model->Vehicle();
 
-    numJoints_ = model->GetArm(armID)->GetNumJoints();
+    numJoints_ = model->Arm(armID)->NumJoints();
 
-	Init();
+    Init();
 
-	SetGravity(Eigen::Vector3d::UnitZ() * -STD_GRAVITY);
-
+    SetGravity(Eigen::Vector3d::UnitZ() * -STD_GRAVITY);
 }
 
 void NewtonEuler::Init()
 {
-	a_column = Eigen::VectorXd::Zero(numJoints_);
+    a_column = Eigen::VectorXd::Zero(numJoints_);
 
-	/*
+    /*
 	 * The size of these internal variable is "numJoints+1" to take into account the
 	 * base "dummy" joint.
 	 */
-	zeroVect3_.setZero();
-	qZeroVec_ = Eigen::VectorXd::Zero(numJoints_ + 1);
+    zeroVect3_.setZero();
+    qZeroVec_ = Eigen::VectorXd::Zero(numJoints_ + 1);
 
-	q_dot_ = qZeroVec_;
-	q_ddot_ = qZeroVec_;
+    q_dot_ = qZeroVec_;
+    q_ddot_ = qZeroVec_;
 
-	omega_.resize(numJoints_ + 1, zeroVect3_);
-	omega_dot_.resize(numJoints_ + 1, zeroVect3_);
-	c_dot_.resize(numJoints_ + 1, zeroVect3_);
-	c_ddot_.resize(numJoints_ + 1, zeroVect3_);
+    omega_.resize(numJoints_ + 1, zeroVect3_);
+    omega_dot_.resize(numJoints_ + 1, zeroVect3_);
+    c_dot_.resize(numJoints_ + 1, zeroVect3_);
+    c_ddot_.resize(numJoints_ + 1, zeroVect3_);
 
-	rhoVec_.resize(numJoints_ + 1);
+    rhoVec_.resize(numJoints_ + 1);
 
-	r_qmc_.resize(numJoints_ + 1, zeroVect3_);
-	r_qpc_.resize(numJoints_ + 1, zeroVect3_);
+    r_qmc_.resize(numJoints_ + 1, zeroVect3_);
+    r_qpc_.resize(numJoints_ + 1, zeroVect3_);
 
-	/* In R_ we put all the rotation matrices used for projecting the velocities, accelerations,
+    /* In R_ we put all the rotation matrices used for projecting the velocities, accelerations,
 	 *  forces and moments in the Newton-Euler algorithm (extracted from wTb, biTri and eTt).
 	 */
-	/*
+    /*
 	 * numjoints+2 = all links + dummybase + endeffector
 	 */
-	R_.resize(numJoints_ + 2);
+    R_.resize(numJoints_ + 2);
 
-	links_.resize(numJoints_ + 2);
+    links_.resize(numJoints_ + 2);
 
-	self_f_.resize(numJoints_ + 2, zeroVect3_);
-	self_n_.resize(numJoints_ + 2, zeroVect3_);
-	interaction_f_.resize(numJoints_ + 2, zeroVect3_);
-	interaction_n_.resize(numJoints_ + 2, zeroVect3_);
+    self_f_.resize(numJoints_ + 2, zeroVect3_);
+    self_n_.resize(numJoints_ + 2, zeroVect3_);
+    interaction_f_.resize(numJoints_ + 2, zeroVect3_);
+    interaction_n_.resize(numJoints_ + 2, zeroVect3_);
 
-	n_.resize(numJoints_ + 2, zeroVect3_);
-	f_.resize(numJoints_ + 2, zeroVect3_);
+    n_.resize(numJoints_ + 2, zeroVect3_);
+    f_.resize(numJoints_ + 2, zeroVect3_);
 
-	AddDummyBaseAndEE();
+    AddDummyBaseAndEE();
 }
 
 void NewtonEuler::InterMom2Torque(Eigen::VectorXd& torques) const
 {
-	/* MOM2TORQUE Returns the actual couple from the moment vector
+    /* MOM2TORQUE Returns the actual couple from the moment vector
 	 *
 	 * Knowing the e_i vector of the joints, gets the torque component
 	 * from the moment vector (that has of course to be projected in the joint
 	 * frame).
 	 */
-	for (int i = 0; i < numJoints_; ++i) {
-		Eigen::MatrixXd e_iT = links_.at(i + 1).Axis().transpose();
-		if (links_.at(i).Type() == JointType::Revolute) {
-			torques(i) = (e_iT * interaction_n_.at(i + 1))(0);
-		} else if (links_.at(i).Type() == JointType::Prismatic) {
-			torques(i) = (e_iT * interaction_f_.at(i + 1))(0);
-		}
-	}
+    for (unsigned int i = 0; i < numJoints_; ++i) {
+        Eigen::MatrixXd e_iT = links_.at(i + 1).Axis().transpose();
+        if (links_.at(i).Type() == JointType::Revolute) {
+            torques(i) = (e_iT * interaction_n_.at(i + 1))(0);
+        } else if (links_.at(i).Type() == JointType::Prismatic) {
+            torques(i) = (e_iT * interaction_f_.at(i + 1))(0);
+        }
+    }
 }
 
 void NewtonEuler::AddDummyBaseAndEE()
 {
-	// Adding dummy 0 link
-	links_.at(0) = RobotLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), Eigen::TransfMatrix(), 0.0, 0.0);
-	Eigen::Matrix3d zeroMat3 = Eigen::Matrix3d::Zero();
-	links_.at(0).SetDynamicProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
+    // Adding dummy 0 link
+    links_.at(0) = RobotLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), Eigen::TransformationMatrix(), 0.0, 0.0);
+    Eigen::Matrix3d zeroMat3 = Eigen::Matrix3d::Zero();
+    links_.at(0).SetDynamicProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
 
-	for (int i = 0; i < numJoints_; ++i) {
-		links_.at(i + 1) = armModel_->GetLink(i);
-	}
+    for (unsigned int i = 0; i < numJoints_; ++i) {
+        links_.at(i + 1) = armModel_->Link(i);
+    }
 
-	// Adding dummy EE link
-	links_.at(numJoints_ + 1) = RobotLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), Eigen::TransfMatrix(), 0.0,
-			0.0);
-	links_.at(numJoints_ + 1).SetDynamicProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
+    // Adding dummy EE link
+    links_.at(numJoints_ + 1) = RobotLink(JointType::Revolute, Eigen::Vector3d::UnitZ(), Eigen::TransformationMatrix(), 0.0,
+        0.0);
+    links_.at(numJoints_ + 1).SetDynamicProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
 }
 
 void NewtonEuler::SetGravity(const Eigen::Vector3d& gravity)
 {
-	gravity_ = gravity;
-	//Eigen::Vector3d::UnitZ() *
+    gravity_ = gravity;
+    //Eigen::Vector3d::UnitZ() *
 }
 
-void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot,
-		const Eigen::Vector3d& gravityVector, Eigen::VectorXd& torques)
+void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, const Eigen::Vector3d& gravityVector, Eigen::VectorXd& torques)
 {
-	Eigen::Vector3d gravity = gravityVector;
-	omega_.at(0) = vehicle_->GetVelocityOnVehicle().GetFirstVect3();
-	omega_dot_.at(0) = vehicle_->GetAccelerationOnVehicle().GetFirstVect3();
+    Eigen::Vector3d gravity = gravityVector;
+    omega_.at(0) = vehicle_->GetVelocityOnVehicle().GetFirstVect3();
+    omega_dot_.at(0) = vehicle_->GetAccelerationOnVehicle().GetFirstVect3();
 
-	rhoVec_.at(0).setZero();
-	for (int i = 1; i < numJoints_; ++i) {
-		rhoVec_.at(i) = armModel_->GetCurrentLinkTransf(i).GetTransl();
-	}
+    rhoVec_.at(0).setZero();
+    for (int i = 1; i < numJoints_; ++i) {
+        rhoVec_.at(i) = armModel_->GetCurrentLinkTransf(i).GetTransl();
+    }
     rhoVec_.at(numJoints_) = armModel_->GeteTt().GetTransl();
 
-	R_.at(0) = armModel_->GetBaseTransf().GetRotMatrix(); // Base TODO Check
-	for (int i = 0; i < numJoints_; ++i) {
-		R_.at(i + 1) = armModel_->GetCurrentLinkTransf(i).GetRotMatrix(); // Base_i to Joint_i
-	}
+    R_.at(0) = armModel_->GetBaseTransf().GetRotMatrix(); // Base TODO Check
+    for (int i = 0; i < numJoints_; ++i) {
+        R_.at(i + 1) = armModel_->GetCurrentLinkTransf(i).GetRotMatrix(); // Base_i to Joint_i
+    }
     R_.at(numJoints_ + 1) = armModel_->GeteTt().GetRotMatrix(); // Last joint to end effector
 
-	for (int i = 0; i < numJoints_; ++i) {
-		q_ = armModel_->GetJointsPosition();
-		q_dot_(i + 1) = qdot(i);
-		q_ddot_(i + 1) = qddot(i);
+    for (int i = 0; i < numJoints_; ++i) {
+        q_ = armModel_->GetJointsPosition();
+        q_dot_(i + 1) = qdot(i);
+        q_ddot_(i + 1) = qddot(i);
 
-		omega_.at(i + 1).setZero();
-		omega_dot_.at(i + 1).setZero();
+        omega_.at(i + 1).setZero();
+        omega_dot_.at(i + 1).setZero();
 
-		c_dot_.at(i + 1).setZero();
-		c_ddot_.at(i + 1).setZero();
-	}
+        c_dot_.at(i + 1).setZero();
+        c_ddot_.at(i + 1).setZero();
+    }
 
-	// *** FORWARD CALCULATION ***///
-	/*
+    // *** FORWARD CALCULATION ***///
+    /*
 	 * Calculate links linear and angular acceleration
 	 */
 
-	/* Angular Velocity **/
-	for (int i = 1; i <= numJoints_; ++i) {
-		if (links_.at(i).Type() == JointType::Revolute) {
-			Eigen::Vector3d e_i = links_.at(i).Axis();
-			omega_.at(i) = R_.at(i).Transpose() * omega_.at(i - 1) + q_dot_(i) * e_i;
-		} else if (links_.at(i).Type() == JointType::Prismatic) {
-			omega_.at(i) = R_.at(i).Transpose() * omega_.at(i - 1);
-		}
-	}
+    /* Angular Velocity **/
+    for (int i = 1; i <= numJoints_; ++i) {
+        if (links_.at(i).Type() == JointType::Revolute) {
+            Eigen::Vector3d e_i = links_.at(i).Axis();
+            omega_.at(i) = R_.at(i).Transpose() * omega_.at(i - 1) + q_dot_(i) * e_i;
+        } else if (links_.at(i).Type() == JointType::Prismatic) {
+            omega_.at(i) = R_.at(i).Transpose() * omega_.at(i - 1);
+        }
+    }
 
-	/** Angular Acceleration **/
-	for (int i = 1; i <= numJoints_; ++i) {
-		if (links_.at(i).Type() == JointType::Revolute) {
-			Eigen::Vector3d e_i = links_.at(i).Axis();
-			temp1_ = R_.at(i).Transpose() * omega_dot_.at(i - 1);
-			temp2_ = q_ddot_(i) * e_i;
-			temp3_ = q_dot_(i) * omega_.at(i).cross(e_i);
-			omega_dot_.at(i) = temp1_ + temp2_ + temp3_;
+    /** Angular Acceleration **/
+    for (int i = 1; i <= numJoints_; ++i) {
+        if (links_.at(i).Type() == JointType::Revolute) {
+            Eigen::Vector3d e_i = links_.at(i).Axis();
+            temp1_ = R_.at(i).Transpose() * omega_dot_.at(i - 1);
+            temp2_ = q_ddot_(i) * e_i;
+            temp3_ = q_dot_(i) * omega_.at(i).cross(e_i);
+            omega_dot_.at(i) = temp1_ + temp2_ + temp3_;
 
-		} else if (links_.at(i).Type() == JointType::Prismatic) {
-			omega_dot_.at(i) = R_.at(i).Transpose() * omega_dot_.at(i - 1);
-		}
-	}
+        } else if (links_.at(i).Type() == JointType::Prismatic) {
+            omega_dot_.at(i) = R_.at(i).Transpose() * omega_dot_.at(i - 1);
+        }
+    }
 
-	/* Linear Velocity */
-	/*
+    /* Linear Velocity */
+    /*
 	 for(i = 1; i <= numJoints_; ++i){
 	 if(jointType_.at(i) == Rot){
 	 temp1_ = c_dot_.at(i-1) + omega_.at(i-1).CrossProd(omega_dot_.at(i-1));
@@ -196,84 +192,84 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
 	 }
 	 */
 
-	/* Linear Acceleration */
-	for (int i = 1; i <= numJoints_; ++i) {
-		if (links_.at(i).Type() == JointType::Revolute) {
-			temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
-			temp2_ = omega_.at(i - 1).cross(omega_.at(i - 1).cross(rhoVec_.at(i - 1)));
-			c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_);
-		} else if (links_.at(i).Type() == JointType::Prismatic) {
-			// Here I compute in advance the projection of omega(i-1) on
-			// frame (i), (omega_prev)
-			Eigen::Vector3d e_i = links_.at(i).Axis();
-			omega_prev_ = R_.at(i).Transpose() * omega_.at(i - 1);
-			temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
-			temp2_ = omega_.at(i - 1).cross(omega_.at(i - 1).cross(rhoVec_.at(i - 1)));
-			temp3_ = omega_prev_.cross((Eigen::Vector3d) (e_i * q_dot_(i)));
-			temp4_ = omega_prev_.cross((Eigen::Vector3d) (e_i * q_dot_(i)));
-			c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_) + temp3_ + temp4_ + e_i * q_ddot_(i);
-		}
-	}
+    /* Linear Acceleration */
+    for (int i = 1; i <= numJoints_; ++i) {
+        if (links_.at(i).Type() == JointType::Revolute) {
+            temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
+            temp2_ = omega_.at(i - 1).cross(omega_.at(i - 1).cross(rhoVec_.at(i - 1)));
+            c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_);
+        } else if (links_.at(i).Type() == JointType::Prismatic) {
+            // Here I compute in advance the projection of omega(i-1) on
+            // frame (i), (omega_prev)
+            Eigen::Vector3d e_i = links_.at(i).Axis();
+            omega_prev_ = R_.at(i).Transpose() * omega_.at(i - 1);
+            temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
+            temp2_ = omega_.at(i - 1).cross(omega_.at(i - 1).cross(rhoVec_.at(i - 1)));
+            temp3_ = omega_prev_.cross((Eigen::Vector3d)(e_i * q_dot_(i)));
+            temp4_ = omega_prev_.cross((Eigen::Vector3d)(e_i * q_dot_(i)));
+            c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_) + temp3_ + temp4_ + e_i * q_ddot_(i);
+        }
+    }
 
-	/** Projection of the acceleration on the Center of Mass **/
-	for (int i = 1; i <= numJoints_; ++i) {
-		temp1_ = c_ddot_.at(i) + omega_dot_.at(i).cross(links_.at(i).CoM());
-		temp2_ = omega_.at(i).cross(omega_.at(i).cross(links_.at(i).CoM()));
-		c_ddot_.at(i) = temp1_ + temp2_;
-	}
+    /** Projection of the acceleration on the Center of Mass **/
+    for (int i = 1; i <= numJoints_; ++i) {
+        temp1_ = c_ddot_.at(i) + omega_dot_.at(i).cross(links_.at(i).CoM());
+        temp2_ = omega_.at(i).cross(omega_.at(i).cross(links_.at(i).CoM()));
+        c_ddot_.at(i) = temp1_ + temp2_;
+    }
 
-	///*** BACKWARD CALCULATION ***//
-	/**
+    ///*** BACKWARD CALCULATION ***//
+    /**
 	 * Calculate Forces for every body using the calculated body acceleration (c_ddot) and
 	 * project the gravity vector to the last frame (end-effector)
 	 */
 
-	for (int i = 0; i <= numJoints_; ++i) {
-		self_f_.at(i) = links_.at(i).Mass() * c_ddot_.at(i);
-		self_n_.at(i) = links_.at(i).Inertia() * omega_dot_.at(i)
-				+ omega_.at(i).cross(links_.at(i).Inertia() * omega_.at(i));
-		gravity = R_.at(i).Transpose() * gravity;
-	}
+    for (int i = 0; i <= numJoints_; ++i) {
+        self_f_.at(i) = links_.at(i).Mass() * c_ddot_.at(i);
+        self_n_.at(i) = links_.at(i).Inertia() * omega_dot_.at(i)
+            + omega_.at(i).cross(links_.at(i).Inertia() * omega_.at(i));
+        gravity = R_.at(i).Transpose() * gravity;
+    }
 
-	for (int i = numJoints_; i > 0; --i) {
+    for (int i = numJoints_; i > 0; --i) {
 
-		// Distance from center_of_mass of link_i to joint_i+1
-		r_qpc_.at(i) = links_.at(i).Sizes() - links_.at(i).CoM();
+        // Distance from center_of_mass of link_i to joint_i+1
+        r_qpc_.at(i) = links_.at(i).Sizes() - links_.at(i).CoM();
 
-		// Distance from joint_i to center_of_mass of link_i
-		r_qmc_.at(i) = R_.at(i).Transpose() * (links_.at(i - 1).Sizes() - rhoVec_.at(i - 1)) - r_qpc_.at(i);
+        // Distance from joint_i to center_of_mass of link_i
+        r_qmc_.at(i) = R_.at(i).Transpose() * (links_.at(i - 1).Sizes() - rhoVec_.at(i - 1)) - r_qpc_.at(i);
 
-		//exit(0);
+        //exit(0);
 
-		interaction_f_.at(i) = self_f_.at(i) + R_.at(i + 1) * interaction_f_.at(i + 1)
-				- links_.at(i).Mass() * gravity;
-		interaction_n_.at(i) = self_n_.at(i) + R_.at(i + 1) * interaction_n_.at(i + 1)
-				- r_qmc_.at(i).cross(interaction_f_.at(i))
-				+ r_qpc_.at(i).cross(R_.at(i + 1) * interaction_f_.at(i + 1));
-		gravity = R_.at(i) * gravity;
-	}
-	InterMom2Torque(torques);
+        interaction_f_.at(i) = self_f_.at(i) + R_.at(i + 1) * interaction_f_.at(i + 1)
+            - links_.at(i).Mass() * gravity;
+        interaction_n_.at(i) = self_n_.at(i) + R_.at(i + 1) * interaction_n_.at(i + 1)
+            - r_qmc_.at(i).cross(interaction_f_.at(i))
+            + r_qpc_.at(i).cross(R_.at(i + 1) * interaction_f_.at(i + 1));
+        gravity = R_.at(i) * gravity;
+    }
+    InterMom2Torque(torques);
 }
 
 Eigen::MatrixXd NewtonEuler::GetA()
 {
-	Eigen::MatrixXd A = Eigen::MatrixXd::Zero(numJoints_, numJoints_);
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(numJoints_, numJoints_);
 
-	// Evaluating the columns of the A matrix (Inertia Matrix)
-	for (int i = 0; i < numJoints_; ++i) {
+    // Evaluating the columns of the A matrix (Inertia Matrix)
+    for (int i = 0; i < numJoints_; ++i) {
 
-		// Fixing the q_dot vector for the current joint
-		q_ddot_Ai_ = qZeroVec_;
-		q_ddot_Ai_(i) = 1.0;
+        // Fixing the q_dot vector for the current joint
+        q_ddot_Ai_ = qZeroVec_;
+        q_ddot_Ai_(i) = 1.0;
 
-		EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), a_column);
+        EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), a_column);
 
-		// Filling current j column
-		for (int j = 0; j < numJoints_; ++j) {
-			A(i, j) = a_column(j);
-		}
-	}
-	return A;
+        // Filling current j column
+        for (int j = 0; j < numJoints_; ++j) {
+            A(i, j) = a_column(j);
+        }
+    }
+    return A;
 }
 
 //void NewtonEuler::GetB()
@@ -283,99 +279,100 @@ Eigen::MatrixXd NewtonEuler::GetA()
 
 Eigen::VectorXd NewtonEuler::GetC()
 {
-	Eigen::VectorXd C = Eigen::VectorXd::Zero(numJoints_);
-	EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, qZeroVec_, gravity_, C);
-	return C;
+    Eigen::VectorXd C = Eigen::VectorXd::Zero(numJoints_);
+    EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, qZeroVec_, gravity_, C);
+    return C;
 }
 
 Eigen::VectorXd NewtonEuler::GetMTilde()
 {
-	Eigen::VectorXd m_bar = Eigen::VectorXd::Zero(numJoints_);
-	EvaluateAlgorithmStep(armModel_->GetJointsPosition(), armModel_->GetJointsVelocity(), qZeroVec_, gravity_, m_bar);
-	return m_bar;
+    Eigen::VectorXd m_bar = Eigen::VectorXd::Zero(numJoints_);
+    EvaluateAlgorithmStep(armModel_->GetJointsPosition(), armModel_->GetJointsVelocity(), qZeroVec_, gravity_, m_bar);
+    return m_bar;
 }
 
 void NewtonEuler::PrintVars() const
 {
-//	std::cout << tc::green << "links lenghtVec (b):\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": " << links_.at(i).Sizes().transpose() << std::endl;
-//	}
-//
-//	std::cout << tc::green << "links CoM (r):\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": " << links_.at(i).CoM().transpose() << std::endl;
-//	}
-//
-//	std::cout << tc::green << "links Mass:\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": " << links_.at(i).Mass() << std::endl << std::endl;
-//	}
-//
-//	std::cout << tc::green << "links Inertia:\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); ++i) {
-//		std::cout << i << ": " << links_.at(i).Inertia().transpose() << std::endl;
-//	}
-//
-//	for (uint i = 0; i < numJoints_; i++) {
-//		std::cout << i << ": ";
-//		futils::PrettyPrint(armModel_->GetCurrentLinkTransf(i),"BiTei");
-//	}
-//
-//	std::cout << tc::green << "q:\n" << tc::none <<	q_.transpose() << std::endl;
-//
-//	std::cout << tc::green << "q_dot_:\n" << tc::none << q_dot_.transpose() << std::endl;
-//
-//	std::cout << tc::green << "q_ddot_:\n" << tc::none << q_ddot_.transpose() << std::endl;
-//
-//	std::cout << tc::green << "omega:\n" << tc::none;
-//	for (uint i = 0; i < omega_.size(); ++i) {
-//		std::cout << i << ": " << omega_.at(i).transpose() << std::endl;
-//	}
-//
-//	std::cout << tc::green << "omega_dot:\n" << tc::none;
-//	for (uint i = 0; i < omega_dot_.size(); ++i) {
-//		std::cout << i << ": " << omega_dot_.at(i).transpose() << std::endl;
-//	}
+    //	std::cout << tc::green << "links lenghtVec (b):\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); ++i) {
+    //		std::cout << i << ": " << links_.at(i).Sizes().transpose() << std::endl;
+    //	}
+    //
+    //	std::cout << tc::green << "links CoM (r):\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); ++i) {
+    //		std::cout << i << ": " << links_.at(i).CoM().transpose() << std::endl;
+    //	}
+    //
+    //	std::cout << tc::green << "links Mass:\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); ++i) {
+    //		std::cout << i << ": " << links_.at(i).Mass() << std::endl << std::endl;
+    //	}
+    //
+    //	std::cout << tc::green << "links Inertia:\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); ++i) {
+    //		std::cout << i << ": " << links_.at(i).Inertia().transpose() << std::endl;
+    //	}
+    //
+    //	for (uint i = 0; i < numJoints_; i++) {
+    //		std::cout << i << ": ";
+    //		futils::PrettyPrint(armModel_->GetCurrentLinkTransf(i),"BiTei");
+    //	}
+    //
+    //	std::cout << tc::green << "q:\n" << tc::none <<	q_.transpose() << std::endl;
+    //
+    //	std::cout << tc::green << "q_dot_:\n" << tc::none << q_dot_.transpose() << std::endl;
+    //
+    //	std::cout << tc::green << "q_ddot_:\n" << tc::none << q_ddot_.transpose() << std::endl;
+    //
+    //	std::cout << tc::green << "omega:\n" << tc::none;
+    //	for (uint i = 0; i < omega_.size(); ++i) {
+    //		std::cout << i << ": " << omega_.at(i).transpose() << std::endl;
+    //	}
+    //
+    //	std::cout << tc::green << "omega_dot:\n" << tc::none;
+    //	for (uint i = 0; i < omega_dot_.size(); ++i) {
+    //		std::cout << i << ": " << omega_dot_.at(i).transpose() << std::endl;
+    //	}
 
-	std::cout << tc::green << "c_ddot:\n" << tc::none;
-	for (uint i = 0; i < c_ddot_.size(); ++i) {
-		std::cout << i << ": " << c_ddot_.at(i).transpose() << std::endl;
-	}
+    std::cout << tc::green << "c_ddot:\n"
+              << tc::none;
+    for (uint i = 0; i < c_ddot_.size(); ++i) {
+        std::cout << i << ": " << c_ddot_.at(i).transpose() << std::endl;
+    }
 
-//	std::cout << tc::green << "r_qpc:\n" << tc::none;
-//	for (uint i = 0; i < r_qpc_.size(); ++i) {
-//		std::cout << i << ": " << r_qpc_.at(i).transpose() << std::endl;
-//	}
-//
-//	std::cout << tc::green << "r_qmc_:\n" << tc::none;
-//	for (uint i = 0; i < r_qmc_.size(); ++i) {
-//		std::cout << i << ": " << r_qmc_.at(i).transpose() << std::endl;
-//	}
-//
-//	std::cout << tc::green << "self force:\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": " << links_.at(i).self_f_.transpose() << std::endl;
-//	}
-//	std::cout << std::endl;
-//
-//	std::cout << tc::green << "interaction force:\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": " << links_.at(i).inter_f_.transpose() << std::endl;
-//	}
-//	std::cout << std::endl;
-//
-//	std::cout << tc::green << "self mom:\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": " << links_.at(i).self_n_.transpose() << std::endl;
-//	}
-//	std::cout << std::endl;
-//
-//	std::cout << tc::green << "interaction mom:\n" << tc::none;
-//	for (uint i = 0; i < links_.size(); i++) {
-//		std::cout << i << ": " << links_.at(i).inter_n_.transpose() << std::endl;
-//	}
-//	std::cout << std::endl;
+    //	std::cout << tc::green << "r_qpc:\n" << tc::none;
+    //	for (uint i = 0; i < r_qpc_.size(); ++i) {
+    //		std::cout << i << ": " << r_qpc_.at(i).transpose() << std::endl;
+    //	}
+    //
+    //	std::cout << tc::green << "r_qmc_:\n" << tc::none;
+    //	for (uint i = 0; i < r_qmc_.size(); ++i) {
+    //		std::cout << i << ": " << r_qmc_.at(i).transpose() << std::endl;
+    //	}
+    //
+    //	std::cout << tc::green << "self force:\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); i++) {
+    //		std::cout << i << ": " << links_.at(i).self_f_.transpose() << std::endl;
+    //	}
+    //	std::cout << std::endl;
+    //
+    //	std::cout << tc::green << "interaction force:\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); i++) {
+    //		std::cout << i << ": " << links_.at(i).inter_f_.transpose() << std::endl;
+    //	}
+    //	std::cout << std::endl;
+    //
+    //	std::cout << tc::green << "self mom:\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); i++) {
+    //		std::cout << i << ": " << links_.at(i).self_n_.transpose() << std::endl;
+    //	}
+    //	std::cout << std::endl;
+    //
+    //	std::cout << tc::green << "interaction mom:\n" << tc::none;
+    //	for (uint i = 0; i < links_.size(); i++) {
+    //		std::cout << i << ": " << links_.at(i).inter_n_.transpose() << std::endl;
+    //	}
+    //	std::cout << std::endl;
 }
 
 } /* namespace rml */

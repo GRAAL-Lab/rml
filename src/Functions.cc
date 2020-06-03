@@ -41,13 +41,12 @@ Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vecto
     return c;
 }
 
-Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2)
+Eigen::Vector3d VersorLemma(const Eigen::RotationMatrix& r1, const Eigen::RotationMatrix& r2)
 {
-
     double costh = 0, sinth = 0, theta = 0;
 
     //Each element of r1 for each element of r2
-    Eigen::RotMatrix h = r1.cwiseProduct(r2);
+    Eigen::RotationMatrix h = r1.cwiseProduct(r2);
     /*
 	 r1=[i1|j1|k1] & r2=[i2|j2|k2]
 	 costh=(i1^i2+j1^j2+k1^k2-1)/2
@@ -104,13 +103,13 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
 // Computes 3-components Cartesian error with 2 EulerYPR elements as imput
 Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2)
 {
-    return VersorLemma(v1.ToRotMatrix(), v2.ToRotMatrix());
+    return VersorLemma(v1.ToRotationMatrix(), v2.ToRotationMatrix());
 }
 
 // Computes 6-components Cartesian error with 2 Transformation matrices as input
-Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2)
+Eigen::Vector6d CartesianError(const Eigen::TransformationMatrix& in1, const Eigen::TransformationMatrix& in2)
 {
-    return Eigen::Vector6d{ in2.Transl() - in1.Transl(), VersorLemma(in1.RotationMatrix(), in2.RotationMatrix()) };
+    return Eigen::Vector6d{ in2.TranslationVector() - in1.TranslationVector(), VersorLemma(in1.RotationMatrix(), in2.RotationMatrix()) };
 }
 
 // Computes 6-components Cartesian error with 2 6-components vectors as input
@@ -231,7 +230,7 @@ Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd JAngul
     return J + Vect3ToSkew(CartesianError).transpose() * JAngularobserver;
 }
 
-Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl)
+Eigen::Matrix6d RigidBodyMatrix(const Eigen::Vector3d& transl)
 {
     Eigen::Matrix6d S;
     S.block(0, 0, 3, 3) = S.block(3, 3, 3, 3) = Eigen::Matrix3d::Identity();

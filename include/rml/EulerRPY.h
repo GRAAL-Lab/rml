@@ -61,7 +61,7 @@ public:
 
     auto ToVector() const -> Eigen::Vector3d { return Eigen::Vector3d(roll_, pitch_, yaw_); }
 
-    Eigen::RotMatrix ToRotMatrix() const;
+    Eigen::RotationMatrix ToRotationMatrix() const;
 
     /**
    * @brief GetDerivative computes the euler rates (derivative) of 'this', given the angular

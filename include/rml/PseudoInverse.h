@@ -53,11 +53,6 @@ struct RegularizationData {
     RegularizationResults results;
 
     RegularizationData() = default;
-
-    template <typename T>
-    void ConfifFromFile(T confObj)
-    {
-    }
 };
 
 /**

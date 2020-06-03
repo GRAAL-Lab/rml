@@ -18,12 +18,14 @@ namespace rml {
 /**
  * \brief Used to describe the type of joint
  */
-enum class JointType : uint8_t { Fixed, Revolute, Prismatic };
+enum class JointType : uint8_t { Fixed,
+    Revolute,
+    Prismatic };
 
 const std::map<JointType, std::string> JointType2String = {
-		{ JointType::Fixed, "Fixed" },
-		{ JointType::Revolute, "Revolute" },
-		{ JointType::Prismatic, "Prismatic" }
+    { JointType::Fixed, "Fixed" },
+    { JointType::Revolute, "Revolute" },
+    { JointType::Prismatic, "Prismatic" }
 };
 
 /**
@@ -50,25 +52,23 @@ const std::map<JointType, std::string> JointType2String = {
  *   4. The link inertia matrix
  *
  */
-class RobotLink
-{
-	// Kinematic properties
-	JointType type_;
-	Eigen::Vector3d axis_;
-	Eigen::TransfMatrix baseTransf_;
-	double jointLimitMin_;
-	double jointLimitMAX_;
+class RobotLink {
+    // Kinematic properties
+    JointType type_;
+    Eigen::Vector3d axis_;
+    Eigen::TransformationMatrix baseTransf_;
+    double jointLimitMin_;
+    double jointLimitMAX_;
 
-	// Dynamic properties
+    // Dynamic properties
     double mass_;
     Eigen::Vector3d sizeVect_;
     Eigen::Vector3d CoM_;
     Eigen::Matrix3d Inertia_;
 
 public:
-
     RobotLink();
-    RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax);
+    RobotLink(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransformationMatrix& baseTransf, double jointLimMin, double jointLimMax);
     virtual ~RobotLink();
 
     /**
@@ -80,7 +80,7 @@ public:
      * @param[in] jointLimMin
      * @param[in] jointLimMax
      */
-    void SetKinematicProperties(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double jointLimMax);
+    void SetKinematicProperties(const JointType type, const Eigen::Vector3d& axis, const Eigen::TransformationMatrix& baseTransf, double jointLimMin, double jointLimMax);
 
     /**
      * \brief Sets the dynamic properties of the link
@@ -92,18 +92,17 @@ public:
      */
     void SetDynamicProperties(double mass, const Eigen::Vector3d& sizes, const Eigen::Vector3d& CoM, const Eigen::Matrix3d& Inertia);
 
-    JointType Type()    					const {	return type_;}
-    const Eigen::Vector3d& Axis()    		const {	return axis_;}
-    const Eigen::TransfMatrix& BaseTransf()	const {	return baseTransf_; }
-    double JointLimitMax()    				const {	return jointLimitMAX_; }
-	double JointLimitMin() 					const {	return jointLimitMin_;	}
+    JointType Type() const { return type_; }
+    const Eigen::Vector3d& Axis() const { return axis_; }
+    const Eigen::TransformationMatrix& BaseTransf() const { return baseTransf_; }
+    double JointLimitMax() const { return jointLimitMAX_; }
+    double JointLimitMin() const { return jointLimitMin_; }
 
-    float Mass() 				   			const { return mass_; }
-    const Eigen::Vector3d& Sizes() 			const { return sizeVect_; }
-    const Eigen::Vector3d& CoM() 			const { return CoM_; }
-    const Eigen::Matrix3d& Inertia()		const { return Inertia_; }
+    double Mass() const { return mass_; }
+    const Eigen::Vector3d& Sizes() const { return sizeVect_; }
+    const Eigen::Vector3d& CoM() const { return CoM_; }
+    const Eigen::Matrix3d& Inertia() const { return Inertia_; }
 };
-
 }
 
 #endif /* SRC_ROBOTLINK_H_ */

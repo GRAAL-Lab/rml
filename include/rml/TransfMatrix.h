@@ -5,54 +5,54 @@
  * \author 	Francesco Wanderlingh
  */
 
-#ifndef INCLUDE_TRANSFMATRIX_H_
-#define INCLUDE_TRANSFMATRIX_H_
+#ifndef INCLUDE_TransformationMatrix_H_
+#define INCLUDE_TransformationMatrix_H_
 
 #include "Types.h"
 
 namespace Eigen {
 
 /**
- * \class TransfMatrix
+ * \class TransformationMatrix
  *
  * \brief This class extends the Eigen::Matrix4d
  *
- * \details The Eigen::TransfMatrix represents an homogeneus transformation matrix an extension of the
+ * \details The Eigen::TransformationMatrix represents an homogeneus transformation matrix an extension of the
  *   Matrix4d class that defaults the constructor to an identity matrix, with the addition of member
  *   functions to convert do different representaions, set and extract rotation and translational
  *   parts of it separately (rot and transl parts).
  *
  */
-class TransfMatrix : public Eigen::Matrix4d {
+class TransformationMatrix : public Eigen::Matrix4d {
 public:
-    TransfMatrix(void);
+    TransformationMatrix(void);
 
-    // This constructor allows you to construct TransfMatrix from Eigen expressions
+    // This constructor allows you to construct TransformationMatrix from Eigen expressions
     template <typename OtherDerived>
-    TransfMatrix(const Eigen::MatrixBase<OtherDerived>& other)
+    TransformationMatrix(const Eigen::MatrixBase<OtherDerived>& other)
         : Eigen::Matrix4d(other)
     {
     }
-    // This method allows you to assign Eigen expressions to TransfMatrix
+    // This method allows you to assign Eigen expressions to TransformationMatrix
     template <typename OtherDerived>
-    TransfMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
+    TransformationMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
     {
         this->Eigen::Matrix4d::operator=(other);
         return *this;
     }
 
-    Eigen::RotMatrix RotationMatrix() const;
+    Eigen::RotationMatrix RotationMatrix() const;
 
-    void RotationMatrix(const Eigen::RotMatrix rot);
+    void RotationMatrix(const Eigen::RotationMatrix rotationMatrix);
 
-    auto Transl() const -> const Vector3d { return this->block(0, 3, 3, 1); }
+    auto TranslationVector() const -> const Vector3d { return this->block(0, 3, 3, 1); }
 
-    auto Transl(const Vector3d transl) -> void { this->block(0, 3, 3, 1) = transl; }
+    auto TranslationVector(const Vector3d translationVector) -> void { this->block(0, 3, 3, 1) = translationVector; }
 
-    Vector6d XYZ_RPY() const;
+    Vector6d ToVector() const;
 
-    TransfMatrix Integral(const Vector6d& vin, double dt) const;
+    TransformationMatrix Integral(const Vector6d& inputVelocities, double dt) const;
 };
 }
 
-#endif /* INCLUDE_TRANSFMATRIX_H_ */
+#endif /* INCLUDE_TransformationMatrix_H_ */

@@ -13,7 +13,7 @@
 namespace Eigen {
 
 /**
- * \class RotMatrix
+ * \class RotationMatrix
  *
  * \brief This class extends the Eigen::Matrix3d
  *
@@ -23,26 +23,24 @@ namespace Eigen {
  * matrix, rml::EulerRPY and Eigen::Quaterniond reprensentation.
  *
  */
-class RotMatrix : public Eigen::Matrix3d {
+class RotationMatrix : public Eigen::Matrix3d {
 public:
-    RotMatrix();
-    RotMatrix(Eigen::Quaterniond q);
+    RotationMatrix();
+    RotationMatrix(Eigen::Quaterniond q);
 
     // This constructor allows you to construct TransfMatrix from Eigen expressions
     template <typename OtherDerived>
-    RotMatrix(const Eigen::MatrixBase<OtherDerived>& other)
+    RotationMatrix(const Eigen::MatrixBase<OtherDerived>& other)
         : Eigen::Matrix3d(other)
     {
     }
     // This method allows you to assign Eigen expressions to TransfMatrix
     template <typename OtherDerived>
-    RotMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
+    RotationMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
     {
         this->Eigen::Matrix3d::operator=(other);
         return *this;
     }
-
-    RotMatrix Transpose() const;
 
     Eigen::Matrix6d CartesianRotationMatrix() const;
 
@@ -51,7 +49,7 @@ public:
     Eigen::Quaterniond ToQuaternion() const;
 
     //Computes the integral of a rotation matrix (Out = e^[wdt^] * Rin )
-    RotMatrix StrapDown(const Vector3d& w, double dt) const;
+    RotationMatrix StrapDown(const Vector3d& w, double dt) const;
 };
 }
 

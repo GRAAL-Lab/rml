@@ -39,8 +39,8 @@ typedef Eigen::Matrix<double, 6, 1> Vector6dBase;
 
 // Forward Declarations
 namespace Eigen {
-class RotMatrix;
-class TransfMatrix;
+class RotationMatrix;
+class TransformationMatrix;
 class Vector6d;
 }
 

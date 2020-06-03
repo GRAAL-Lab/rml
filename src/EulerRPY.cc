@@ -29,14 +29,14 @@ EulerRPY::EulerRPY(Eigen::Vector3d vec3)
     yaw_ = vec3(2);
 }
 
-EulerRPY::EulerRPY(Eigen::Quaterniond q) { *this = Eigen::RotMatrix(q.toRotationMatrix()).ToEulerRPY(); }
+EulerRPY::EulerRPY(Eigen::Quaterniond q) { *this = Eigen::RotationMatrix(q.toRotationMatrix()).ToEulerRPY(); }
 
 EulerRPY::~EulerRPY() {}
 
 /**
  * R = Rz(yaw)*Ry(pitch)*Rx(roll)
  */
-Eigen::RotMatrix EulerRPY::ToRotMatrix() const
+Eigen::RotationMatrix EulerRPY::ToRotationMatrix() const
 {
     return Eigen::AngleAxisd(this->Yaw(), Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(this->Pitch(), Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(this->Roll(), Eigen::Vector3d::UnitX());
 }
@@ -48,7 +48,7 @@ Eigen::Vector3d EulerRPY::Derivative(const Eigen::Vector3d& omega) const
         sin(yaw_) * cos(pitch_), cos(yaw_), 0,
         -sin(pitch_), 0, 1;
     RegularizationData mySvd;
-    return RegularizedPseudoInverse(S, mySvd) * this->ToRotMatrix() * omega;
+    return RegularizedPseudoInverse(S, mySvd) * this->ToRotationMatrix() * omega;
 }
 
 Eigen::Vector3d EulerRPY::Omega(const Eigen::Vector3d& rpyDerivarives) const
@@ -57,11 +57,11 @@ Eigen::Vector3d EulerRPY::Omega(const Eigen::Vector3d& rpyDerivarives) const
     S << cos(yaw_) * cos(pitch_), -sin(yaw_), 0,
         sin(yaw_) * cos(pitch_), cos(yaw_), 0,
         -sin(pitch_), 0, 1;
-    return this->ToRotMatrix().transpose() * S * rpyDerivarives;
+    return this->ToRotationMatrix().transpose() * S * rpyDerivarives;
 }
 Eigen::Quaterniond EulerRPY::ToQuaternion() const
 {
-    return this->ToRotMatrix().ToQuaternion();
+    return this->ToRotationMatrix().ToQuaternion();
 }
 
 } // namespace rml

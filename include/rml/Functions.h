@@ -17,7 +17,6 @@
 #include <vector>
 
 namespace rml {
-
 /**
  * @brief Using four parameters represention in the form:
  * Ax + By + Cz + D = 0;
@@ -33,7 +32,6 @@ struct PlaneParameters {
     {
     }
 };
-
 /**
  * @brief Compute the misalignment error between two vectors. The result is the vector around which v1 has to rotate to reach v2.
  *
@@ -57,8 +55,7 @@ Eigen::Vector3d ReducedVersorLemma(const Eigen::Vector3d& v1, const Eigen::Vecto
  * @note the two rotation matrix should be w.r.t a common frame, i.e. r1 = cRa, r2 = cRb then the versor lemma gives the rotation vector
  *       that brings frame \<a\> over frame \<b\> projected on \<c\>
  */
-Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& r2);
-
+Eigen::Vector3d VersorLemma(const Eigen::RotationMatrix& r1, const Eigen::RotationMatrix& r2);
 /**
  * @brief Compute the versor lemma between the two rotation matrices.
  *
@@ -76,7 +73,6 @@ Eigen::Vector3d VersorLemma(const Eigen::RotMatrix& r1, const Eigen::RotMatrix& 
  *       that brings frame \<a\> over frame \<b\> projected on \<c\>
  */
 Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2);
-
 /**
  * @brief Compute the Cartesian error between two transformation matrices.
  *
@@ -92,8 +88,7 @@ Eigen::Vector3d VersorLemma(const EulerRPY& v1, const EulerRPY& v2);
  * @note the two transformation matrix should have a common base frame, i.e. CartesianError(wTt, wTg) brings the tool
  * 		 frame \<t\> towards a goal frame \<g\>, and returns the error projected on frame \<w\>
  */
-Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::TransfMatrix& in2);
-
+Eigen::Vector6d CartesianError(const Eigen::TransformationMatrix& in1, const Eigen::TransformationMatrix& in2);
 /**
  * @brief Compute the Cartesian error between two transformation matrices
  *
@@ -113,7 +108,6 @@ Eigen::Vector6d CartesianError(const Eigen::TransfMatrix& in1, const Eigen::Tran
  *       brings the tool frame \<t\> towards a goal frame \<g\>, and returns the error projected on frame \<w\>
  */
 Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d& v2);
-
 /**
  * @brief A decreasing bell shaped (sigmoid) function.
  *
@@ -130,7 +124,6 @@ Eigen::Vector6d CartesianError(const Eigen::Vector6d& v1, const Eigen::Vector6d&
  * @return the value of the function
  */
 double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) noexcept(false);
-
 /**
  * @brief An increasing bell shaped (sigmoid) function.
  *
@@ -148,14 +141,12 @@ double DecreasingBellShapedFunction(double xmin, double xmax, double ymin, doubl
  * @return the value of the function
  */
 double IncreasingBellShapedFunction(double xmin, double xmax, double ymin, double ymax, double x) noexcept(false);
-
 /**
  * @brief Saturate the scalar to a given maximum value
  * @param[in] sat 			the value of the saturation
  * @param[in,out] value 	the value which is saturated to the maximum value
  */
 void SaturateScalar(double sat, double& value);
-
 /**
  * @brief Saturate the vector to a given maximum value applying normalization for preserving the vector direction
  *
@@ -163,7 +154,6 @@ void SaturateScalar(double sat, double& value);
  * @param[in,out] vector 	the vector which is saturated to the maximum value
  */
 void SaturateVector(const double sat, Eigen::VectorXd& vector);
-
 /**
  * @brief Evaluates the norm of the shortest distance vector among a point and a given plane
  *
@@ -172,7 +162,6 @@ void SaturateVector(const double sat, Eigen::VectorXd& vector);
  * @return The distance norm
  */
 double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams);
-
 /**
  * @brief Given a point and a plane evaluates the coordinates of the closest point on plane w.r.t the input one.
  *
@@ -181,7 +170,6 @@ double DistancePointToPlane(const Eigen::Vector3d& point, const PlaneParameters&
  * @return	The 3d coordinates of the closest point laying on the plane
  */
 Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlaneParameters& planeParams);
-
 /**
  * \brief Computes the skew symmetric matrix form for a vector
  *
@@ -196,7 +184,6 @@ Eigen::Vector3d ClosestPointOnPlane(const Eigen::Vector3d& point, const PlanePar
  * @return the skew symmetric matrix
  */
 Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
-
 /**
  * @brief Compute a rigid body matrix.
  *
@@ -224,7 +211,7 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
  *
  * @return the rigid body matrix
  */
-Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl);
+Eigen::Matrix6d RigidBodyMatrix(const Eigen::Vector3d& transl);
 /**
  * @brief ChangeJacobianObserver Method implementing change of observer for a cartesian Jacobian. \n
  * @details \f$ J^{v}_{error}=J^{o}_{error}-S_{e/o}J^{o}_{v}  \f$
@@ -234,7 +221,6 @@ Eigen::Matrix6d GetRigidBodyMatrix(const Eigen::Vector3d& transl);
  * @return Jacobian of the error observed by the input observer
  */
 Eigen::MatrixXd ChangeJacobianObserver(Eigen::MatrixXd J, Eigen::MatrixXd Jobserver, Eigen::Vector3d CartesianError);
-
 /**
  * @brief A norm comparing function (is "a < b" ?) to be binded to STL algorithms.
  *
@@ -247,7 +233,6 @@ static bool eigen_norm_compare(MatT& a, MatT& b)
 {
     return (a.norm() < b.norm());
 }
-
 /**
  * @brief An utility to find the vector with the greatest norm among three.
  *
@@ -263,7 +248,6 @@ MatT GreatestNormElement(const MatT& vect1, const MatT& vect2, const MatT& vect3
     std::vector<MatT> vecs = { vect1, vect2, vect3 };
     return *std::max_element(vecs.begin(), vecs.end(), eigen_norm_compare<MatT>);
 }
-
 template <typename T>
 int sgn(T val)
 {

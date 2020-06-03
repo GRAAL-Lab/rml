@@ -51,17 +51,16 @@ ArmModel::~ArmModel()
 {
 }
 
-void ArmModel::AddJointLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransfMatrix& baseTransf, double jointLimMin, double joinLimMax)
+void ArmModel::AddJointLink(JointType type, const Eigen::Vector3d& axis, const Eigen::TransformationMatrix& baseTransf, double jointLimMin, double joinLimMax)
 {
-
     links_.push_back(RobotLink(type, axis, baseTransf, jointLimMin, joinLimMax));
 
-    totalNumJoints_ = static_cast<int>(links_.size());
+    totalNumJoints_ = static_cast<unsigned int>(links_.size());
     movingJoints_.push_back(totalNumJoints_ - 1);
-    movingNumJoints_ = static_cast<int>(movingJoints_.size());
+    movingNumJoints_ = static_cast<unsigned int>(movingJoints_.size());
 
-    baseTei_.push_back(Eigen::TransfMatrix());
-    biTei_.push_back(Eigen::TransfMatrix());
+    baseTei_.push_back(Eigen::TransformationMatrix());
+    biTei_.push_back(Eigen::TransformationMatrix());
     h_.push_back(Eigen::Vector6d());
     dJdq_.push_back(Eigen::MatrixXd());
     for (auto&& i : dJdq_) { // access by forwarding reference, the type of i is auto&
@@ -81,13 +80,13 @@ void ArmModel::AddJointLink(JointType type, const Eigen::Vector3d& axis, const E
     JointsPosition(Eigen::VectorXd::Zero(totalNumJoints_));
 }
 
-void ArmModel::AddFixedLink(const Eigen::TransfMatrix& baseTransf)
+void ArmModel::AddFixedLink(const Eigen::TransformationMatrix& baseTransf)
 {
     links_.push_back(RobotLink(JointType::Fixed, Eigen::Vector3d::UnitZ(), baseTransf, 0, 0));
-    totalNumJoints_ = static_cast<int>(links_.size());
+    totalNumJoints_ = static_cast<unsigned int>(links_.size());
 
-    baseTei_.push_back(Eigen::TransfMatrix());
-    biTei_.push_back(Eigen::TransfMatrix());
+    baseTei_.push_back(Eigen::TransformationMatrix());
+    biTei_.push_back(Eigen::TransformationMatrix());
     h_.push_back(Eigen::Vector6d());
     dJdq_.push_back(Eigen::MatrixXd());
     for (auto&& i : dJdq_) { // access by forwarding reference, the type of i is auto&
@@ -106,15 +105,14 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
 {
     if (!modelInitialized_) {
         ArmModelNotInitializedException armModelNotIntialized;
-
         throw(armModelNotIntialized);
     }
 
     if (fbk.size() != movingNumJoints_) {
         ArmModelJointException armModelWrongJointSize;
-
         throw(armModelWrongJointSize);
     }
+
     for (unsigned int i = 0; i < movingJoints_.size(); i++) {
         q_total_(movingJoints_.at(i)) = fbk(i);
     }
@@ -127,14 +125,12 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
         //updating the joint jacobians
-        for (int i = 0; i < totalNumJoints_; i++) {
-            transformation_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), baseTei_.at(i)));
-            jacobians_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), EvaluateBase2JointJacobian(i)));
+        for (unsigned int i = 0; i < totalNumJoints_; i++) {
+            transformation_.insert(std::make_pair(id_.append(FrameID::Joint).append(std::to_string(i)), baseTei_.at(i)));
+            jacobians_.insert(std::make_pair(id_.append(FrameID::Joint).append(std::to_string(i)), EvaluateBase2JointJacobian(i)));
         }
         //updating rigid frame transformation matrix
-        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin();
-             iter != rigidBodyFrames_.end();
-             ++iter) {
+        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin(); iter != rigidBodyFrames_.end(); ++iter) {
             std::string id = iter->first;
             transformation_.insert(std::make_pair(id, EvaluateRigidBodyTransf(id)));
             jacobians_.insert(std::make_pair(id, EvaluateRigidBodyJacobian(id)));
@@ -142,15 +138,12 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
         isMapInitialized_ = true;
     } else {
         //updating the joint jacobians
-        for (int i = 0; i < totalNumJoints_; i++) {
-
-            transformation_.find(id_ + FrameID::Joint + std::to_string(i))->second = baseTei_.at(i);
-            jacobians_.find(id_ + FrameID::Joint + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
+        for (unsigned int i = 0; i < totalNumJoints_; i++) {
+            transformation_.find(id_.append(FrameID::Joint).append(std::to_string(i)))->second = baseTei_.at(i);
+            jacobians_.find(id_.append(FrameID::Joint).append(std::to_string(i)))->second = EvaluateBase2JointJacobian(i);
         }
         //updating rigid frame transformation matrix
-        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin();
-             iter != rigidBodyFrames_.end();
-             ++iter) {
+        for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin(); iter != rigidBodyFrames_.end(); ++iter) {
             std::string id = iter->first;
             transformation_.find(id)->second = EvaluateRigidBodyTransf(id);
             jacobians_.find(id)->second = EvaluateRigidBodyJacobian(id);
@@ -162,7 +155,6 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
 
 void ArmModel::JointsVelocity(const Eigen::VectorXd qdot) noexcept(false)
 {
-
     if (!modelInitialized_) {
         ArmModelNotInitializedException armModelNotIntialized;
         throw(armModelNotIntialized);
@@ -178,7 +170,6 @@ void ArmModel::JointsVelocity(const Eigen::VectorXd qdot) noexcept(false)
 
 void ArmModel::JointsAcceleration(const Eigen::VectorXd qddot) noexcept(false)
 {
-
     if (!modelInitialized_) {
         ArmModelNotInitializedException armModelNotIntialized;
         throw(armModelNotIntialized);
@@ -194,55 +185,49 @@ void ArmModel::JointsAcceleration(const Eigen::VectorXd qddot) noexcept(false)
 
 void ArmModel::EvaluateTotalForwardGeometry()
 {
-    for (int jointNumber = 0; jointNumber < totalNumJoints_; jointNumber++) {
+    for (unsigned int jointNumber = 0; jointNumber < totalNumJoints_; jointNumber++) {
         ForwardDirectGeometry(jointNumber);
     }
 }
 
-void ArmModel::ForwardDirectGeometry(int jointNumber)
+void ArmModel::ForwardDirectGeometry(unsigned int jointNumber)
 {
     // wTbi is the transformation between the base of joint <jointNumber> and the base frame <b>
     if (jointNumber == 0) {
-        baseTbi_ = Eigen::TransfMatrix();
+        baseTbi_ = Eigen::TransformationMatrix();
     } else {
         // in this case, the base of joint <jointNumber> is the position of the end-effector of the joint <jointNumber - 1>
         baseTbi_ = baseTei_.at(jointNumber - 1);
     }
 
     // biTri is the constant transformation between the base of the joint <i> and its end-effector
-    // biTei also takes into account the actual rotation of the joint, so
-    // biTei = biTri * Tz(qi)
-
+    // biTei also takes into account the actual rotation of the joint, so biTei = biTri * Tz(qi)
     if (links_.at(jointNumber).Type() == JointType::Revolute) {
         Eigen::AngleAxisd rot = Eigen::AngleAxisd(q_total_(jointNumber), links_.at(jointNumber).Axis());
         Tz_.RotationMatrix(rot.toRotationMatrix());
     } else if (links_.at(jointNumber).Type() == JointType::Prismatic) {
         Eigen::Vector3d transl = q_total_(jointNumber) * links_.at(jointNumber).Axis();
-        Tz_.Transl(transl);
+        Tz_.TranslationVector(transl);
     } else if (links_.at(jointNumber).Type() == JointType::Fixed) {
         Tz_.setIdentity();
     }
 
     // biTei = biTri * Tz(qi)
-
     biTei_.at(jointNumber) = links_.at(jointNumber).BaseTransf() * Tz_;
 
-    // baseTei_ is the transformation between the end-effector of joint <i> and base frame <b>
-    // baseTei_ = wTbi * biTei
+    // baseTei_ is the transformation between the end-effector of joint <i> and base frame <b> baseTei_ = wTbi * biTei
     baseTei_.at(jointNumber) = baseTbi_ * biTei_.at(jointNumber);
 }
 
-void ArmModel::BackwardDirectGeometry(int jointNumber, int endEffectorIndex)
+void ArmModel::BackwardDirectGeometry(unsigned int jointNumber, unsigned int endEffectorIndex)
 {
     // Calcolo w_ki
-    // Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione
-    // ogni giunto ruota lungo z si ha che ri_ki = ei_ki = [ 0 0 1 ]'
+    // Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione ogni giunto ruota lungo z si ha che ri_ki = ei_ki = [ 0 0 1 ]'
     // Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
     base_ki_ = baseTei_.at(jointNumber).block(0, 2, 3, 1); //GetSubMatrix(1, 3, 3, 3));
-    //futils::PrettyPrint(base_ki_.transpose(), "base_ki_");
 
     h_.at(jointNumber).AngularVector(base_ki_);
-    h_.at(jointNumber).LinearVector(base_ki_.cross(baseTei_.at(endEffectorIndex).Transl() - baseTei_.at(jointNumber).Transl()));
+    h_.at(jointNumber).LinearVector(base_ki_.cross(baseTei_.at(endEffectorIndex).TranslationVector() - baseTei_.at(jointNumber).TranslationVector()));
 }
 
 Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string& frameID)
@@ -261,8 +246,8 @@ Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string& frameID)
         mySVD.params.lambda = 0.0;
         mySVD.params.threshold = 0.00;
         /// For defective manipulators
-        Jpinv = rml::RegularizedPseudoInverse((Eigen::MatrixXd)J.transpose(), mySVD);
-        for (int k = 0; k < n; k++) {
+        Jpinv = rml::RegularizedPseudoInverse(static_cast<Eigen::MatrixXd>(J.transpose()), mySVD);
+        for (unsigned int k = 0; k < n; k++) {
             Jmu(k) = 0;
             djdqJpinv_ = dJdq_.at(k).transpose() * Jpinv;
 
@@ -276,7 +261,7 @@ Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string& frameID)
         mySVD.params.threshold = 0.01;
         Jpinv = rml::RegularizedPseudoInverse(J, mySVD);
 
-        for (int k = 0; k < n; k++) {
+        for (unsigned int k = 0; k < n; k++) {
             Jmu(k) = 0;
             djdqJpinv_ = dJdq_.at(k) * Jpinv;
             for (int i = 0; i < 6; i++)
@@ -292,8 +277,6 @@ Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string& frameID)
 
 void ArmModel::EvaluatedJdqNumeric()
 {
-    // std::cout << "BEFORE" << std::endl;
-
     Eigen::MatrixXd bJt_0, bJt_dQ;
     Eigen::MatrixXd dQ, qVar, q_orig;
     double delta_q = 1E-6;
@@ -302,10 +285,10 @@ void ArmModel::EvaluatedJdqNumeric()
     EvaluateTotalForwardGeometry();
     bJt_0 = EvaluateBase2JointJacobian(movingJoints_.back());
 
-    /// Here we iterate till "numJoints - 1" since the last joint will not influence
-    /// on the Jacobian since nothing is connected to it.
-    for (int i = 0; i < totalNumJoints_ - 1; ++i) {
-        /// Computing the single q variation vector dQ.
+    // Here we iterate till "numJoints - 1" since the last joint will not influence on the Jacobian since nothing is connected to it.
+    for (unsigned int i = 0; i < totalNumJoints_ - 1; ++i) {
+
+        // Computing the single q variation vector dQ.
         dQ = Eigen::VectorXd::Zero(totalNumJoints_); // Initialising a zero vector.
 
         if (links_.at(i).Type() != JointType::Fixed) {
@@ -314,18 +297,17 @@ void ArmModel::EvaluatedJdqNumeric()
 
         qVar = q_orig + dQ; // Computing the new single q variation based on previous state
 
-        /// Computing scalar delta_q (the denominator of the numerical integration).
+        // Computing scalar delta_q (the denominator of the numerical integration).
         q_total_ = qVar;
 
         EvaluateTotalForwardGeometry();
+
         //EvaluateBase2JointJacobian(numberOfJoints_ - 1);
         //bJt_dQ = bJt_;
         bJt_dQ = EvaluateBase2JointJacobian(movingJoints_.back());
         //futils::PrettyPrint(wJt_dQ,"wJt_dQ");
         for (int iJrow = 0; iJrow < 6; ++iJrow) {
-            for (int iJcol = 0; iJcol < movingNumJoints_; ++iJcol) {
-                //std::cout << "(i,j) = " << iJrow << "," << iJcol << std::endl;
-                //futils::PrettyPrint(dJdq_[i],"dJdq[i]");
+            for (unsigned int iJcol = 0; iJcol < movingNumJoints_; ++iJcol) {
                 dJdq_.at(i)(iJrow, iJcol) = (bJt_dQ(iJrow, iJcol) - bJt_0(iJrow, iJcol)) / delta_q;
                 if (std::fabs(dJdq_.at(i)(iJrow, iJcol)) < 1E-6)
                     dJdq_.at(i)(iJrow, iJcol) = 0.0;
@@ -337,38 +319,37 @@ void ArmModel::EvaluatedJdqNumeric()
     //std::cout << "AFTER" << std::endl;
 }
 
-Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(int jointIndex)
+Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(unsigned int jointIndex)
 {
     //Here we calculate the h columns involved in our joint's jacobian
-    for (int jointNumber = jointIndex; jointNumber >= 0; jointNumber--)
+    for (unsigned int jointNumber = jointIndex; jointNumber == 0; jointNumber--)
         BackwardDirectGeometry(jointNumber, jointIndex);
 
     //Then we set all the remainings columns to zero
-    for (int i = jointIndex + 1; i < totalNumJoints_; i++) {
+    for (unsigned int i = jointIndex + 1; i < totalNumJoints_; i++) {
         h_.at(i).setZero();
     }
 
     Eigen::MatrixXd bJj; // = (h_[0]);
-    for (int i = 0; i < movingNumJoints_; i++) {
+    for (unsigned int i = 0; i < movingNumJoints_; i++) {
         bJj = RightJuxtapose(bJj, h_.at(movingJoints_.at(i)));
     }
-
-    //futils::PrettyPrint(bJj, "bJj");
 
     return bJj;
 }
 
-void ArmModel::SetRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransfMatrix TMat) noexcept(false)
+void ArmModel::AttachRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransformationMatrix attachedFrameID_T_frameID) noexcept(false)
 {
+    std::string rigidBodyID = id_.append("_").append(frameID);
 
-    std::string idRigidFrame = id_ + FrameID::Body + frameID;
     // Check if rigid body is already present
-    if (rigidBodyFrames_.find(idRigidFrame) != rigidBodyFrames_.end()) {
+    if (rigidBodyFrames_.find(rigidBodyID) != rigidBodyFrames_.end()) {
+
         // Check if the associated joint is the same otherwise throw exception
-        if (rigidBodyFrames_.at(idRigidFrame).first == attachedFrameID) {
-            rigidBodyFrames_.at(idRigidFrame).second = TMat;
-            transformation_.at(idRigidFrame) = EvaluateRigidBodyTransf(idRigidFrame);
-            jacobians_.at(idRigidFrame) = EvaluateRigidBodyJacobian(idRigidFrame);
+        if (rigidBodyFrames_.at(rigidBodyID).first == attachedFrameID) {
+            rigidBodyFrames_.at(rigidBodyID).second = attachedFrameID_T_frameID;
+            transformation_.at(rigidBodyID) = EvaluateRigidBodyTransf(rigidBodyID);
+            jacobians_.at(rigidBodyID) = EvaluateRigidBodyJacobian(rigidBodyID);
         } else {
             WrongFrameException except;
             std::string how = "[ARM MODEL] Trying to change attached frame for a rigid body " + frameID;
@@ -376,33 +357,26 @@ void ArmModel::SetRigidBodyFrame(std::string frameID, std::string attachedFrameI
             throw(except);
         }
     } else {
-        IndexedTMat myMat(attachedFrameID, TMat);
-        rigidBodyFrames_.insert(std::make_pair(idRigidFrame, myMat));
-        transformation_.insert(std::make_pair(idRigidFrame, EvaluateRigidBodyTransf(idRigidFrame)));
-        jacobians_.insert(std::make_pair(idRigidFrame, EvaluateRigidBodyJacobian(idRigidFrame)));
+        IndexedTMat myMat(attachedFrameID, attachedFrameID_T_frameID);
+        rigidBodyFrames_.insert(std::make_pair(rigidBodyID, myMat));
+        transformation_.insert(std::make_pair(rigidBodyID, EvaluateRigidBodyTransf(rigidBodyID)));
+        jacobians_.insert(std::make_pair(rigidBodyID, EvaluateRigidBodyJacobian(rigidBodyID)));
     }
 }
 
-Eigen::TransfMatrix ArmModel::EvaluateRigidBodyTransf(const std::string& frameID)
+Eigen::TransformationMatrix ArmModel::EvaluateRigidBodyTransf(const std::string& frameID)
 {
-
-    std::string frameAttachedID = rigidBodyFrames_.at(frameID).first;
-    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(frameID).second;
-
-    return transformation_.at(frameAttachedID) * TMat;
+    return transformation_.at(rigidBodyFrames_.at(frameID).first) * rigidBodyFrames_.at(frameID).second;
 }
 
 Eigen::MatrixXd ArmModel::EvaluateRigidBodyJacobian(const std::string& frameID)
 {
-    std::string attachedFrame = rigidBodyFrames_.at(frameID).first;
-    Eigen::TransfMatrix TMat = rigidBodyFrames_.at(frameID).second;
-    Eigen::Vector3d projectedTransl = transformation_.at(attachedFrame).RotationMatrix() * TMat.Transl();
-    return GetRigidBodyMatrix(projectedTransl) * jacobians_.at(attachedFrame);
+    std::string attachedFrameID = rigidBodyFrames_.at(frameID).first;
+    return RigidBodyMatrix(transformation_.at(attachedFrameID).RotationMatrix() * rigidBodyFrames_.at(frameID).second.TranslationVector()) * jacobians_.at(attachedFrameID);
 }
 
-Eigen::TransfMatrix ArmModel::GetTransformation(const std::string& frameID) noexcept(false)
+Eigen::TransformationMatrix ArmModel::TransformationMatrix(const std::string& frameID) noexcept(false)
 {
-
     if (transformation_.find(frameID) == transformation_.end()) {
         WrongFrameException armModelWrongLabel;
         std::string how = "[ARM MODEL] The frame does not exist " + frameID;
@@ -412,9 +386,9 @@ Eigen::TransfMatrix ArmModel::GetTransformation(const std::string& frameID) noex
     return transformation_.at(frameID);
 }
 
-Eigen::TransfMatrix ArmModel::GetTransformationFrames(const std::string& frameID_j, const std::string& frameID_k)
+Eigen::TransformationMatrix ArmModel::TransformationMatrix(const std::string& frameID_j, const std::string& frameID_k)
 {
-    return GetTransformation(frameID_j).transpose() * GetTransformation(frameID_k);
+    return TransformationMatrix(frameID_j).transpose() * TransformationMatrix(frameID_k);
 }
 
 Eigen::MatrixXd ArmModel::Jacobian(const std::string& frameID) noexcept(false)
@@ -436,7 +410,7 @@ Eigen::MatrixXd ArmModel::ManipulabilityJacobian(const std::string& frameID)
     return (manipulabilityJacobians_.at(frameID));
 }
 
-RobotLink& ArmModel::GetLink(int jointIndex) noexcept(false)
+RobotLink& ArmModel::Link(int jointIndex) noexcept(false)
 {
     if (jointIndex < static_cast<int>(links_.size()))
         return links_.at(static_cast<unsigned long>(jointIndex));
@@ -463,7 +437,7 @@ void ArmModel::ControlVector(const Eigen::VectorXd controlRef) noexcept(false)
 double ArmModel::Manipulability(const std::string& frameID)
 {
     if (manipulability_.find(frameID) == manipulability_.end()) {
-        //trow exception
+        std::cerr << "rml::ArmModel, Manipulability() no frame " << frameID << std::endl;
     }
     return manipulability_.at(frameID);
 }

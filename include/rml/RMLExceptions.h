@@ -10,7 +10,7 @@ public:
     {
         how_ = how;
     }
-    const char* how() const throw()
+    const char* how() const noexcept
     {
         return how_.c_str();
     }
@@ -21,7 +21,7 @@ private:
 
 // GENERAL
 class LabelSyntaxException : public ExceptionWithHow {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "[RML] Label Syntax Error! (check how())";
     }
@@ -32,7 +32,7 @@ class LabelSyntaxException : public ExceptionWithHow {
  * @brief Exception to be thrown in robot model when dealing with the arm model
  */
 class RobotModelArmException : public ExceptionWithHow {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "[RobotModel] Error: Arm model exception (check how())";
     }
@@ -42,7 +42,7 @@ class RobotModelArmException : public ExceptionWithHow {
  * @brief Exception to be thrown when trying to set a wrong control vector
  */
 class RobotModelWrongControlSizeVectorException : public std::exception {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "[RobotModel] Error: wrong input size vector (check how())";
     }
@@ -52,7 +52,7 @@ class RobotModelWrongControlSizeVectorException : public std::exception {
  * @brief Exception to be thrown in robot model when dealing with wrong frame id's
  */
 class WrongFrameException : public ExceptionWithHow {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "Error: wrong frame id (check how())";
     }
@@ -63,7 +63,7 @@ class WrongFrameException : public ExceptionWithHow {
  * @brief Exception to be thrown when setting joint variable on a not initialized arm model
  */
 class ArmModelNotInitializedException : public std::exception {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "[ArmModel] Error: setting variable on a not initialized model ";
     }
@@ -73,7 +73,7 @@ class ArmModelNotInitializedException : public std::exception {
  * @brief Exception to be thrown when setting joint variable of wrong size
  */
 class ArmModelJointException : public ExceptionWithHow {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "[ArmModel] Error: trying to access wrong joints (Check how()) ";
     }
@@ -83,7 +83,7 @@ class ArmModelJointException : public ExceptionWithHow {
  * @brief Exception to be thrown when the vehicle model is not initialized
  */
 class VehicleModelNotInitializedException : public std::exception {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "[VehicleModel] Error: vehicle model not initialized ";
     }
@@ -94,7 +94,7 @@ class VehicleModelNotInitializedException : public std::exception {
  * @brief Exception to be thrown id wrong initialization of bell shape parameters
  */
 class BellShapeParameterException : public ExceptionWithHow {
-    virtual const char* what() const throw()
+    virtual const char* what() const noexcept
     {
         return "[rml::Functions] Error: wrong bell shape parameters. (Check how())";
     }
