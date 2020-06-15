@@ -126,8 +126,8 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
         //updating the joint jacobians
         for (unsigned int i = 0; i < totalNumJoints_; i++) {
-            transformation_.insert(std::make_pair(id_.append(FrameID::Joint).append(std::to_string(i)), baseTei_.at(i)));
-            jacobians_.insert(std::make_pair(id_.append(FrameID::Joint).append(std::to_string(i)), EvaluateBase2JointJacobian(i)));
+            transformation_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), baseTei_.at(i)));
+            jacobians_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), EvaluateBase2JointJacobian(i)));
         }
         //updating rigid frame transformation matrix
         for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin(); iter != rigidBodyFrames_.end(); ++iter) {
@@ -139,8 +139,8 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
     } else {
         //updating the joint jacobians
         for (unsigned int i = 0; i < totalNumJoints_; i++) {
-            transformation_.find(id_.append(FrameID::Joint).append(std::to_string(i)))->second = baseTei_.at(i);
-            jacobians_.find(id_.append(FrameID::Joint).append(std::to_string(i)))->second = EvaluateBase2JointJacobian(i);
+            transformation_.find(id_ + FrameID::Joint + std::to_string(i))->second = baseTei_.at(i);
+            jacobians_.find(id_ + FrameID::Joint + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
         }
         //updating rigid frame transformation matrix
         for (std::unordered_map<std::string, IndexedTMat>::iterator iter = rigidBodyFrames_.begin(); iter != rigidBodyFrames_.end(); ++iter) {
@@ -322,7 +322,7 @@ void ArmModel::EvaluatedJdqNumeric()
 Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(unsigned int jointIndex)
 {
     //Here we calculate the h columns involved in our joint's jacobian
-    for (unsigned int jointNumber = jointIndex; jointNumber == 0; jointNumber--)
+    for (int jointNumber = jointIndex; jointNumber >= 0; jointNumber--)
         BackwardDirectGeometry(jointNumber, jointIndex);
 
     //Then we set all the remainings columns to zero
@@ -340,7 +340,7 @@ Eigen::MatrixXd ArmModel::EvaluateBase2JointJacobian(unsigned int jointIndex)
 
 void ArmModel::AttachRigidBodyFrame(std::string frameID, std::string attachedFrameID, Eigen::TransformationMatrix attachedFrameID_T_frameID) noexcept(false)
 {
-    std::string rigidBodyID = id_.append("_").append(frameID);
+    std::string rigidBodyID = id_ + "_" + frameID;
 
     // Check if rigid body is already present
     if (rigidBodyFrames_.find(rigidBodyID) != rigidBodyFrames_.end()) {
