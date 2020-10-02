@@ -27,10 +27,12 @@ VehicleModel::VehicleModel(const std::string id)
     velocity_.setZero();
     acceleration_.setZero();
     controlRef_.setZero();
-    transformation_.insert(std::make_pair(id_, Eigen::TransformationMatrix::Zero()));
+
     std::size_t underscorepos = id.find_first_of("_");
     if (underscorepos == std::string::npos) {
         id_ = std::move(id);
+        transformation_.insert(std::make_pair(id_, inertialF_T_vehicleF_));
+
     } else {
         LabelSyntaxException labelException;
         labelException.SetHow("VehicleModel() constructor: Underscores '_' not allowed in ID");
@@ -82,9 +84,11 @@ void VehicleModel::Jacobian(Eigen::Matrix6d J)
     isMapInitialized_ = false;
 }
 
-void VehicleModel::AttachRigidBodyFrame(const std::string frameID, const Eigen::TransformationMatrix vehicleF_T_frameID)
+void VehicleModel::AttachRigidBodyFrame(const std::string& frameID, const Eigen::TransformationMatrix& vehicleF_T_frameID)
 {
-    std::string rigidBodyFrameID = id_.append("_").append(frameID);
+    std::string rigidBodyFrameID = id_ + "_" + frameID;
+
+    std::cout << "rigidBodyFrameID " << rigidBodyFrameID << std::endl;
     // Check if rigid body is already present
     if (rigidBodyFrames_.find(rigidBodyFrameID) != rigidBodyFrames_.end()) {
         rigidBodyFrames_.at(rigidBodyFrameID) = vehicleF_T_frameID;

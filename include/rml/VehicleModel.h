@@ -81,7 +81,7 @@ public:
      * @param ID Id of the frame.
      * @param TMat Transformation matrix of the frame.
      */
-    void AttachRigidBodyFrame(const std::string frameID, const Eigen::TransformationMatrix vehicleF_T_frameID);
+    void AttachRigidBodyFrame(const std::string& frameID, const Eigen::TransformationMatrix& vehicleF_T_frameID);
     /**
      * @brief Method returning the transformation matrix related to the frame id in input.
      * @param ID frame id.

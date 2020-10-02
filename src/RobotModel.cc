@@ -14,20 +14,20 @@
 namespace rml {
 
 RobotModel::RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::string bodyFrameID)
-    : bodyFrameID_{ std::move(bodyFrameID) }
-    , inertialF_T_bodyF_{ std::move(inertialF_T_bodyF) }
-    , DoF_{ 0 }
-    , isMobileRobot_{ false }
+    : bodyFrameID_ { std::move(bodyFrameID) }
+    , inertialF_T_bodyF_ { std::move(inertialF_T_bodyF) }
+    , DoF_ { 0 }
+    , isMobileRobot_ { false }
 {
-    robotBase_ = std::make_shared<rml::VehicleModel>(rml::VehicleModel(bodyFrameID));
+    robotBase_ = std::make_shared<rml::VehicleModel>(rml::VehicleModel(bodyFrameID_));
     robotBase_->Jacobian(Eigen::MatrixXd::Zero(6, 6));
     robotBase_->PositionOnInertialFrame(inertialF_T_bodyF);
 }
 
 RobotModel::RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::string bodyFrameID, Eigen::MatrixXd JRobotFrame)
-    : bodyFrameID_{ std::move(bodyFrameID) }
-    , inertialF_T_bodyF_{ std::move(inertialF_T_bodyF) }
-    , isMobileRobot_{ true }
+    : bodyFrameID_ { std::move(bodyFrameID) }
+    , inertialF_T_bodyF_ { std::move(inertialF_T_bodyF) }
+    , isMobileRobot_ { true }
 {
     robotBase_ = std::make_shared<rml::VehicleModel>(rml::VehicleModel(bodyFrameID_));
     robotBase_->Jacobian(JRobotFrame);
@@ -41,6 +41,7 @@ RobotModel::~RobotModel()
 
 bool RobotModel::LoadArm(const std::shared_ptr<ArmModel>& arm, const Eigen::TransformationMatrix& bodyframeToArm) noexcept(false)
 {
+    std::cout << "Is model initialize " << arm->IsModelInitialized() << std::endl;
     if (arm->IsModelInitialized()) {
         if (CheckArm(arm->ID())) {
             std::string how;
@@ -50,9 +51,15 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel>& arm, const Eigen::Tran
             throw(conflictingArmModelException);
         }
         armsModel_.insert(std::make_pair(arm->ID(), arm));
+        std::cout << "Insert arm model" << std::endl;
         bodyFrameToArm_.insert(std::make_pair(arm->ID(), bodyframeToArm));
+        std::cout << "Insert bodyFrameToArm_" << std::endl;
+
         DoF_ += arm->NumJoints();
+        std::cout << " DoF_ " << arm->NumJoints() << std::endl;
         robotBase_->AttachRigidBodyFrame(arm->ID(), bodyframeToArm);
+        std::cout << "After AttachRigidBodyFrame " << arm->NumJoints() << std::endl;
+
         return true;
 
     } else {
