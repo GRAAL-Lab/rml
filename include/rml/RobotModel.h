@@ -20,30 +20,51 @@ namespace rml {
 /**
  * \class RobotModel
  *
- * \brief Robot Model class, to evaluate either mobile or fixed manipulators total transformation
- * matrices and jacobians.
+ * \brief Robot Model class, to evaluate either mobile or fixed manipulators total transformation matrices and jacobians.
  *
- * \details This class provides a container for storing a multi-arm mobile or fixed model,
- * including a series of model related functions. The robot could either be mobile one (hence characterized by a
- * moving body Frame) or a static one (hence with a fixed body Frame) depending on the constructor used (hence whether a Jacobian
- * for the body Frame is provided as input in the constructor).\n
- * In order to add arm to the robot the method LoadArm() is provided.\n
- * It is in addition possible to add rigid body frames to the robot frames by using the method SetAttachedRigidBodyFrame().\n
- * The robot model contains an internal unique representation of the whole system, hence all the information about the robot model are given by organizing the vectors in
- * an order a priori defined, where the moving body frame, if present, corresponds to the first 6 position of the vector.\n
- * It is possible to obtain unified information about the robot position, velocity, acceleration and control by using the given methods (e.g. GetSystemPositionVector() to know the position
- * of the whole system) but methods to obtain information of a single part of the robot model are provided (e.g. GetPositionVector() for the position of a part of the robot method, such function takes as
- * input the id of the desired part).\n
- * The user must update the feedback for the arms and the mobile platform, if present, by using the methods SetSystemPositionVector() if the feedback for the whole robot are in a unique vector
- * or SetPositionVector() if the data are separated into vectors. The before mentioned method takes as input  the id of the part and the fbk vector. Similar methods are provided
- * also with the purpose of setting the feedback in velocity and acceleration and control. For setting uniquely the body frame position, the dedicated method SetBodyFramePosition() is provided.\n
- * By exploiting the methods provided in the ArmModel and VehicleModel class, the robot model is able to provide the transformation matrices and the jacobians for all the frames defined in the robot.\n
- * For this purpose the methods GetTransformation() and GetCartesianJacobian() are provided. These methods take as input the id of the frame for which computing the matrices. It is worth noticing that
- * the transformation matrices are expressed wrt to the world frame meanwhile the jacobians are observed by the inertial frame and expressed wrt to the body frame.\n
- * In addition the method GetTransformationFrames() is provided in order to compute the transformation matrices in between the two frames identified by the input ids.\n
- * Furthermore the two methods GetJointSpaceJacobian() and GetManipulabilityJacobian() are provided. \n
- * The former takes as input the armID and returns the related joint space jacobian. The latter takes as input a frame id and returns the related manipulability jacobian. In order to obtain the manipulability value for a frame the method GetManipulability() must be used\n
- * It is worth noticing that the jacobians given by the RobotModel takes into account the degrees of freedom of the whole robot (hence of all the arms and of the moving platform, if present) in the aforementioned a priori defined order.\n
+ * \details
+ * This class provides a container for storing a multi-arm robot model. The robot could either be mobile one
+ * (hence characterized by a moving body Frame) or a static one (hence with a fixed body frame).
+ * Use the constructor a Jacobian for the body Frame is provided as input in the constructor).
+ *
+ * In order to add arm to the robot the method LoadArm() is provided.
+ * It is in addition possible to add rigid body frames to the robot frames by using the method AttachedRigidBodyFrame().
+ *
+
+ * The robot model contains an internal unique representation of the whole system, hence all the information about the robot
+ * model are given by organizing the vectors in an order a priori defined, where the moving body frame, if present, corresponds
+ * to the first 6 position of the vector.
+ * It is possible to obtain unified information about the robot position, velocity, acceleration and control by using the given
+ * methods (e.g. PositionVector() to know the position of the whole system) but methods to obtain information of a single part
+ * of the robot model are provided (e.g. PositionVector(partId) for the position of a part of the robot method, such function takes as
+ * input the id of the desired part).
+ *
+ * The user must update the feedback for the arms and the mobile platform, if present, by using the methods PositionVector() = feedbackVector
+ * if the feedback for the whole robot are in a unique vector or PositionVector(partID) = part_feedbackVecotr if the data are separated into vectors.
+ * Similar methods are provided also with the purpose of setting the feedback in velocity and acceleration and control. For setting uniquely
+ * the body frame position, the dedicated method PositionOnInertialFrame() is provided.
+
+ * By exploiting the methods provided in the ArmModel and VehicleModel class, the robot model is able to provide the transformation matrices
+ * and the jacobians for all the frames defined in the robot.
+ * For this purpose the methods TransformationMatrix() and CartesianJacobian() are provided. These methods take as input the id of the frame
+ * for which computing the matrices.
+ *
+ * The id must be provieded according the following logic:
+ * - joint n-th: armID + rml::FrameID::Joint + "n"
+ * - rigidBody attached on arm: armID + "_" + "rigidBodyID"
+ * - rigid body attached on body frame: robotName + "_" + rigidBodyID
+ *
+ *
+ *
+ * It is worth noticing that the transformation matrices are expressed wrt to the world frame meanwhile
+ * the jacobians are observed by the inertial frame and expressed wrt to the body frame.
+ * In addition the method TransformationMatrix() is provided in order to compute the transformation matrices in between the two frames identified by the input ids.\n
+ * Furthermore the two methods JointSpaceJacobian() and ManipulabilityJacobian() are provided. \n
+ * The former takes as input the armID and returns the related joint space jacobian.
+ * The latter takes as input a frame id and returns the related manipulability jacobian.
+ * In order to obtain the manipulability value for a frame the method Manipulability() must be used\n
+ * It is worth noticing that the jacobians given by the RobotModel takes into account the degrees of freedom of the whole robot
+ * (hence of all the arms and of the moving platform, if present) in the aforementioned a priori defined order.
  * >
  *
 
@@ -61,14 +82,13 @@ public:
      * @brief Constructor for mobile robot model
      * @param[in] inertialF_T_bodyF transformation matrix from the world frame to body Frame.
      * @param[in] bodyFrameID id of the body Frame
-     * @param[in] JBodyFrame jacobian of the bodyFrame
+     * @param[in] JBodyFrame jacobian of the bodyFrame in the body frame
      */
-    RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::string bodyFrameID, Eigen::MatrixXd JBodyFrame);
+    RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::string bodyFrameID, Eigen::MatrixXd bodyF_JBodyFrame);
     /**
      * @brief Default deconstructor
      */
     virtual ~RobotModel();
-
     /**
      * @brief Returns the number of total degrees of fredoom of the system composed (both of the base if mobile and the arms).
      * @return The total number of DOFs (mobile base + arms)
@@ -114,9 +134,16 @@ public:
      * @return true if the body Frame is mobile, false otherwise.
      */
     auto IsMobile() const -> bool { return isMobileRobot_; }
+
+    /*
+     * For CartesianJacobian, JointSpaceJacobian, ManipulabilityJacobian and TransformationMatrix the id must be provieded according the following logic:
+     * - n-th joint: armID + rml::FrameID::Joint + "n"
+     * - rigidBody attached on arm: armID + "_" + "rigidBodyID"
+     * - rigid body attached on body frame: robotName + "_" + rigidBodyID
+     */
     /**
      * @brief Method computing the jacobian observed by the world frame and projected on the body Frame of the input frameID
-     * @param[in] ID frameID
+     * @param[in] ID frameID :
      * @return Jacobian observed by the world frame, projected on the body Frame.
      */
     Eigen::MatrixXd CartesianJacobian(const std::string& frameID) noexcept(false);

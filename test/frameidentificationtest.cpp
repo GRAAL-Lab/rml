@@ -8,83 +8,68 @@
 int main()
 {
     //ROBOT MODEL TEST
-    std::string arm_id = "armID";
-    std::string robot_frame_id = "robotID";
-    std::string joint_one_frame = arm_id + rml::FrameID::Joint + "1";
-    std::string rigid_body_frame_id = robot_frame_id + "cameraFrame";
-    std::string frame_ID = "cameraFrame";
-    std::string rigid_body_frame_id_arm= arm_id+ rml::FrameID::Joint+frame_ID;
-    Eigen::TransformationMatrix T;
-    T.TranslationVector(Eigen::Vector3d(0.2, 0.0, 0.2));
-    Eigen::TransformationMatrix TrobotFrame;
-    TrobotFrame.TranslationVector(Eigen::Vector3d(1, 0.2, 0));
-    Eigen::TransformationMatrix vTb;
-    vTb(0, 0) = -1;
-    vTb(0, 1) = 0;
-    vTb(0, 2) = 0;
-    vTb(0, 3) = 0.85;
-    vTb(1, 0) = 0;
-    vTb(1, 1) = -1;
-    vTb(1, 2) = 0;
-    vTb(1, 3) = 0;
-    vTb(2, 0) = 0;
-    vTb(2, 1) = 0;
-    vTb(2, 2) = 1;
-    vTb(2, 3) = 0.42;
-    vTb(3, 0) = 0;
-    vTb(3, 1) = 0;
-    vTb(3, 2) = 0;
-    vTb(3, 3) = 1;
-    std::cout << "INITIALIZATION" << std::endl;
-    auto arm_model = std::make_shared<rml::TwoLinksArmModel>(rml::TwoLinksArmModel(arm_id));
-    auto robot_model = std::make_shared<rml::RobotModel>(rml::RobotModel(Eigen::TransformationMatrix(), robot_frame_id));
-//    auto robot_model_with_vehicle = std::make_shared<rml::RobotModel>(rml::RobotModel(Eigen::TransformationMatrix(), robot_frame_id, Eigen::MatrixXd::Identity(6, 6)));
-    robot_model->LoadArm(arm_model, vTb);
-//    robot_model_with_vehicle->LoadArm(arm_model, vTb);
-//    Eigen::VectorXd initial_tool_pos(2);
-//    initial_tool_pos << 0.011, 0.11; // -1.4, -0.11, 1.57;//, -1.4, -0.11, 1.57;
-//    robot_model->GetArm(arm_id)->SetJointsPosition(initial_tool_pos);
-//    robot_model_with_vehicle->GetArm(arm_id)->SetJointsPosition(initial_tool_pos);
-//    robot_model->SetAttachedRigidBodyFrame(frame_ID,T,robot_frame_id);
-//    robot_model->SetAttachedRigidBodyFrame(frame_ID, T, joint_one_frame);
-//    robot_model_with_vehicle->SetAttachedRigidBodyFrame(frame_ID,T,robot_frame_id);
-//    robot_model_with_vehicle->SetAttachedRigidBodyFrame(frame_ID,T,joint_one_frame);
-//    robot_model->SetBodyFramePosition(TrobotFrame);
-//    robot_model_with_vehicle->SetBodyFramePosition(TrobotFrame);
-//    Eigen::Vector2d control_no_vehicle(0.1, 0.2);
-//    robot_model->SetRobotControl(control_no_vehicle);
-//    Eigen::VectorXd control(8);
-//    control << 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8;
-//    robot_model_with_vehicle->SetRobotControl(control);
+    std::string robotName = "RobotBodyFrame";
+    std::string cameraFrameName = "CameraFrame";
+    std::string armName = "ArmName";
 
-//    futils::PrettyPrint(robot_model_with_vehicle->GetRobotControl(arm_id), "robot control arm with");
-//    futils::PrettyPrint(robot_model_with_vehicle->GetRobotControl(robot_frame_id), "robot control arm  with vehicle ");
-//    futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(joint_one_frame), "JOINT ONE CARTESIAN JACOBIAN WITH VEHICLE");
-//    futils::PrettyPrint(robot_model_with_vehicle->GetTransformation(robot_frame_id), "ROBOT FRAME WITH WITH VEHICLE");
-//    futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(robot_frame_id), "ROBOT FRAME JACOBIAN WITH VEHICLE");
+    Eigen::TransformationMatrix T_AUV = Eigen::TransformationMatrix::Zero();
+    Eigen::TransformationMatrix body_T_camera = Eigen::TransformationMatrix::Zero();
+    Eigen::MatrixXd J_AUV = Eigen::MatrixXd::Zero(6, 6);
 
-//    futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(rigid_body_frame_id), "RIGID BODY JACOBIAN WITH VEHICLE");
-//    futils::PrettyPrint(robot_model_with_vehicle->GetCartesianJacobian(rigid_body_frame_id_arm),"RIGID BODY FRAME ID WITH VEHICLE ARM ");
-//    futils::PrettyPrint(robot_model->GetRobotControl(arm_id), "robot control arm ");
-//    //futils::PrettyPrint(robot_model->GetRobotControl(robot_frame_id),"robot control arm ");
-//    futils::PrettyPrint(robot_model->GetCartesianJacobian(joint_one_frame), "JOINT ONE CARTESIAN JACOBIAN WITH NO VEHICLE");
-//    futils::PrettyPrint(robot_model->GetTransformation(robot_frame_id), "ROBOT FRAME WITH NO VEHICLE");
-//    futils::PrettyPrint(robot_model->GetCartesianJacobian(robot_frame_id), "ROBOT FRAME JACOBIAN WITH NO VEHICLE");
-//    futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_frame_id), "RIGID BODY JACOBIAN WITH WITH VEHICLE");
-//    futils::PrettyPrint(robot_model->GetCartesianJacobian(rigid_body_frame_id_arm),"RIGID BODY FRAME ID NO VEHICLE ");
-//    //Test change jacobian observer  from inertial to vehicle for joint 5
-//    Eigen::Vector3d Error= rml::CartesianError(Eigen::TransfMatrix(),robot_model_with_vehicle->GetTransformation(joint_one_frame)).GetFirstVect3();
-//    Eigen::MatrixXd J = robot_model_with_vehicle->GetCartesianJacobian(joint_one_frame).block(0,0,3,robot_model_with_vehicle->GetTotalDOFs());
-//    Eigen::MatrixXd Jobs= robot_model_with_vehicle->GetCartesianJacobian(robot_frame_id).block(0,0,3,robot_model_with_vehicle->GetTotalDOFs());
-//    futils::PrettyPrint(J, "JACOBIAN BEFORE CHANGING OBSERVER") ;
-//    futils::PrettyPrint(rml::ChangeJacobianObserver(J,Jobs,Error), "CHANGE OF OBSERVER ");
+    // create a robot whose name is robotName (which is the name of the body frame)
+    auto robotModel_ = std::make_shared<rml::RobotModel>(rml::RobotModel(T_AUV, robotName, J_AUV));
+    // add a new frame in the rigid space of the body, called "CameraFrame", described by the transformation matrix body_T_camera
+    robotModel_->AttachRigidBodyFrame(cameraFrameName, robotName, body_T_camera);
+    // we can get its Cartesian Jacobian by appending the name of the frame to the body frame name
+    auto Jcam = robotModel_->CartesianJacobian(robotName + "_" + cameraFrameName);
+    std::cout << "Jcam: " << std::endl;
+    std::cout << Jcam << std::endl;
 
-    Eigen::Vector3d a;
-    a<< 0, 0, 1;
-    Eigen::Vector3d b;
-    b<< 0, 0, -1;
-    std::cout<<"reduced versor lemma"<<std::endl;
-    Eigen::Vector3d c = rml::ReducedVersorLemma(a,b);
-    std::cout<< "Reduced Versor Lemma in btw "<<a.transpose()<<" and "<<b.transpose()<<" = "<< c.norm()<<"vector="<<c.normalized().transpose()<<std::endl;
+    // create an arm model called "ArmName"
+    auto armModel = std::make_shared<rml::ArmModel>(rml::ArmModel(armName));
+    // add an arm with two joint and a tool attached on the second joint
+    // baseF_T_joint0 is the transformation matrix between the the base and the current joint at q=0
+    // each joint will get a frame called armName+rml::FrameID::Joint+Number, where number starts from 0
+    // so "ArmName"+rml::FrameID::Joint+"0"
+    Eigen::TransformationMatrix baseF_T_joint0 = Eigen::TransformationMatrix::Zero();
+    double minJoint0 = 0.0, maxJoint0 = 0.0;
+    std::cout << "AddJointLink" << std::endl;
+    armModel->AddJointLink(rml::JointType::Revolute, Eigen::Vector3d::UnitZ(), baseF_T_joint0, minJoint0, maxJoint0);
+
+    Eigen::TransformationMatrix joint0_T_joint1 = Eigen::TransformationMatrix::Zero();
+    double minJoint1 = 0.0, maxJoint1 = 0.0;
+    std::cout << "AddJointLink" << std::endl;
+    armModel->AddJointLink(rml::JointType::Prismatic, Eigen::Vector3d::UnitZ(), joint0_T_joint1, minJoint1, maxJoint1);
+
+    //add a tool to the second joint. In this case the tool get a frame "ArmName" + "_" + "toolID"
+    Eigen::TransformationMatrix joint1_T_toolF = Eigen::TransformationMatrix::Zero();
+    armModel->AttachRigidBodyFrame("toolID", armName + rml::FrameID::Joint + "1", joint1_T_toolF);
+
+    Eigen::TransformationMatrix bodyF_T_baseF = Eigen::TransformationMatrix::Zero();
+    // add the arm to the robot model, specifying where the base of the arm is with respect to the body frame of the vehicle
+    robotModel_->LoadArm(armModel, bodyF_T_baseF);
+
+    // if I want the Cartesian jacobian, I have
+    auto Jlink1 = robotModel_->CartesianJacobian(armName + rml::FrameID::Joint + "0");
+    std::cout << "Jlink1: " << std::endl;
+    std::cout << Jlink1 << std::endl;
+    // transformation w_T_j1 (by default its with respect to world frame)
+    auto w_T_j1 = robotModel_->TransformationMatrix(armName + rml::FrameID::Joint + "0");
+    std::cout << "w_T_j1: " << std::endl;
+    std::cout << w_T_j1 << std::endl;
+    // or explicit
+    //    auto w_T_j1 = robotModel_->TransformationMatrix(rml::FrameID::WorldFrame, armName + rml::FrameID::Joint + "0");
+    // Joint 1 with respect to camera frame
+    auto c_T_j1 = robotModel_->TransformationMatrix(robotName + "_" + cameraFrameName, armName + rml::FrameID::Joint + "0");
+    std::cout << "c_T_j1: " << std::endl;
+    std::cout << c_T_j1 << std::endl;
+
+    auto w_T_tool = robotModel_->TransformationMatrix(armName + "_" + "toolID");
+    std::cout << "w_T_tool: " << std::endl;
+    std::cout << w_T_tool << std::endl;
+
+    auto armBaseF_T_joint = armModel->TransformationMatrix(armName + "_" + "toolID");
+    std::cout << "armBaseF_T_joint: " << std::endl;
+    std::cout << armBaseF_T_joint << std::endl;
     return 0;
 }

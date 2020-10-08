@@ -24,13 +24,13 @@ RobotModel::RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::strin
     robotBase_->PositionOnInertialFrame(inertialF_T_bodyF);
 }
 
-RobotModel::RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::string bodyFrameID, Eigen::MatrixXd JRobotFrame)
+RobotModel::RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::string bodyFrameID, Eigen::MatrixXd bodyF_JBodyFrame)
     : bodyFrameID_ { std::move(bodyFrameID) }
     , inertialF_T_bodyF_ { std::move(inertialF_T_bodyF) }
     , isMobileRobot_ { true }
 {
     robotBase_ = std::make_shared<rml::VehicleModel>(rml::VehicleModel(bodyFrameID_));
-    robotBase_->Jacobian(JRobotFrame);
+    robotBase_->Jacobian(bodyF_JBodyFrame);
     robotBase_->PositionOnInertialFrame(inertialF_T_bodyF_);
     DoF_ = 6;
 }
@@ -41,7 +41,6 @@ RobotModel::~RobotModel()
 
 bool RobotModel::LoadArm(const std::shared_ptr<ArmModel>& arm, const Eigen::TransformationMatrix& bodyframeToArm) noexcept(false)
 {
-    std::cout << "Is model initialize " << arm->IsModelInitialized() << std::endl;
     if (arm->IsModelInitialized()) {
         if (CheckArm(arm->ID())) {
             std::string how;
@@ -225,8 +224,10 @@ Eigen::TransformationMatrix RobotModel::TransformationMatrix(const std::string& 
 
 Eigen::MatrixXd RobotModel::CartesianJacobian(const std::string& frameID) noexcept(false)
 {
+    std::cout << "CartesianJacobian: " << frameID << std::endl;
     std::string modelID = frameID.substr(0, frameID.find_first_of("_"));
     Eigen::MatrixXd totJac, tempJ;
+    std::cout << "CartesianJacobian: " << frameID << std::endl;
     if (frameID == bodyFrameID_ || modelID == bodyFrameID_) {
         if (isMobileRobot_) {
             totJac = RightJuxtapose(totJac, robotBase_->Jacobian(frameID));

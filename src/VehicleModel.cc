@@ -127,4 +127,5 @@ Eigen::MatrixXd VehicleModel::Jacobian(const std::string& ID) noexcept(false)
     }
     return jacobians_.at(ID);
 }
+
 }

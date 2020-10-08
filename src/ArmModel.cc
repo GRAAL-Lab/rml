@@ -126,6 +126,7 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
         //updating the joint jacobians
         for (unsigned int i = 0; i < totalNumJoints_; i++) {
+            std::cout << id_ + FrameID::Joint + std::to_string(i) << std::endl;
             transformation_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), baseTei_.at(i)));
             jacobians_.insert(std::make_pair(id_ + FrameID::Joint + std::to_string(i), EvaluateBase2JointJacobian(i)));
         }
@@ -139,6 +140,7 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
     } else {
         //updating the joint jacobians
         for (unsigned int i = 0; i < totalNumJoints_; i++) {
+            std::cout << id_ + FrameID::Joint + std::to_string(i) << std::endl;
             transformation_.find(id_ + FrameID::Joint + std::to_string(i))->second = baseTei_.at(i);
             jacobians_.find(id_ + FrameID::Joint + std::to_string(i))->second = EvaluateBase2JointJacobian(i);
         }
@@ -342,6 +344,7 @@ void ArmModel::AttachRigidBodyFrame(std::string frameID, std::string attachedFra
 {
     std::string rigidBodyID = id_ + "_" + frameID;
 
+    std::cout << "RigidbodyFrameId" << rigidBodyID << std::endl;
     // Check if rigid body is already present
     if (rigidBodyFrames_.find(rigidBodyID) != rigidBodyFrames_.end()) {
 

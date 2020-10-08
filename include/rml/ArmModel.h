@@ -37,9 +37,11 @@ typedef std::pair<std::string, Eigen::TransformationMatrix> IndexedTMat;
  *
  * * Joint Frame: armID + FrameID::Joint + joint°;
  *
- * * Rigid Body: armID + frameID
+ * * Rigid Body: armID + "_" + frameID
  *
  * In order to get the transformation matrix the GetTransformation() method is provided. The method takes as input a string which is the id of the frame asked.
+ *
+
  * All the transformation matrices are expressed wrt the arm base.
  * In order to get the jacobian the GetJacobian() method is provided. The method takes as input a string which is the id of the frame asked.
  * All the jacobian matrix are expressed wrt the arm base.
@@ -123,6 +125,15 @@ public:
      * @param frameId frame id
      * @return  transformation matrix
      */
+
+
+    /*
+    * For CartesianJacobian, TransformationMatrix, Jacobian and ManipulabilityJacobian the id must be provieded according the following logic:
+    *
+    * * Joint Frame: armID + FrameID::Joint + joint°;
+    *
+    * * Rigid Body: armID + "_" + frameID
+    */
     Eigen::TransformationMatrix TransformationMatrix(const std::string& frameID) noexcept(false);
     /**
      * @brief Method returing a transformation matrix from frameID_j to frameID_k, i.e. jTk.
