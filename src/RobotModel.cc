@@ -187,19 +187,21 @@ Eigen::TransformationMatrix RobotModel::TransformationMatrix(const std::string& 
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
 
-    if (partIDIndex == std::string::npos && frameID != bodyFrameID_) {
-        std::string how;
-        how = "[ROBOT MODEL] Wrong string format: " + frameID;
-        WrongFrameException robotModelWrongFrameFormat;
-        robotModelWrongFrameFormat.SetHow(how);
-        throw(robotModelWrongFrameFormat);
-    }
+
     if (frameID == bodyFrameID_ || partID == bodyFrameID_) {
         return robotBase_->TransformationMatrix(frameID);
     } else if (CheckArm(partID)) {
         return inertialF_T_bodyF_ * bodyFrameToArm_.at(partID) * armsModel_.at(partID)->TransformationMatrix(frameID);
     } else if (frameID == rml::FrameID::WorldFrame) {
         return Eigen::TransformationMatrix::Identity();
+    }
+
+    if (partIDIndex == std::string::npos && frameID != bodyFrameID_) {
+        std::string how;
+        how = "[ROBOT MODEL] Wrong string format: " + frameID;
+        WrongFrameException robotModelWrongFrameFormat;
+        robotModelWrongFrameFormat.SetHow(how);
+        throw(robotModelWrongFrameFormat);
     }
 
     std::string how;
@@ -224,10 +226,8 @@ Eigen::TransformationMatrix RobotModel::TransformationMatrix(const std::string& 
 
 Eigen::MatrixXd RobotModel::CartesianJacobian(const std::string& frameID) noexcept(false)
 {
-    std::cout << "CartesianJacobian: " << frameID << std::endl;
     std::string modelID = frameID.substr(0, frameID.find_first_of("_"));
     Eigen::MatrixXd totJac, tempJ;
-    std::cout << "CartesianJacobian: " << frameID << std::endl;
     if (frameID == bodyFrameID_ || modelID == bodyFrameID_) {
         if (isMobileRobot_) {
             totJac = RightJuxtapose(totJac, robotBase_->Jacobian(frameID));
