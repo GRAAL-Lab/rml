@@ -50,14 +50,12 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel>& arm, const Eigen::Tran
             throw(conflictingArmModelException);
         }
         armsModel_.insert(std::make_pair(arm->ID(), arm));
-        std::cout << "Insert arm model" << std::endl;
+
         bodyFrameToArm_.insert(std::make_pair(arm->ID(), bodyframeToArm));
-        std::cout << "Insert bodyFrameToArm_" << std::endl;
 
         DoF_ += arm->NumJoints();
-        std::cout << " DoF_ " << arm->NumJoints() << std::endl;
+
         robotBase_->AttachRigidBodyFrame(arm->ID(), bodyframeToArm);
-        std::cout << "After AttachRigidBodyFrame " << arm->NumJoints() << std::endl;
 
         return true;
 
@@ -186,7 +184,6 @@ Eigen::TransformationMatrix RobotModel::TransformationMatrix(const std::string& 
 
     std::size_t partIDIndex = frameID.find_first_of("_");
     std::string partID = frameID.substr(0, partIDIndex);
-
 
     if (frameID == bodyFrameID_ || partID == bodyFrameID_) {
         return robotBase_->TransformationMatrix(frameID);
@@ -396,8 +393,7 @@ Eigen::VectorXd RobotModel::VelocityVector()
     if (isMobileRobot_) {
         vel = UnderJuxtapose(vel, robotBase_->VelocityVector());
     }
-    for (std::map<std::string, std::shared_ptr<rml::ArmModel>>::iterator iter = armsModel_.begin(); iter != armsModel_.end();
-         ++iter) {
+    for (std::map<std::string, std::shared_ptr<rml::ArmModel>>::iterator iter = armsModel_.begin(); iter != armsModel_.end(); ++iter) {
         vel = UnderJuxtapose(vel, iter->second->JointsVelocity());
     }
     return vel;

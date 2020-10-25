@@ -16,7 +16,7 @@ project(RML_project VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
 
-option(BUILD_TESTS "Compile tests" OFF)
+option(BUILD_TESTS "Compile tests" ON)
 option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
 
 add_library(rml SHARED
@@ -32,7 +32,7 @@ add_library(rml SHARED
     src/ArmModel.cc
     src/VehicleModel.cc
     src/RobotModel.cc
-#    src/NewtonEuler.cc
+    src/NewtonEuler.cc
 )
 
 set_target_properties(rml PROPERTIES LINKER_LANGUAGE CXX)

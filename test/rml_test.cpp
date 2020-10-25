@@ -9,9 +9,9 @@
 
 #include "test/rml_test_defines.h"
 
+using futils::PrettyPrint;
 using std::cout;
 using std::endl;
-using futils::PrettyPrint;
 
 int main(int, char**)
 {
@@ -29,7 +29,8 @@ int main(int, char**)
     ///    MATRIX OPERATIONS    ///
     ///////////////////////////////
 
-    std::cout << std::endl << tc::yellow << "### MATRIX OPERATIONS Test ###" << tc::none << std::endl;
+    std::cout << std::endl
+              << tc::yellow << "### MATRIX OPERATIONS Test ###" << tc::none << std::endl;
 
     S = rml::RightJuxtapose(A, U);
     V = rml::UnderJuxtapose(A, U);
@@ -49,15 +50,15 @@ int main(int, char**)
     PrettyPrint(vect3_1.transpose(), "vect3_1'");
     PrettyPrint(vect3_2.transpose(), "vect3_2'");
 
-    vect6_1.SetFirstVect3(vect3_1);
+    vect6_1.AngularVector() = vect3_1;
     PrettyPrint(vect6_1.transpose(), "vect6' after SetFirstVect3()");
-    vect6_1.SetSecondVect3(vect3_2);
+    vect6_1.LinearVector() = vect3_2;
     PrettyPrint(vect6_1.transpose(), "vect6' after SetSecondVect3()");
 
-    Eigen::TransfMatrix Tmat = A.setRandom(4, 4);
+    Eigen::TransformationMatrix Tmat = A.setRandom(4, 4);
     PrettyPrint(Tmat, "Tmat");
-    PrettyPrint(Tmat.GetRotMatrix(), "A.GetRotMatrix()");
-    PrettyPrint(Tmat.GetTransl(), "A.GetTrasl()");
+    PrettyPrint(Tmat.RotationMatrix(), "A.GetRotMatrix()");
+    PrettyPrint(Tmat.TranslationVector(), "A.GetTrasl()");
 
     vect3_3.setConstant(3);
     PrettyPrint(vect3_1.transpose(), "vect3_1");
@@ -67,20 +68,21 @@ int main(int, char**)
     futils::PrettyPrint(maxvect3.transpose(), "maxvect3");
 
     rml::EulerRPY rpy;
-    rpy.SetRPY(0.0, 0.3, 0.4);
+    rpy.RPY(0.0, 0.3, 0.4);
     PrettyPrint(rpy, "rpy cout");
-    PrettyPrint(rpy.ToRotMatrix(), "rpy.ToRotMatrix()");
-    PrettyPrint(rpy.ToRotMatrix().ToEulerRPY(), "rpy.ToRotMatrix().ToEulerYPR()");
+    PrettyPrint(rpy.ToRotationMatrix(), "rpy.ToRotMatrix()");
+    PrettyPrint(rpy.ToRotationMatrix().ToEulerRPY(), "rpy.ToRotMatrix().ToEulerYPR()");
 
     Eigen::Vector3d transl(1.0, 2.0, 3.0);
-    PrettyPrint(rml::GetRigidBodyMatrix(transl), "rml::GetRigidBodyMatrix(transl)");
+    PrettyPrint(rml::RigidBodyMatrix(transl), "rml::GetRigidBodyMatrix(transl)");
     // PrettyPrint(transl.GetRigidBodyMatrix(), "transl.GetRigidBodyMatrix()");
 
     ///////////////////////////////
     //////     PINV TEST     //////
     ///////////////////////////////
 
-    std::cout << std::endl << tc::yellow << "### PINV Test (with timings) ###" << tc::none << std::endl;
+    std::cout << std::endl
+              << tc::yellow << "### PINV Test (with timings) ###" << tc::none << std::endl;
 
     Eigen::MatrixXd Avar, Apinv;
     int iterations = 1000;
@@ -109,7 +111,8 @@ int main(int, char**)
     //////     SVD TEST      //////
     ///////////////////////////////
 
-    std::cout << std::endl << tc::yellow << "### SVD Test ###" << tc::none << std::endl;
+    std::cout << std::endl
+              << tc::yellow << "### SVD Test ###" << tc::none << std::endl;
 
     for (int i = 0; i < A.rows(); i++) {
         for (int j = 0; j < A.cols(); j++) {
@@ -127,10 +130,10 @@ int main(int, char**)
     Eigen::MatrixXd A_usv = U * S * V.transpose();
     PrettyPrint(A_usv, "A as the result of: A = U*S*V'");
 
-    Eigen::TransfMatrix wTt, wTg;
+    Eigen::TransformationMatrix wTt, wTg;
     std::cout << "CartesianError() 1: " << (rml::CartesianError(wTt, wTg)).transpose() << std::endl;
 
-    wTg.SetTransl(Eigen::Vector3d(1, 1, 1));
+    wTg.TranslationVector(Eigen::Vector3d(1, 1, 1));
     std::cout << "CartesianError() 2: " << (rml::CartesianError(wTt, wTg)).transpose() << std::endl;
 
     Eigen::Matrix3d n_rot;
@@ -138,16 +141,15 @@ int main(int, char**)
     // *Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())
     // *Eigen::AngleAxisd(0, Eigen::Vector3d::UnitX());
 
-    rml::EulerRPY rpy(M_PI,0, 0);
+    rml::EulerRPY rpy1(M_PI, 0, 0);
 
+    futils::PrettyPrint(rpy1.ToRotationMatrix(), "rpy.toRotMatrix");
 
-    futils::PrettyPrint(rpy.ToRotMatrix(),"rpy.toRotMatrix");
-
-    wTg.SetRotMatrix(Eigen::Matrix3d::Identity());
+    wTg.RotationMatrix(Eigen::Matrix3d::Identity());
 
     //wTg.SetRotMatrix(n_rot);
 
-    wTg.SetRotMatrix(rpy.ToRotMatrix());
+    wTg.RotationMatrix(rpy.ToRotationMatrix());
     futils::PrettyPrint(wTg, "wTg");
 
     futils::PrettyPrint(rml::CartesianError(wTt, wTg), "rml::CartesianError(wTt, wTg)");

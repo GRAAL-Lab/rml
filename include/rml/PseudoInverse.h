@@ -9,7 +9,6 @@
 #define INCLUDE_RML_PSEUDOINVERSE_H_
 
 #include <eigen3/Eigen/Dense>
-#include <libconfig.h++>
 
 #include "SVD.h"
 #include "Types.h"

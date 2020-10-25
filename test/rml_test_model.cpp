@@ -12,9 +12,9 @@
 #include "test/youbot_vehiclemodel.h"
 //#include "test/baxterLeft_armmodel.h"
 
+using futils::PrettyPrint;
 using std::cout;
 using std::endl;
-using futils::PrettyPrint;
 
 int main(int, char**)
 {
@@ -33,15 +33,15 @@ int main(int, char**)
     int numJoints(0);
     double elapsed_Timer(0);
 
-    //std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
+    //    std::shared_ptr<rml::BaxterLeftArmModel> baxterAM = std::make_shared<rml::BaxterLeftArmModel>();
     std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>(yb_arm1_id);
     std::shared_ptr<rml::ArmModel> armModel = std::make_shared<rml::ArmModel>("ybArm2");
 
     armModel = youbotAM;
-    numJoints = armModel->GetNumJoints();
+    numJoints = armModel->NumJoints();
 
     cout << tc::magL << "*dJdq Test*" << tc::none << std::endl;
-    cout << "numJoints=" << armModel->GetNumJoints() << endl;
+    cout << "numJoints=" << armModel->NumJoints() << endl;
     std::vector<Eigen::MatrixXd> dJdq_NEW(numJoints, Eigen::MatrixXd::Zero(6, numJoints));
 
     Eigen::MatrixXd zeroQ = Eigen::MatrixXd::Zero(numJoints, 1);
@@ -61,8 +61,8 @@ int main(int, char**)
     PrettyPrint(q_0.transpose(), "q_0");
 
     myTimer.Start();
-    armModel->SetJointsPosition(q_0);
-    dJdq_NEW = armModel->GetdJdq();
+    armModel->JointsPosition(q_0);
+    dJdq_NEW = armModel->dJdq();
     elapsed_Timer = myTimer.Lap() * 1000;
 
     std::cout << "elapsed_Timer=" << elapsed_Timer << "ms" << std::endl;
@@ -73,26 +73,30 @@ int main(int, char**)
         cout << "------------------------------------------------------------" << endl;
     }
 
-    for (int i = 0; i < youbotAM->GetNumJoints(); ++i) {
-        PrettyPrint(youbotAM->GetLink(i).JointLimitMin(), "GetJointLimitsMin()");
-        PrettyPrint(youbotAM->GetLink(i).JointLimitMax(), "GetJointLimitsMax()");
+    for (unsigned int i = 0; i < youbotAM->NumJoints(); ++i) {
+        PrettyPrint(youbotAM->Link(i).JointLimitMin(), "GetJointLimitsMin()");
+        PrettyPrint(youbotAM->Link(i).JointLimitMax(), "GetJointLimitsMax()");
     }
 
     ////////////////////////////////////////////////////////////
 
     std::shared_ptr<rml::YouBotVehicleModel> youbotVM = std::make_shared<rml::YouBotVehicleModel>("yb_vehicle");
-    std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>();
+    Eigen::TransformationMatrix world_T_vehicle;
+
+    /// Jacobian
+    Eigen::Matrix6d J_ASV;
+    J_ASV.setIdentity();
+    std::shared_ptr<rml::RobotModel> robotModel = std::make_shared<rml::RobotModel>(world_T_vehicle, "yb_vehicle", J_ASV);
 
     int armIndex1, armIndex2;
-    armIndex1 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+    armIndex1 = robotModel->LoadArm(youbotAM, Eigen::TransformationMatrix());
     try {
-        int armIndex2 = robotModel->LoadArm(youbotAM, Eigen::TransfMatrix());
+        unsigned int armIndex2 = robotModel->LoadArm(youbotAM, Eigen::TransformationMatrix());
     } catch (rml::ExceptionWithHow& e) {
         std::cout << e.how() << std::endl;
     }
 
     //robotModel->LoadVehicle(youbotVM);
-
 
     std::string vehicle_id = "vehicleID";
     std::string joint_one_frame = yb_arm1_id + rml::FrameID::Joint + "1";

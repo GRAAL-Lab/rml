@@ -21,16 +21,15 @@ NewtonEuler::~NewtonEuler()
     // TODO Auto-generated destructor stub
 }
 
-NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, std::string armID)
+NewtonEuler::NewtonEuler(std::shared_ptr<RobotModel>& model, std::string& armID, std::string& toolID)
+    : numJoints_ { model->Arm(armID)->NumJoints() }
+    , armModel_ { model->Arm(armID) }
+    , robotModel_ { model }
+    , toolID_ { toolID }
+
 {
-    armModel_ = model->Arm(armID);
-    //	vehicle_ = model->Vehicle();
-
-    numJoints_ = model->Arm(armID)->NumJoints();
-
     Init();
-
-    SetGravity(Eigen::Vector3d::UnitZ() * -STD_GRAVITY);
+    Gravityvector() = Eigen::Vector3d::UnitZ() * -STD_GRAVITY;
 }
 
 void NewtonEuler::Init()
@@ -113,32 +112,30 @@ void NewtonEuler::AddDummyBaseAndEE()
     links_.at(numJoints_ + 1).SetDynamicProperties(0.0, zeroVect3_, zeroVect3_, zeroMat3);
 }
 
-void NewtonEuler::SetGravity(const Eigen::Vector3d& gravity)
-{
-    gravity_ = gravity;
-    //Eigen::Vector3d::UnitZ() *
-}
-
 void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::VectorXd& qdot, const Eigen::VectorXd& qddot, const Eigen::Vector3d& gravityVector, Eigen::VectorXd& torques)
 {
     Eigen::Vector3d gravity = gravityVector;
-    omega_.at(0) = vehicle_->GetVelocityOnVehicle().GetFirstVect3();
-    omega_dot_.at(0) = vehicle_->GetAccelerationOnVehicle().GetFirstVect3();
+    omega_.at(0) = robotModel_->VelocityVector().segment(3, 3);
+    omega_dot_.at(0) = robotModel_->AccelerationVector().segment(3, 3);
 
     rhoVec_.at(0).setZero();
-    for (int i = 1; i < numJoints_; ++i) {
-        rhoVec_.at(i) = armModel_->GetCurrentLinkTransf(i).GetTransl();
-    }
-    rhoVec_.at(numJoints_) = armModel_->GeteTt().GetTransl();
 
-    R_.at(0) = armModel_->GetBaseTransf().GetRotMatrix(); // Base TODO Check
-    for (int i = 0; i < numJoints_; ++i) {
-        R_.at(i + 1) = armModel_->GetCurrentLinkTransf(i).GetRotMatrix(); // Base_i to Joint_i
+    for (unsigned int i = 0; i < armModel_->NumJoints(); i++) {
+        rhoVec_.at(i) = armModel_->TransformationMatrix(armModel_->ID() + FrameID::Joint + std::to_string(i)).TranslationVector();
     }
-    R_.at(numJoints_ + 1) = armModel_->GeteTt().GetRotMatrix(); // Last joint to end effector
 
-    for (int i = 0; i < numJoints_; ++i) {
-        q_ = armModel_->GetJointsPosition();
+    rhoVec_.at(numJoints_) = armModel_->TransformationMatrix(armModel_->ID() + "_" + toolID_).TranslationVector();
+
+    R_.at(0) = Eigen::TransformationMatrix().RotationMatrix(); // Base TODO Check
+
+    for (unsigned int i = 0; i < numJoints_; ++i) {
+        R_.at(i + 1) = armModel_->TransformationMatrix(armModel_->ID() + FrameID::Joint + std::to_string(i)).RotationMatrix(); // Base_i to Joint_i
+    }
+
+    R_.at(numJoints_ + 1) = armModel_->TransformationMatrix(armModel_->ID() + "_" + toolID_).RotationMatrix(); // Last joint to end effector
+
+    for (unsigned int i = 0; i < numJoints_; ++i) {
+        q_ = armModel_->JointsPosition();
         q_dot_(i + 1) = qdot(i);
         q_ddot_(i + 1) = qddot(i);
 
@@ -148,36 +145,34 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
         c_dot_.at(i + 1).setZero();
         c_ddot_.at(i + 1).setZero();
     }
-
     // *** FORWARD CALCULATION ***///
     /*
 	 * Calculate links linear and angular acceleration
 	 */
 
     /* Angular Velocity **/
-    for (int i = 1; i <= numJoints_; ++i) {
+    for (unsigned int i = 1; i <= numJoints_; ++i) {
         if (links_.at(i).Type() == JointType::Revolute) {
             Eigen::Vector3d e_i = links_.at(i).Axis();
-            omega_.at(i) = R_.at(i).Transpose() * omega_.at(i - 1) + q_dot_(i) * e_i;
+            omega_.at(i) = R_.at(i).transpose() * omega_.at(i - 1) + q_dot_(i) * e_i;
         } else if (links_.at(i).Type() == JointType::Prismatic) {
-            omega_.at(i) = R_.at(i).Transpose() * omega_.at(i - 1);
+            omega_.at(i) = R_.at(i).transpose() * omega_.at(i - 1);
         }
     }
 
     /** Angular Acceleration **/
-    for (int i = 1; i <= numJoints_; ++i) {
+    for (unsigned int i = 1; i <= numJoints_; ++i) {
         if (links_.at(i).Type() == JointType::Revolute) {
             Eigen::Vector3d e_i = links_.at(i).Axis();
-            temp1_ = R_.at(i).Transpose() * omega_dot_.at(i - 1);
+            temp1_ = R_.at(i).transpose() * omega_dot_.at(i - 1);
             temp2_ = q_ddot_(i) * e_i;
             temp3_ = q_dot_(i) * omega_.at(i).cross(e_i);
             omega_dot_.at(i) = temp1_ + temp2_ + temp3_;
 
         } else if (links_.at(i).Type() == JointType::Prismatic) {
-            omega_dot_.at(i) = R_.at(i).Transpose() * omega_dot_.at(i - 1);
+            omega_dot_.at(i) = R_.at(i).transpose() * omega_dot_.at(i - 1);
         }
     }
-
     /* Linear Velocity */
     /*
 	 for(i = 1; i <= numJoints_; ++i){
@@ -193,26 +188,26 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
 	 */
 
     /* Linear Acceleration */
-    for (int i = 1; i <= numJoints_; ++i) {
+    for (unsigned int i = 1; i <= numJoints_; ++i) {
         if (links_.at(i).Type() == JointType::Revolute) {
             temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
             temp2_ = omega_.at(i - 1).cross(omega_.at(i - 1).cross(rhoVec_.at(i - 1)));
-            c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_);
+            c_ddot_.at(i) = R_.at(i).transpose() * (temp1_ + temp2_);
         } else if (links_.at(i).Type() == JointType::Prismatic) {
             // Here I compute in advance the projection of omega(i-1) on
             // frame (i), (omega_prev)
             Eigen::Vector3d e_i = links_.at(i).Axis();
-            omega_prev_ = R_.at(i).Transpose() * omega_.at(i - 1);
+            omega_prev_ = R_.at(i).transpose() * omega_.at(i - 1);
             temp1_ = c_ddot_.at(i - 1) + omega_dot_.at(i - 1).cross(rhoVec_.at(i - 1));
             temp2_ = omega_.at(i - 1).cross(omega_.at(i - 1).cross(rhoVec_.at(i - 1)));
             temp3_ = omega_prev_.cross((Eigen::Vector3d)(e_i * q_dot_(i)));
             temp4_ = omega_prev_.cross((Eigen::Vector3d)(e_i * q_dot_(i)));
-            c_ddot_.at(i) = R_.at(i).Transpose() * (temp1_ + temp2_) + temp3_ + temp4_ + e_i * q_ddot_(i);
+            c_ddot_.at(i) = R_.at(i).transpose() * (temp1_ + temp2_) + temp3_ + temp4_ + e_i * q_ddot_(i);
         }
     }
 
     /** Projection of the acceleration on the Center of Mass **/
-    for (int i = 1; i <= numJoints_; ++i) {
+    for (unsigned int i = 1; i <= numJoints_; ++i) {
         temp1_ = c_ddot_.at(i) + omega_dot_.at(i).cross(links_.at(i).CoM());
         temp2_ = omega_.at(i).cross(omega_.at(i).cross(links_.at(i).CoM()));
         c_ddot_.at(i) = temp1_ + temp2_;
@@ -224,11 +219,11 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
 	 * project the gravity vector to the last frame (end-effector)
 	 */
 
-    for (int i = 0; i <= numJoints_; ++i) {
+    for (unsigned int i = 0; i <= numJoints_; ++i) {
         self_f_.at(i) = links_.at(i).Mass() * c_ddot_.at(i);
         self_n_.at(i) = links_.at(i).Inertia() * omega_dot_.at(i)
             + omega_.at(i).cross(links_.at(i).Inertia() * omega_.at(i));
-        gravity = R_.at(i).Transpose() * gravity;
+        gravity = R_.at(i).transpose() * gravity;
     }
 
     for (int i = numJoints_; i > 0; --i) {
@@ -237,7 +232,7 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
         r_qpc_.at(i) = links_.at(i).Sizes() - links_.at(i).CoM();
 
         // Distance from joint_i to center_of_mass of link_i
-        r_qmc_.at(i) = R_.at(i).Transpose() * (links_.at(i - 1).Sizes() - rhoVec_.at(i - 1)) - r_qpc_.at(i);
+        r_qmc_.at(i) = R_.at(i).transpose() * (links_.at(i - 1).Sizes() - rhoVec_.at(i - 1)) - r_qpc_.at(i);
 
         //exit(0);
 
@@ -251,21 +246,21 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
     InterMom2Torque(torques);
 }
 
-Eigen::MatrixXd NewtonEuler::GetA()
+Eigen::MatrixXd NewtonEuler::InertiaMatrix()
 {
     Eigen::MatrixXd A = Eigen::MatrixXd::Zero(numJoints_, numJoints_);
 
     // Evaluating the columns of the A matrix (Inertia Matrix)
-    for (int i = 0; i < numJoints_; ++i) {
+    for (unsigned int i = 0; i < numJoints_; ++i) {
 
         // Fixing the q_dot vector for the current joint
         q_ddot_Ai_ = qZeroVec_;
         q_ddot_Ai_(i) = 1.0;
 
-        EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), a_column);
+        EvaluateAlgorithmStep(armModel_->JointsPosition(), qZeroVec_, q_ddot_Ai_, Eigen::Vector3d::Zero(), a_column);
 
         // Filling current j column
-        for (int j = 0; j < numJoints_; ++j) {
+        for (unsigned int j = 0; j < numJoints_; ++j) {
             A(i, j) = a_column(j);
         }
     }
@@ -277,17 +272,17 @@ Eigen::MatrixXd NewtonEuler::GetA()
 //
 //}
 
-Eigen::VectorXd NewtonEuler::GetC()
+Eigen::VectorXd NewtonEuler::GravityEffect()
 {
     Eigen::VectorXd C = Eigen::VectorXd::Zero(numJoints_);
-    EvaluateAlgorithmStep(armModel_->GetJointsPosition(), qZeroVec_, qZeroVec_, gravity_, C);
+    EvaluateAlgorithmStep(armModel_->JointsPosition(), qZeroVec_, qZeroVec_, gravity_, C);
     return C;
 }
 
-Eigen::VectorXd NewtonEuler::GetMTilde()
+Eigen::VectorXd NewtonEuler::CoriolisGravityExternalForcesEffect()
 {
     Eigen::VectorXd m_bar = Eigen::VectorXd::Zero(numJoints_);
-    EvaluateAlgorithmStep(armModel_->GetJointsPosition(), armModel_->GetJointsVelocity(), qZeroVec_, gravity_, m_bar);
+    EvaluateAlgorithmStep(armModel_->JointsPosition(), armModel_->JointsVelocity(), qZeroVec_, gravity_, m_bar);
     return m_bar;
 }
 
@@ -315,7 +310,7 @@ void NewtonEuler::PrintVars() const
     //
     //	for (uint i = 0; i < numJoints_; i++) {
     //		std::cout << i << ": ";
-    //		futils::PrettyPrint(armModel_->GetCurrentLinkTransf(i),"BiTei");
+    //		futils::PrettyPrint(armModel_->GravityEffecturrentLinkTransf(i),"BiTei");
     //	}
     //
     //	std::cout << tc::green << "q:\n" << tc::none <<	q_.transpose() << std::endl;

@@ -34,8 +34,8 @@ void single_arm_sim(const state_type& q, state_type& dqdt, double t)
         for (int i = 0; i < numJoints; i++)
             qfb_single(i) = q[i];
 
-        armModel->SetJointsPosition(qfb_single);
-        armModel->SetJointsVelocity(qdotcontrol_single);
+        armModel->JointsPosition(qfb_single);
+        armModel->JointsVelocity(qdotcontrol_single);
 
         ////TODO
         /// SET GOAL TO CARTERROR
@@ -43,7 +43,7 @@ void single_arm_sim(const state_type& q, state_type& dqdt, double t)
         /// COMPUTE REFERENCE
 
         rml::RegularizationData regData;
-        Eigen::MatrixXd JPinv = rml::RegularizedPseudoInverse(armModel->GetJacobian(""), regData);
+        Eigen::MatrixXd JPinv = rml::RegularizedPseudoInverse(armModel->Jacobian(""), regData);
         //multiArmCtrl->ComputeControl();
         //qdotcontrol_single = multiArmCtrl->GetJointControl();
 
@@ -97,7 +97,7 @@ int main(int, char**)
     armModel = std::make_shared<rml::ArmModel>("genericAM");
 
     armModel = youbotAM;
-    numJoints = armModel->GetNumJoints();
+    numJoints = armModel->NumJoints();
     qfb_single = qdotcontrol_single = q_single_final = Eigen::VectorXd::Zero(numJoints);
 
     // YouBot Q_unfolded
@@ -121,13 +121,13 @@ int main(int, char**)
         qfb_single[i] = init_q_single[i];
 
     // First model initialisation
-    armModel->SetJointsPosition(qfb_single);
-    armModel->SetJointsVelocity(qdotcontrol_single);
+    armModel->JointsPosition(qfb_single);
+    armModel->JointsVelocity(qdotcontrol_single);
 
-    Eigen::TransfMatrix bTt = armModel->GetBase2ToolTransf();
-    Eigen::TransfMatrix bTg = bTt;
-    bTg.SetTransl(bTg.GetTransl() + Eigen::Vector3d(0.1, 0.0, 0.0));
-    Eigen::Vector6d cart_err = rml::CartesianError(bTt, bTg);
+    //    Eigen::TransformationMatrix bTt = armModel->GetBase2ToolTransf();
+    //    Eigen::TransformationMatrix bTg = bTt;
+    //    bTg.TranslationVector(bTg.TranslationVector() + Eigen::Vector3d(0.1, 0.0, 0.0));
+    //    Eigen::Vector6d cart_err = rml::CartesianError(bTt, bTg);
 
     cout << "goal Pose: ";
     fileLog << "goal Pose: ";
@@ -153,8 +153,6 @@ int main(int, char**)
             << "\n";
     fileLog << "simulation start: "
             << "\n";
-
-
 
     //multiArmCtrl->SetCartGoalEE(armIndex, goal);
 

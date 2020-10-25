@@ -37,7 +37,7 @@ const double STD_GRAVITY = 9.80665;
  *  \f$ \ddot{q} = A^{-1}[ m + \hat{m} - \tilde{m}] \f$
  *
  *  The newton euler algorithm can be used to evaulate the \f$ A \f$ matrix and the
- *  \f$ \tilde{m} \f$ , and the functions GetA() and GetMTilde() provide this
+ *  \f$ \tilde{m} \f$ , and the functions InertiaMatrix() and CoriolisGravityExternalForcesEffect() provide this
  *  functionalities.
  *
  *  \note Don't forget to set the dynamic properties of the ArmModel links before
@@ -48,7 +48,7 @@ class NewtonEuler {
 
     //std::shared_ptr<RobotModel> model_;
     std::shared_ptr<ArmModel> armModel_;
-    std::shared_ptr<VehicleModel> vehicle_;
+    std::shared_ptr<RobotModel> robotModel_;
 
     std::vector<Eigen::RotationMatrix> R_;
     std::vector<Eigen::Vector3d> rhoVec_; // Distance between joint "i" and "i+1"
@@ -69,28 +69,38 @@ class NewtonEuler {
 
     std::vector<RobotLink> links_;
 
+    std::string toolID_;
+
     void Init();
     void AddDummyBaseAndEE();
     void InterMom2Torque(Eigen::VectorXd& torques) const;
 
 public:
     //NewtonEuler();
-    NewtonEuler(std::shared_ptr<RobotModel>& model, std::string armID);
+    NewtonEuler(std::shared_ptr<RobotModel>& model, std::string& armID, std::string& toolID);
     virtual ~NewtonEuler();
 
-    void SetGravity(const Eigen::Vector3d& gravity);
     void EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::VectorXd& q_dot, const Eigen::VectorXd& q_ddot, const Eigen::Vector3d& gravity, Eigen::VectorXd& torques);
-    /**
-	 * @return the A gravity matrix
-	 */
-    Eigen::MatrixXd GetA();
 
-    Eigen::VectorXd GetC();
+    /**
+     * set the gravity vector
+     */
+    auto Gravityvector() -> Eigen::Vector3d& { return gravity_; }
+
+    /**
+     * @return the inertia matrix matrix
+	 */
+    Eigen::MatrixXd InertiaMatrix();
+
+    /**
+     * @return matrix of the effect of gravity in the joint space
+     */
+    Eigen::VectorXd GravityEffect();
 
     /**
 	 * @return \f$ \tilde{m} = B\dot{q} + C \f$
 	 */
-    Eigen::VectorXd GetMTilde();
+    Eigen::VectorXd CoriolisGravityExternalForcesEffect();
 
     void PrintVars() const;
 };

@@ -88,7 +88,6 @@ void VehicleModel::AttachRigidBodyFrame(const std::string& frameID, const Eigen:
 {
     std::string rigidBodyFrameID = id_ + "_" + frameID;
 
-    std::cout << "rigidBodyFrameID " << rigidBodyFrameID << std::endl;
     // Check if rigid body is already present
     if (rigidBodyFrames_.find(rigidBodyFrameID) != rigidBodyFrames_.end()) {
         rigidBodyFrames_.at(rigidBodyFrameID) = vehicleF_T_frameID;
