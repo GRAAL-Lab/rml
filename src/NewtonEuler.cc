@@ -124,7 +124,7 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
         rhoVec_.at(i) = armModel_->TransformationMatrix(armModel_->ID() + FrameID::Joint + std::to_string(i)).TranslationVector();
     }
 
-    rhoVec_.at(numJoints_) = armModel_->TransformationMatrix(armModel_->ID() + "_" + toolID_).TranslationVector();
+    rhoVec_.at(numJoints_) = armModel_->TransformationMatrix(armModel_->ID() + FrameID::Joint + std::to_string(armModel_->NumJoints() - 1), armModel_->ID() + "_" + toolID_).TranslationVector();
 
     R_.at(0) = Eigen::TransformationMatrix().RotationMatrix(); // Base TODO Check
 
@@ -132,7 +132,7 @@ void NewtonEuler::EvaluateAlgorithmStep(const Eigen::VectorXd& q, const Eigen::V
         R_.at(i + 1) = armModel_->TransformationMatrix(armModel_->ID() + FrameID::Joint + std::to_string(i)).RotationMatrix(); // Base_i to Joint_i
     }
 
-    R_.at(numJoints_ + 1) = armModel_->TransformationMatrix(armModel_->ID() + "_" + toolID_).RotationMatrix(); // Last joint to end effector
+    R_.at(numJoints_ + 1) = armModel_->TransformationMatrix(armModel_->ID() + FrameID::Joint + std::to_string(armModel_->NumJoints() - 1), armModel_->ID() + "_" + toolID_).RotationMatrix(); // Last joint to end effector
 
     for (unsigned int i = 0; i < numJoints_; ++i) {
         q_ = armModel_->JointsPosition();
