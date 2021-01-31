@@ -2,7 +2,7 @@
 The **RML** library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators.
 
 ## Documentation
-Full doxygen-generated documentation can be found at: https://merosss.bitbucket.io/rml.
+Full doxygen-generated documentation can be found at: [RML Documentation](https://merosss.bitbucket.io/rml).
 
 ## Features
 Its major features are:
