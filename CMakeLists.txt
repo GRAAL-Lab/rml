@@ -12,7 +12,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 # Define library. Only source files here!
-project(RML_project VERSION 0.1 LANGUAGES CXX)
+project(rml VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
 

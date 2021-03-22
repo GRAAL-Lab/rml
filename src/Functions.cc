@@ -234,8 +234,8 @@ Eigen::Matrix6d RigidBodyMatrix(const Eigen::Vector3d& transl)
 {
     Eigen::Matrix6d S;
     S.block(0, 0, 3, 3) = S.block(3, 3, 3, 3) = Eigen::Matrix3d::Identity();
-    S.block(0, 3, 3, 3) = Eigen::Matrix3d::Zero();
-    S.block(3, 0, 3, 3) = -1.0 * Vect3ToSkew(transl);
+    S.block(0, 3, 3, 3) = -1.0 * Vect3ToSkew(transl);
+    S.block(3, 0, 3, 3) = Eigen::Matrix3d::Zero();
     return S;
 }
 }
