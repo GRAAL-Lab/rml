@@ -23,7 +23,7 @@ VehicleModel::VehicleModel(const std::string id)
     : modelInitialized_(false)
     , isMapInitialized_(false)
 {
-    inertialF_T_vehicleF_.setZero();
+    inertialF_T_vehicleF_.setIdentity();
     velocity_.setZero();
     acceleration_.setZero();
     controlRef_.setZero();
