@@ -47,7 +47,7 @@ public:
 	 * have the updated values 
      * @param[in] inertialF_T_vehicleF the postion of the vehicle w.r.t the inertial frame
      */
-    void PositionOnInertialFrame(Eigen::TransformationMatrix inertialF_T_vehicleF);
+    void PositionOnInertialFrame(const Eigen::TransformationMatrix& inertialF_T_vehicleF);
     /**
      * @brief Get the inertialF_T_vehicleF
      * independently from the DOF of the vehicle.

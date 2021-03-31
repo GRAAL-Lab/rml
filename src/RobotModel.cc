@@ -21,7 +21,7 @@ RobotModel::RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::strin
 {
     robotBase_ = std::make_shared<rml::VehicleModel>(rml::VehicleModel(bodyFrameID_));
     robotBase_->Jacobian(Eigen::MatrixXd::Zero(6, 6));
-    robotBase_->PositionOnInertialFrame(inertialF_T_bodyF);
+    robotBase_->PositionOnInertialFrame(inertialF_T_bodyF_);
 }
 
 RobotModel::RobotModel(Eigen::TransformationMatrix inertialF_T_bodyF, std::string bodyFrameID, Eigen::MatrixXd bodyF_JBodyFrame)
@@ -68,9 +68,9 @@ bool RobotModel::LoadArm(const std::shared_ptr<ArmModel>& arm, const Eigen::Tran
     }
 }
 
-void RobotModel::PositionOnInertialFrame(Eigen::TransformationMatrix inertialF_T_bodyF)
+void RobotModel::PositionOnInertialFrame(const Eigen::TransformationMatrix& inertialF_T_bodyF)
 {
-    inertialF_T_bodyF_ = std::move(inertialF_T_bodyF);
+    inertialF_T_bodyF_ = inertialF_T_bodyF;
     robotBase_->PositionOnInertialFrame(inertialF_T_bodyF_);
 }
 

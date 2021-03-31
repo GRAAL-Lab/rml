@@ -44,17 +44,20 @@ VehicleModel::~VehicleModel()
 {
 }
 
-void VehicleModel::PositionOnInertialFrame(Eigen::TransformationMatrix inertialF_T_vehicleF)
+void VehicleModel::PositionOnInertialFrame(const Eigen::TransformationMatrix& inertialF_T_vehicleF)
 {
-    inertialF_T_vehicleF_ = std::move(inertialF_T_vehicleF);
+    inertialF_T_vehicleF_ = inertialF_T_vehicleF;
+
     if (!isMapInitialized_) {
         // If the Jacobian has been changed we need to rebuild the transformation
         // map --> Question is, will it ever change? Does it make sense to erase
         // everytime?
         transformation_.erase(transformation_.begin(), transformation_.end());
         jacobians_.erase(jacobians_.begin(), jacobians_.end());
-        transformation_.insert(std::make_pair(id_, Eigen::TransformationMatrix::Zero()));
+
+        transformation_.insert(std::make_pair(id_, inertialF_T_vehicleF_));
         jacobians_.insert(std::make_pair(id_, vJv_));
+
         // Updating rigid frame transformation matrix
         for (std::unordered_map<std::string, Eigen::TransformationMatrix>::iterator iter = rigidBodyFrames_.begin(); iter != rigidBodyFrames_.end(); ++iter) {
             std::string id = iter->first;
@@ -65,7 +68,8 @@ void VehicleModel::PositionOnInertialFrame(Eigen::TransformationMatrix inertialF
     } else {
         transformation_.find(id_)->second = inertialF_T_vehicleF_;
         jacobians_.find(id_)->second = vJv_;
-        //updating rigid frame transformation matrix
+
+        // Updating rigid frame transformation matrix
         for (std::unordered_map<std::string, Eigen::TransformationMatrix>::iterator iter = rigidBodyFrames_.begin(); iter != rigidBodyFrames_.end(); ++iter) {
             std::string id = iter->first;
             transformation_.find(id)->second = inertialF_T_vehicleF_ * iter->second;
@@ -73,8 +77,6 @@ void VehicleModel::PositionOnInertialFrame(Eigen::TransformationMatrix inertialF
         }
     }
 }
-
-void PositionOnInertialFrame(Eigen::Vector6d inertialF_position);
 
 void VehicleModel::Jacobian(Eigen::Matrix6d J)
 {

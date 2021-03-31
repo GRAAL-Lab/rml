@@ -116,7 +116,7 @@ public:
      * @brief Method to set the new body Frame position
      * @param[in] bodyFrame body Frame position wrt to the world frame
      */
-    void PositionOnInertialFrame(Eigen::TransformationMatrix inertialF_T_bodyF);
+    void PositionOnInertialFrame(const Eigen::TransformationMatrix& inertialF_T_bodyF);
     /**
      * @brief Method adding a rigid body frame attached to the input frame id .
      * @param[in] ID Id of the frame.
