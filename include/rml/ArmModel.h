@@ -87,22 +87,22 @@ public:
 	 *
      * \param[in] q the joint position vector (must be a numMovingJoints x 1 vector)
 	 */
-    void JointsPosition(const Eigen::VectorXd q) noexcept(false);
+    virtual void JointsPosition(const Eigen::VectorXd q) noexcept(false);
     /**
      * \brief Get the moving joint position
      * \return q the joint position vector (a numMovingJoints x 1 vector)
 	 */
-    auto JointsPosition() const -> const Eigen::VectorXd& { return q_moving_; }
+    virtual auto JointsPosition() const -> const Eigen::VectorXd& { return q_moving_; }
     /**
      * @brief Set the moving joints velocity
      * @param qdot the joint velocity vector (must be a numMovingJoints x 1 vector)
      */
-    void JointsVelocity(const Eigen::VectorXd qdot) noexcept(false);
+    virtual void JointsVelocity(const Eigen::VectorXd qdot) noexcept(false);
     /**
      * @brief Get the moving joints velocity
      * @return  the joints velocity vector (must be a numMovingJoints x 1 vector)
      */
-    auto JointsVelocity() const -> const Eigen::VectorXd& { return q_dot_moving_; }
+    virtual auto JointsVelocity() const -> const Eigen::VectorXd& { return q_dot_moving_; }
     /**
      * @brief Set the moving joints acceleration.
      * @param qddot the joints acceleration vector (must be a numMovingJoints x 1 vector)
@@ -147,7 +147,7 @@ public:
      * @param frameId frame id
      * @return jacobian matrix
      */
-    Eigen::MatrixXd Jacobian(const std::string& frameID) noexcept(false);
+    virtual Eigen::MatrixXd Jacobian(const std::string& frameID) noexcept(false);
     /**
      * @brief Method returning the manipulability jacobian related to the input frameID wrt to the arm base.
      * @param frameId frame id
@@ -158,7 +158,7 @@ public:
      * @brief Method returning the arm number of moving  joints
      * @return  arm number of moving joints
      */
-    auto NumJoints() const -> unsigned int { return movingNumJoints_; }
+    virtual auto NumJoints() const -> unsigned int { return movingNumJoints_; }
     /**
      * @brief Method returning dJdq evaluated numerically
      * @return  dJdq
@@ -208,7 +208,7 @@ protected:
     /**
 	 * @brief Evaluates numerically the Jacobian derivative w.r.t. joint variations
 	 */
-    void EvaluatedJdqNumeric();
+    virtual void EvaluatedJdqNumeric();
     /**
      * @brief Evaluates the manipulability measure and its Jacobian
      * This method returns the manipulability measure and its Jacobian
