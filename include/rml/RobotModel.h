@@ -166,6 +166,18 @@ public:
      */
     double Manipulability(const std::string& frameID) noexcept(false);
     /**
+     * @brief Method computing the dexterity jacobian of the input arm ID
+     * @param[in] ID armID
+     * @return Jacobian
+     */
+    Eigen::MatrixXd DexterityJacobian(const std::string& frameID) noexcept(false);
+    /**
+     * @brief Method returning the dexterity value for the jacobian related to the input frameID
+     * @param[in] frameID
+     * @return dexterity
+     */
+    double Dexterity(const std::string& frameID) noexcept(false);
+    /**
      * @brief Method returning a transformation matrix of the robot model.\n
      * @details The methods returns a transformation matrix depending on the input string framID.\n
      * @param[in] transformationID

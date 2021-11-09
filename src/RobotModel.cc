@@ -342,6 +342,59 @@ double RobotModel::Manipulability(const std::string& frameID) noexcept(false)
     throw(notExistingArm);
 }
 
+Eigen::MatrixXd RobotModel::DexterityJacobian(const std::string& frameID) noexcept(false) {
+    Eigen::MatrixXd totJac, tempJ;
+    std::string armID = frameID.substr(0, frameID.find_first_of("_"));
+    if (frameID.find_first_of("_") == std::string::npos) {
+        std::string how;
+        how = "[ROBOT MODEL] Wrong format frame id: " + frameID;
+        WrongFrameException robotModelWrongFrameFormat;
+        robotModelWrongFrameFormat.SetHow(how);
+        throw(robotModelWrongFrameFormat);
+    }
+    if (CheckArm(armID)) {
+        if (isMobileRobot_) {
+            totJac = RightJuxtapose(totJac, Eigen::MatrixXd::Zero(1, 6));
+        }
+        for (std::map<std::string, std::shared_ptr<rml::ArmModel>>::iterator iter = armsModel_.begin(); iter != armsModel_.end();
+             ++iter) {
+
+            if (iter->first == armID) {
+                tempJ = iter->second->DexterityJacobian(frameID);
+
+            } else {
+                tempJ = Eigen::MatrixXd::Zero(1, armsModel_.at(iter->first)->NumJoints());
+            }
+            totJac = RightJuxtapose(totJac, tempJ);
+        }
+        return totJac;
+    }
+    std::string how;
+    how = "[ROBOT MODEL] Asking frame for a no existing arm: " + armID;
+    WrongFrameException notExistingPartExc;
+    notExistingPartExc.SetHow(how);
+    throw(notExistingPartExc);    
+}
+
+double RobotModel::Dexterity(const std::string& frameID) noexcept(false) {
+    std::string armID = frameID.substr(0, frameID.find_first_of("_"));
+    if (frameID.find_first_of("_") == std::string::npos) {
+        std::string how;
+        how = "[ROBOT MODEL] Wrong format frame id: " + frameID;
+        WrongFrameException robotModelWrongFrameFormat;
+        robotModelWrongFrameFormat.SetHow(how);
+        throw(robotModelWrongFrameFormat);
+    }
+    if (CheckArm(armID)) {
+        return armsModel_.at(armID)->Dexterity(frameID);
+    }
+    RobotModelArmException notExistingArm;
+    std::string how;
+    how = "Asking a not existing arm: " + armID;
+    notExistingArm.SetHow(how);
+    throw(notExistingArm);
+}
+
 const std::shared_ptr<ArmModel>& RobotModel::Arm(const std::string& ID) const noexcept(false)
 {
     if (CheckArm(ID)) {
