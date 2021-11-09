@@ -190,6 +190,17 @@ public:
      */
     double Manipulability(const std::string& frameID);
     /**
+     * @brief Method returning the dexterity jacobian related to the input frameID wrt to the arm base.
+     * @param frameId frame id
+     * @return jacobian matrix
+     */
+    Eigen::MatrixXd DexterityJacobian(const std::string& frameID);
+    /**
+     * @brief Method returning the arm dexterity
+     * @return  dexterity value.
+     */
+    double Dexterity(const std::string& frameID);
+    /**
      * @brief Method returning the arm id.
      * @return arm id
      */
@@ -213,7 +224,12 @@ protected:
      * @brief Evaluates the manipulability measure and its Jacobian
      * This method returns the manipulability measure and its Jacobian
      */
-    Eigen::MatrixXd EvaluateManipulability(const std::string& frameID);
+    virtual Eigen::MatrixXd EvaluateManipulability(const std::string& frameID);
+    /**
+     * @brief Evaluates the dexterity measure and its Jacobian
+     * This method returns the dexterity measure and its Jacobian
+     */
+    virtual Eigen::MatrixXd EvaluateDexterity(const std::string& frameID);
     /**
      * @brief Method returning the attached body frame wrt to the arm base.
      * @param ID frame ID.
@@ -243,7 +259,7 @@ protected:
      * @param jointNumber which joint is intended as last of the chain
      * @param endEffectorIndex
      */
-    void BackwardDirectGeometry(unsigned int jointNumber, unsigned int endEffectorIndex);
+    void BackwardDirectGeometry(unsigned int jointNumber, unsigned int endEffectorIndex); 
 
     bool modelInitialized_; //!< boolean stating whether the model is initialized
     bool isMapInitialized_; //!< boolean stating whether the transformation and jacobian maps are initialized
@@ -272,6 +288,10 @@ protected:
     Eigen::RotationMatrix I3_; //!< identity matrix
     bool modelReadFromFile_; //!< boolean stating whether the model is read from file
     std::string id_; //!< arm id
+    std::unordered_map<std::string, Eigen::MatrixXd> dexterityJacobians_; //!< map of the manipulability jacobians
+    std::unordered_map<std::string, double> dexterity_; //!< map of the manipulability values
+    Eigen::MatrixXd Jdjdq_; //!< jacobian * djdq 
+    Eigen::MatrixXd Jpinvdjpinvdq_; //!< jacobian pseudoinverse * djpinvdq
 };
 }
 

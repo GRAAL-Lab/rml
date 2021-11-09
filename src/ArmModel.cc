@@ -151,6 +151,8 @@ void ArmModel::JointsPosition(const Eigen::VectorXd fbk) noexcept(false)
     }
     manipulability_.erase(manipulability_.begin(), manipulability_.end());
     manipulabilityJacobians_.erase(manipulabilityJacobians_.begin(), manipulabilityJacobians_.end());
+    dexterity_.erase(dexterity_.begin(), dexterity_.end());
+    dexterityJacobians_.erase(dexterityJacobians_.begin(), dexterityJacobians_.end());
 }
 
 void ArmModel::JointsVelocity(const Eigen::VectorXd qdot) noexcept(false)
@@ -192,6 +194,7 @@ void ArmModel::EvaluateTotalForwardGeometry()
 
 void ArmModel::ForwardDirectGeometry(unsigned int jointNumber)
 {
+    Tz_ = Eigen::TransformationMatrix();
     // wTbi is the transformation between the base of joint <jointNumber> and the base frame <b>
     if (jointNumber == 0) {
         baseTbi_ = Eigen::TransformationMatrix();
@@ -224,10 +227,19 @@ void ArmModel::BackwardDirectGeometry(unsigned int jointNumber, unsigned int end
     // Calcolo w_ki
     // Dal momento che ri_ki e ei_ki sono ruotate lungo ki e per convenzione ogni giunto ruota lungo z si ha che ri_ki = ei_ki = [ 0 0 1 ]'
     // Di conseguenza w_ki e' la 3a colonna della R che lo proietta sul mondo
-    base_ki_ = baseTei_.at(jointNumber).block(0, 2, 3, 1); //GetSubMatrix(1, 3, 3, 3));
-
-    h_.at(jointNumber).AngularVector(base_ki_);
-    h_.at(jointNumber).LinearVector(base_ki_.cross(baseTei_.at(endEffectorIndex).TranslationVector() - baseTei_.at(jointNumber).TranslationVector()));
+    h_.at(jointNumber) = Eigen::VectorXd::Zero(6);
+    if (links_.at(jointNumber).Type() == JointType::Revolute) {
+        base_ki_ = baseTei_.at(jointNumber).block(0, 2, 3, 1); //GetSubMatrix(1, 3, 3, 3));
+        h_.at(jointNumber).AngularVector(base_ki_);
+        h_.at(jointNumber).LinearVector(base_ki_.cross(baseTei_.at(endEffectorIndex).TranslationVector() - baseTei_.at(jointNumber).TranslationVector()));
+    } else if (links_.at(jointNumber).Type() == JointType::Prismatic) {
+        base_ki_ = baseTei_.at(jointNumber).block(0, 2, 3, 1); //GetSubMatrix(1, 3, 3, 3)); 
+        h_.at(jointNumber).AngularVector(Eigen::Vector3d(0,0,0));
+        h_.at(jointNumber).LinearVector(base_ki_);
+    } else if (links_.at(jointNumber).Type() == JointType::Fixed) {
+        h_.at(jointNumber).AngularVector(Eigen::Vector3d(0,0,0));
+        h_.at(jointNumber).LinearVector(Eigen::Vector3d(0,0,0));
+    }
 }
 
 Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string& frameID)
@@ -237,10 +249,12 @@ Eigen::MatrixXd ArmModel::EvaluateManipulability(const std::string& frameID)
 
     Eigen::MatrixXd Jmu, Jpinv;
 
+    Eigen::MatrixXd dJdq;
+
     Jmu.resize(1, n);
     Jmu.setZero();
 
-    RegularizationData mySVD;
+    rml::RegularizationData mySVD;
     if (n < 6) {
         //TODO change svd data
         mySVD.params.lambda = 0.0;
@@ -440,5 +454,96 @@ double ArmModel::Manipulability(const std::string& frameID)
         std::cerr << "rml::ArmModel, Manipulability() no frame " << frameID << std::endl;
     }
     return manipulability_.at(frameID);
+}
+    
+Eigen::MatrixXd ArmModel::EvaluateDexterity(const std::string& frameID)
+{
+    Eigen::MatrixXd J = Jacobian(frameID);
+    long n = J.cols();
+
+    Eigen::MatrixXd Jdext, Jpinv, dJnorm_dq, dJpinvnorm_dq;
+    double dext;
+    Eigen::MatrixXd In = Eigen::MatrixXd::Identity(n,n);
+    Eigen::MatrixXd I6 = Eigen::MatrixXd::Identity(6,6);
+
+    Eigen::MatrixXd dJdq;
+
+    Jdext.resize(1, n);
+    Jdext.setZero();
+    dJnorm_dq.resize(1, n);
+    dJnorm_dq.setZero();
+    dJpinvnorm_dq.resize(1, n);
+    dJpinvnorm_dq.setZero();
+
+    rml::RegularizationData mySVD;
+    if (n < 6) {
+        //TODO change svd data
+        mySVD.params.lambda = 0.0;
+        mySVD.params.threshold = 0.00;
+        /// For defective manipulators
+        Jpinv = rml::RegularizedPseudoInverse(J, mySVD);
+        dext = 1/(J.norm()*Jpinv.norm());
+
+        for (unsigned int k = 0; k < n; k++) {
+            dJdq = dJdq_.at(k);
+            Jdext(k) = 0;
+            Jdjdq_ = J.transpose() * dJdq;
+            Jpinvdjpinvdq_ = Jpinv.transpose()*(-Jpinv*dJdq*Jpinv
+                                                +Jpinv*Jpinv.transpose()*dJdq.transpose()*(In-J*Jpinv)
+                                                +(In-Jpinv*J)*dJdq.transpose()*Jpinv.transpose()*Jpinv);
+            for (int i = 0; i < n; i++) {
+                dJnorm_dq(k) += Jdjdq_(i, i);
+                dJpinvnorm_dq(k) += Jpinvdjpinvdq_(i, i);
+            }
+            dJnorm_dq(k) *= 1/J.norm();
+            dJpinvnorm_dq(k) *= 1/Jpinv.norm();
+
+            Jdext(k) = -pow(dext,2)*(dJnorm_dq(k)*Jpinv.norm()+J.norm()*dJpinvnorm_dq(k));
+        }
+    } else {
+        mySVD.params.lambda = 0.01;
+        mySVD.params.threshold = 0.01;
+        Jpinv = rml::RegularizedPseudoInverse(J, mySVD);
+        dext = 1/(J.norm()*Jpinv.norm());
+
+        for (unsigned int k = 0; k < n; k++) {
+            dJdq = dJdq_.at(k);
+            Jdext(k) = 0;
+            Jdjdq_ = J.transpose() * dJdq;
+            Jpinvdjpinvdq_ = Jpinv.transpose()*(-Jpinv*dJdq*Jpinv
+                                                +Jpinv*Jpinv.transpose()*dJdq.transpose()*(I6-J*Jpinv)
+                                                +(In-Jpinv*J)*dJdq.transpose()*Jpinv.transpose()*Jpinv);
+            for (int i = 0; i < n; i++) {
+                dJnorm_dq(k) += Jdjdq_(i, i);
+            }
+            for (int j = 0; j < 6; j++) {
+                dJpinvnorm_dq(k) += Jpinvdjpinvdq_(j, j);
+            }
+            dJnorm_dq(k) *= 1/J.norm();
+            dJpinvnorm_dq(k) *= 1/Jpinv.norm();
+
+            Jdext(k) = -pow(dext,2)*(dJnorm_dq(k)*Jpinv.norm()+J.norm()*dJpinvnorm_dq(k));
+        }
+    }
+
+    dexterity_.insert(std::make_pair(frameID, dext));
+
+    return Jdext;
+}
+
+Eigen::MatrixXd ArmModel::DexterityJacobian(const std::string& frameID) 
+{
+    if (dexterityJacobians_.find(frameID) == dexterityJacobians_.end()) {
+        dexterityJacobians_.insert(std::make_pair(frameID, EvaluateDexterity(frameID)));
+    }
+    return (dexterityJacobians_.at(frameID));
+}
+
+double ArmModel::Dexterity(const std::string& frameID) 
+{
+    if (dexterity_.find(frameID) == dexterity_.end()) {
+        std::cerr << "nimblbot::ArmModel, Dexterity() no frame " << frameID << std::endl;
+    }
+    return dexterity_.at(frameID);
 }
 }
