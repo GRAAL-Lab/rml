@@ -23,8 +23,8 @@ inline Matrix<Scalar, 6, 6> GetRigidBodyMatrix() const
 			-derived()(1),  derived()(0),    0;
 	Matrix<Scalar, 6, 6> S;
 	S.block(0,0,3,3) = S.block(3,3,3,3) = Eigen::Matrix<Scalar, 3, 3>::Identity();
-	S.block(0,3,3,3) = Eigen::Matrix<Scalar, 3, 3>::Zero();
-	S.block(3,0,3,3) = -1.0 * t_hat;
+	S.block(0,3,3,3) = -1.0 * t_hat;
+	S.block(3,0,3,3) = Eigen::Matrix<Scalar, 3, 3>::Zero();
 	return S;
 }
 
