@@ -169,7 +169,7 @@ public:
      * @param jointIndex link index
      * @return robot link
      */
-    RobotLink& Link(int jointIndex) noexcept(false);
+    virtual RobotLink& Link(int jointIndex) noexcept(false);
     /**
      * @brief Method returning true if the model is initialized false otherwise.
      */
