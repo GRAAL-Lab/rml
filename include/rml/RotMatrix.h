@@ -23,22 +23,23 @@ namespace Eigen {
  * matrix, rml::EulerRPY and Eigen::Quaterniond reprensentation.
  *
  */
-class RotationMatrix : public Eigen::Matrix<double,3,3,Eigen::DontAlign> {
+class RotationMatrix : public Eigen::Matrix<double,3,3> {
 public:
+    
     RotationMatrix();
     RotationMatrix(Eigen::Quaterniond q);
 
     // This constructor allows you to construct RotMatrix from Eigen expressions
     template <typename OtherDerived>
     RotationMatrix(const Eigen::MatrixBase<OtherDerived>& other)
-        : Eigen::Matrix<double,3,3,Eigen::DontAlign>(other)
+        : Eigen::Matrix<double,3,3>(other)
     {
     }
     // This method allows you to assign Eigen expressions to RotMatrix
     template <typename OtherDerived>
     RotationMatrix& operator=(const Eigen::MatrixBase<OtherDerived>& other)
     {
-        this->Eigen::Matrix<double,3,3,Eigen::DontAlign>::operator=(other);
+        this->Eigen::Matrix<double,3,3>::operator=(other);
         return *this;
     }
 

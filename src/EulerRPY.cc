@@ -38,7 +38,15 @@ EulerRPY::~EulerRPY() {}
  */
 Eigen::RotationMatrix EulerRPY::ToRotationMatrix() const
 {
-    return Eigen::AngleAxisd(this->Yaw(), Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(this->Pitch(), Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(this->Roll(), Eigen::Vector3d::UnitX());
+
+    Eigen::AngleAxisd x_aa = Eigen::AngleAxisd(this->Roll(), Eigen::Vector3d::UnitX());
+    Eigen::AngleAxisd y_aa = Eigen::AngleAxisd(this->Pitch(), Eigen::Vector3d::UnitY());
+    Eigen::AngleAxisd z_aa = Eigen::AngleAxisd(this->Yaw(), Eigen::Vector3d::UnitZ());
+
+    Eigen::Quaterniond q_rot = Eigen::Quaterniond(z_aa) * Eigen::Quaterniond(y_aa) * Eigen::Quaterniond(x_aa);
+    Eigen::RotationMatrix rot_matrix(q_rot);
+
+    return rot_matrix;
 }
 
 Eigen::Vector3d EulerRPY::Derivative(const Eigen::Vector3d& omega) const
