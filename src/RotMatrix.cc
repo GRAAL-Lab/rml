@@ -10,13 +10,13 @@
 namespace Eigen {
 
 RotationMatrix::RotationMatrix()
-    : Eigen::Matrix3d()
+    : Eigen::Matrix<double,3,3,Eigen::DontAlign>()
 {
     *this = Eigen::Matrix3d::Identity();
 }
 
 RotationMatrix::RotationMatrix(Eigen::Quaterniond q)
-    : Eigen::Matrix3d()
+    : Eigen::Matrix<double,3,3,Eigen::DontAlign>()
 {
     *this = q.toRotationMatrix();
 }
