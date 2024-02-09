@@ -2,24 +2,20 @@
 
 # At LEAST 2.8 but newer is better
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+project(rml VERSION 1.0 LANGUAGES CXX)
+
+
+#set(CMAKE_CXX_STANDARD 17)
+add_compile_options(-std=c++17)
 
 # Must use GNUInstallDirs to install libraries into correct
 # locations on all platforms.
 include(GNUInstallDirs)
 
-#if(NOT CMAKE_CXX_STANDARD)
-set(CMAKE_CXX_STANDARD 17)
-#endif()
-
-add_compile_options(-std=c++17)
-
-# Define library. Only source files here!
-project(rml VERSION 0.1 LANGUAGES CXX)
-
 set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
 
-option(BUILD_TESTS "Compile tests" ON)
-option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
+option(BUILD_TESTS "Compile tests" OFF)
+option(BUILD_TESTS_DEVEL "Compile tests devel branch" OFF)
 
 add_library(rml SHARED
     src/Vector6d.cc
