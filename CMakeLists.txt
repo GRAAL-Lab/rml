@@ -7,14 +7,18 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 # locations on all platforms.
 include(GNUInstallDirs)
 
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+#if(NOT CMAKE_CXX_STANDARD)
+set(CMAKE_CXX_STANDARD 17)
+#endif()
+
+#if(NOT CMAKE_BUILD_TYPE)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+#endif()
 
 # Define library. Only source files here!
 project(rml VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug" CACHE STRING "" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug RelWithDebInfo" CACHE STRING "" FORCE)
 
 option(BUILD_TESTS "Compile tests" ON)
 option(BUILD_TESTS_DEVEL "Compile tests devel branch" ON)
