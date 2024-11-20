@@ -154,6 +154,22 @@ void SaturateScalar(double sat, double& value);
  * @param[in,out] vector 	the vector which is saturated to the maximum value
  */
 void SaturateVector(const double sat, Eigen::VectorXd& vector);
+
+/**
+ * @brief Saturate the vector within the limits
+ *
+ * Saturates the input vector within the limits defined by the upper and lower limits vectors
+ * The scaling is done by evaluating the maximum value of the vector and then scaling all the components
+ * proportionally to the maximum value
+ *
+ * @param[in] upper_limits 	the upper limits of the vector
+ * @param[in] lower_limits 	the lower limits of the vector
+ * @param[in,out] vect 		the vector to be saturated
+ */
+
+void SaturateVectorWithinLimits(const Eigen::VectorXd& upper_limits, const Eigen::VectorXd& lower_limits, Eigen::VectorXd& vect);
+
+
 /**
  * @brief Evaluates the norm of the shortest distance vector among a point and a given plane
  *

@@ -186,6 +186,33 @@ void SaturateVector(const double sat, Eigen::VectorXd& vect)
     }
 }
 
+void SaturateVectorWithinLimits(const Eigen::VectorXd& upper_limits, const Eigen::VectorXd& lower_limits, Eigen::VectorXd& vect)
+{
+    // Ensure the size of the limits matches the vector size
+    if (upper_limits.size() != vect.size() || lower_limits.size() != vect.size()) {
+        throw std::invalid_argument("Size of limits must match the size of the vector.");
+    }
+
+    double scaling_factor = 1.0;
+
+    for (int i = 0; i < vect.size(); i++) {
+        double upper_ratio = vect(i) > upper_limits(i) ? upper_limits(i) / vect(i) : 1.0;
+        double lower_ratio = vect(i) < lower_limits(i) ? lower_limits(i) / vect(i) : 1.0;
+        double component_scaling = std::min(upper_ratio, lower_ratio);
+
+        // Update the overall scaling factor
+        if (component_scaling < scaling_factor) {
+            scaling_factor = component_scaling;
+        }
+    }
+
+    // Scale the vector if necessary
+    if (scaling_factor < 1.0) {
+        vect *= scaling_factor;
+    }
+}
+
+
 void SaturateScalar(double sat, double& value)
 {
     if (value > sat)
