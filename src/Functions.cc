@@ -186,6 +186,47 @@ void SaturateVector(const double sat, Eigen::VectorXd& vect)
     }
 }
 
+void SaturateVector(const Eigen::VectorXd& upper_limits, const Eigen::VectorXd& lower_limits, Eigen::VectorXd& vect)
+{
+    // Step 1: Ensure the size of the upper and lower limits matches the size of the vector.
+    // If the sizes do not match, the function throws an exception because saturation would be undefined.
+    if (upper_limits.size() != vect.size() || lower_limits.size() != vect.size()) {
+        throw std::invalid_argument("Size of limits must match the size of the vector.");
+    }
+
+    // Step 2: Initialize a scaling factor to 1.0.
+    // This factor will be used to scale the vector if any of its components exceed the specified limits.
+    double scaling_factor = 1.0;
+
+    // Step 3: Iterate through each component of the vector.
+    for (int i = 0; i < vect.size(); i++) {
+        // Step 4: Compute the ratio needed to scale the current component down to the upper limit if it exceeds the limit.
+        // If the component is within the upper limit, the ratio is 1.0 (no scaling needed).
+        double upper_ratio = vect(i) > upper_limits(i) ? upper_limits(i) / vect(i) : 1.0;
+
+        // Step 5: Compute the ratio needed to scale the current component up to the lower limit if it is below the limit.
+        // If the component is within the lower limit, the ratio is 1.0 (no scaling needed).
+        double lower_ratio = vect(i) < lower_limits(i) ? lower_limits(i) / vect(i) : 1.0;
+
+        // Step 6: Determine the scaling factor for the current component.
+        // The scaling factor is the smaller of the upper or lower ratio, ensuring the component stays within the limits.
+        double component_scaling = std::min(upper_ratio, lower_ratio);
+
+        // Step 7: Update the overall scaling factor if the current component's scaling factor is smaller.
+        // This ensures that all components of the vector remain within the specified limits.
+        if (component_scaling < scaling_factor) {
+            scaling_factor = component_scaling;
+        }
+    }
+
+    // Step 8: Apply the overall scaling factor to the vector if necessary.
+    // If the scaling factor is less than 1.0, the vector is scaled down to ensure all components are within limits.
+    if (scaling_factor < 1.0) {
+        vect *= scaling_factor;
+    }
+}
+
+
 void SaturateScalar(double sat, double& value)
 {
     if (value > sat)
