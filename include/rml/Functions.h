@@ -156,18 +156,31 @@ void SaturateScalar(double sat, double& value);
 void SaturateVector(const double sat, Eigen::VectorXd& vector);
 
 /**
- * @brief Saturate the vector within the limits
+ * @brief Saturate the vector within the specified limits.
  *
- * Saturates the input vector within the limits defined by the upper and lower limits vectors
- * The scaling is done by evaluating the maximum value of the vector and then scaling all the components
- * proportionally to the maximum value
+ * This function ensures that all components of a given vector remain within the bounds
+ * defined by the provided upper and lower limits. If any component of the vector exceeds
+ * its corresponding upper limit or falls below its lower limit, the entire vector is scaled
+ * proportionally to keep all components within the valid range.
  *
- * @param[in] upper_limits 	the upper limits of the vector
- * @param[in] lower_limits 	the lower limits of the vector
- * @param[in,out] vect 		the vector to be saturated
+ * The scaling process ensures that the direction of the vector is preserved while bringing
+ * all components within bounds. The scaling factor is calculated based on the strictest limit
+ * violation across all components.
+ *
+ * @param[in] upper_limits  The upper limits for each component of the vector.
+ *                          This must be the same size as the input vector.
+ * @param[in] lower_limits  The lower limits for each component of the vector.
+ *                          This must be the same size as the input vector.
+ * @param[in,out] vect      The vector to be saturated. This vector is updated in place
+ *                          to ensure all its components lie within the specified bounds.
+ *
+ * @note If the size of the `upper_limits` or `lower_limits` vectors does not match the size
+ *       of the input `vect`, the function will throw a `std::invalid_argument` exception.
+ *
+ * @throws std::invalid_argument If the size of the `upper_limits` or `lower_limits`
+ *                               does not match the size of `vect`.
  */
-
-void SaturateVectorWithinLimits(const Eigen::VectorXd& upper_limits, const Eigen::VectorXd& lower_limits, Eigen::VectorXd& vect);
+void SaturateVector(const Eigen::VectorXd& upper_limits, const Eigen::VectorXd& lower_limits, Eigen::VectorXd& vect);
 
 
 /**
