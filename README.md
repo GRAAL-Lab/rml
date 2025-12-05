@@ -42,4 +42,4 @@ The software is released under the MIT License, as reported in the [LICENSE.md](
 
 ### Mantainer
 
-* <fwanderlingh@gmail.com>
+* <francesco.wanderlingh@unige.it>
