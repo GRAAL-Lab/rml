@@ -35,6 +35,10 @@ The build tool used for this project is CMake. To build and install the project 
 The CMakeLists.txt provides also an additional BUILD_TESTS option, which by default is set to OFF. If you want to build also the tests just run:
 
     $ cmake .. -DBUILD_TESTS=ON
+    
+### License
+
+The software is released under the MIT License, as reported in the [LICENSE.md](/LICENSE.md) file.
 
 ### Mantainer
 
