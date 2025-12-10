@@ -12,7 +12,7 @@ Its major features are:
 3. Implementation of a **Pseudo-Inversion** algorithm (rml::RegularizedPseudoInverse()).
 4. Implementation of a slim **RobotModel** class able to manage multi arm mobile robotic platforms (rml::RobotModel), in which we can load a rml::VehicleModel and many rml::ArmModel(s), providing frame and jacobian utilities, also including dJdq and manipulability measurements.
 5. Implementation of the **Newton-Euler** algorithm (rml::NewtonEuler), with some utility functions to simulate dynamic systems.
-6. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more ().
+6. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more.
 
 Check out the doxygen ::rml namespace documentation for a brief overview of all functionalities.
 Where not explicitly stated so, the default units are the SI ones (meters, kg, seconds, etc.).
