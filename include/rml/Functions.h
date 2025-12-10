@@ -219,8 +219,8 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
  * This method assumes that the three values stored in the Vect3 correspond to a translation r between two frames
  * Then it computes the rigid body transformation matrix defined as\n
  *
- * \f$
-
+ *
+\f$
 \left| \begin{array}{c}
 		\omega  \\
 		   v
@@ -234,7 +234,7 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
 		\omega  \\
 		   v
 		\end{array} \right|
-		 \f$
+\f$
  *
  *
  *
