@@ -21,7 +21,7 @@ void RegPinvEnrico(const double *J, int m, int n, double *JPInv, double M, doubl
 	double Reg;
 	*flag = 0;
 
-	GT_TransMatrix(J, m, n, U);
+	MatrixTranspose(J, m, n, U);
 
 	tempswap = n;
 	n = m;
@@ -82,7 +82,7 @@ void RegPinvEnrico(const double *J, int m, int n, double *JPInv, double M, doubl
 	}
 
 	// Jpinv = V*S*U'
-	GT_MultMatrix(U, m, n, temp, n, n, JPInv);
+	MatrixMultiply(U, m, n, temp, n, n, JPInv);
 
 }
 
@@ -100,7 +100,7 @@ void RegPinvAlpha(const double *J, int m, int n, double *JPInv, double M, double
 	double RegAlpha;
 	*flag = 0;
 
-	GT_TransMatrix(J, m, n, U);
+	MatrixTranspose(J, m, n, U);
 
 	tempswap = n;
 	n = m;
@@ -159,7 +159,7 @@ void RegPinvAlpha(const double *J, int m, int n, double *JPInv, double M, double
 	}
 
 	// Jpinv = V*S*U'
-	GT_MultMatrix(U, m, n, temp, n, n, JPInv);
+	MatrixMultiply(U, m, n, temp, n, n, JPInv);
 
 }
 
@@ -243,7 +243,7 @@ void RegPinvSmooth(const double *J, int m, int n, double *JPInv, double threshol
 	double Reg;
 	*flag = 0;
 
-	GT_TransMatrix(J, m, n, U);
+	MatrixTranspose(J, m, n, U);
 
 	tempswap = n;
 	n = m;
@@ -297,7 +297,7 @@ void RegPinvSmooth(const double *J, int m, int n, double *JPInv, double threshol
 	}
 
 	// Jpinv = V*S*U'
-	GT_MultMatrix(U, m, n, temp, n, n, JPInv);
+	MatrixMultiply(U, m, n, temp, n, n, JPInv);
 
 }
 }

@@ -19,22 +19,15 @@ const double SVDEpsilon = 0.00000001;
 /**
  * @internal for internal use only
  *
- * @return  sqrt(a*a+b*b) (@see CMAT::GT_svdcmp)
- */
-double GT_pythag(double a, double b);
-
-/**
- * @internal for internal use only
- *
  * @brief Raised cosine function  (out = lambda*cos[(in/th)*(PI/2)]).
  */
-double GT_RaisedCos(double in, double th, double lambda);
+double RaisedCosine(double in, double th, double lambda);
 /**
  * @internal for internal use only
  *
  * @brief Product of two matrices
  */
-short GT_MultMatrix(const double* A, int m, int n, const double* B, char k, char p, double* OUT);
+short MatrixMultiply(const double* A, int m, int n, const double* B, char k, char p, double* OUT);
 /**
  * @internal for internal use only
  *
@@ -42,7 +35,7 @@ short GT_MultMatrix(const double* A, int m, int n, const double* B, char k, char
  *
  * @note the input and the output matrices must be different!!!
  */
-void GT_TransMatrix(const double* A, int m, int n, double* OUT);
+void MatrixTranspose(const double* A, int m, int n, double* OUT);
 
 /**
  * @internal for internal use only

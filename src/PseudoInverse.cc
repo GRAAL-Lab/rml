@@ -15,7 +15,7 @@
 namespace rml {
 
 //  Computes the SVD-based regularized matrix pseudoinversion (a = U*S*V')
-void GT_RegPinv(const double* J, int m, int n, double* JPInv, double treshold, double lambda, double* prod, int* flag) {
+void RegPinv(const double* J, int m, int n, double* JPInv, double treshold, double lambda, double* prod, int* flag) {
 	int tempswap;
 	static double SVD[3 * MaxMatrixDim];
 	static double V[MaxMatrixDim];
@@ -28,7 +28,7 @@ void GT_RegPinv(const double* J, int m, int n, double* JPInv, double treshold, d
 	//short flag = 0;
 	*flag = 0;
 
-	GT_TransMatrix(J, m, n, U);
+	MatrixTranspose(J, m, n, U);
 
 	tempswap = n;
 	n = m;
@@ -50,7 +50,7 @@ void GT_RegPinv(const double* J, int m, int n, double* JPInv, double treshold, d
 			S[i] = 0;
 			*flag += 1;
 		} else {
-			Reg = GT_RaisedCos(S[i], treshold, lambda);
+			Reg = RaisedCosine(S[i], treshold, lambda);
 
 			*prod = (*prod) * S[i];
 
@@ -69,7 +69,7 @@ void GT_RegPinv(const double* J, int m, int n, double* JPInv, double treshold, d
 	}
 
 	// Jpinv = V*S*U'
-	GT_MultMatrix(U, m, n, temp, n, n, JPInv);
+	MatrixMultiply(U, m, n, temp, n, n, JPInv);
 
 }
 

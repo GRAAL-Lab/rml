@@ -393,7 +393,7 @@ Eigen::TransformationMatrix ArmModel::TransformationMatrix(const std::string& fr
 {
     if (transformation_.find(frameID) == transformation_.end()) {
         WrongFrameException armModelWrongLabel;
-        std::string how = "[ARM MODEL] The frame does not exist " + frameID;
+        std::string how = "[ARM MODEL] The frame does not exist: " + frameID;
         armModelWrongLabel.SetHow(how);
         throw(armModelWrongLabel);
     }
@@ -409,7 +409,7 @@ Eigen::MatrixXd ArmModel::Jacobian(const std::string& frameID) noexcept(false)
 {
     if (jacobians_.find(frameID) == jacobians_.end()) {
         WrongFrameException armModelWrongLabel;
-        std::string how = "[ARM MODEL] The frame does not exist " + frameID;
+        std::string how = "[ARM MODEL] The frame does not exist: " + frameID;
         armModelWrongLabel.SetHow(how);
         throw(armModelWrongLabel);
     }
@@ -546,4 +546,33 @@ double ArmModel::Dexterity(const std::string& frameID)
     }
     return dexterity_.at(frameID);
 }
+
+std::vector<std::string> ArmModel::GetRigidBodyFrameIDs() const noexcept {
+    std::vector<std::string> frameIDs;
+    for (const auto& pair : rigidBodyFrames_) {
+        frameIDs.push_back(pair.first);
+    }
+    return frameIDs;
+}
+
+std::vector<std::string> ArmModel::GetJointFrameIDs() const noexcept {
+    std::vector<std::string> frameIDs;
+    for (unsigned int i = 0; i < totalNumJoints_; ++i) {
+        frameIDs.push_back(id_ + FrameID::Joint + std::to_string(i));
+    }
+    return frameIDs;
+}
+
+std::vector<std::string> ArmModel::GetJacobianFrameIDs() const noexcept {
+    std::vector<std::string> frameIDs;
+    for (const auto& pair : jacobians_) {
+        frameIDs.push_back(pair.first);
+    }
+    return frameIDs;
+}
+
+std::string ArmModel::GetEndEffectorFrameID() const noexcept {
+    return id_ + FrameID::Joint + std::to_string(totalNumJoints_ - 1);
+}
+
 }

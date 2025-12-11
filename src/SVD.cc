@@ -180,7 +180,7 @@ void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double 
 						break;
 					}
 					g = w[i];
-					h = GT_pythag(f, g);
+					h = sqrt(f * f + g * g);
 					w[i] = h;
 					h = 1.0 / h;
 					c = g * h;
@@ -217,7 +217,7 @@ void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double 
 			g = rv1[nm];
 			h = rv1[k];
 			f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2.0 * h * y);
-			g = GT_pythag(f, 1.0);
+			g = sqrt(f * f + 1.0); 
 			//f = ((x - z) * (x + z) + h * ((y / (f + MATRIXLIB_SIGN(g, f))) - h)) / x;
 			f = ((x - z) * (x + z) + h * ((y / (f + copysign(g, f))) - h)) / x;
 			c = 1.0;
@@ -229,7 +229,7 @@ void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double 
 				y = w[i];
 				h = s * g;
 				g = c * g;
-				z = GT_pythag(f, h);
+				z = sqrt(f * f + h * h); 
 				rv1[j] = z;
 				c = f / z;
 				s = h / z;
@@ -244,7 +244,7 @@ void SVD_NumericalRecipes(double *a, int m, int n, double *w, double *v, double 
 					v[jj + n * j] = x * c + z * s;
 					v[jj + n * i] = z * c - x * s;
 				}
-				z = GT_pythag(f, h);
+				z = sqrt(f * f + h * h);
 				w[j] = z;
 				if (z) {
 					z = 1.0 / z;

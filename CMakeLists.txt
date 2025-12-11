@@ -1,7 +1,7 @@
 # RML: Robotic Matematical Library
 
 # At LEAST 2.8 but newer is better
-cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 project(rml VERSION 1.0 LANGUAGES CXX)
 
 #set(CMAKE_CXX_STANDARD 17)

@@ -50,9 +50,9 @@ namespace rml {
  * for which computing the matrices.
  *
  * The id must be provieded according the following logic:
- * - joint n-th: armID + rml::FrameID::Joint + "n"
- * - rigidBody attached on arm: armID + "_" + "rigidBodyID"
- * - rigid body attached on body frame: robotName + "_" + rigidBodyID
+ * - <b>joint n-th</b>: armID + rml::FrameID::Joint + "n"
+ * - <b>rigidBody attached on arm</b>: armID + "_" + "rigidBodyID"
+ * - <b>rigid body attached on body frame</b>: robotName + "_" + rigidBodyID
  *
  *
  *
@@ -65,11 +65,12 @@ namespace rml {
  * In order to obtain the manipulability value for a frame the method Manipulability() must be used\n
  * It is worth noticing that the jacobians given by the RobotModel takes into account the degrees of freedom of the whole robot
  * (hence of all the arms and of the moving platform, if present) in the aforementioned a priori defined order.
- * >
- *
-
- *
+ * 
+ * Example of frame id:
+ * - "youbot_Joint_0" for the first joint of the arm "youbot"
+ * - "youbot_tool0" for a rigid body frame "tool0" attached to the arm "youbot"
  */
+
 class RobotModel {
 public:
     /**

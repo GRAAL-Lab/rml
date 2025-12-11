@@ -10,11 +10,6 @@
 #include <iostream>
 
 namespace rml {
-//  Return  sqrt(a*a+b*b) (used by GT_svdcmp)
-double GT_pythag(double a, double b)
-{
-    return sqrt(a * a + b * b);
-}
 
 double SmoothFunction(double x, double beta, double lambda)
 {
@@ -35,7 +30,7 @@ double SmoothTransition(double x, double beta, double xmin, double lambda)
 }
 
 //  Raised cosine function  (out = lambda*cos[(in/th)*(PI/2)])
-double GT_RaisedCos(double in, double th, double lambda)
+double RaisedCosine(double in, double th, double lambda)
 {
     if (in < 0)
         in = -in;
@@ -47,7 +42,7 @@ double GT_RaisedCos(double in, double th, double lambda)
 }
 
 //  Product of two matrices
-short GT_MultMatrix(const double* A, int m, int n, const double* B, char k, char p, double* output)
+short MatrixMultiply(const double* A, int m, int n, const double* B, char k, char p, double* output)
 {
 
     int i;
@@ -73,7 +68,7 @@ short GT_MultMatrix(const double* A, int m, int n, const double* B, char k, char
 }
 
 //  Transpose a matrix (NOTE: the input and the output matrices must be different!!!)
-void GT_TransMatrix(const double* A, int m, int n, double* output)
+void MatrixTranspose(const double* A, int m, int n, double* output)
 {
 
     int i;
