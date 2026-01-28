@@ -2,7 +2,7 @@
 The **RML** library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators. The library can be found in the [GRAAL Robotics Toolbox](https://bitbucket.org/isme_robotics/workspace/projects/RTB) repositories.
 
 ## Documentation
-Full doxygen-generated documentation can be found at: [RML Documentation](https://merosss.bitbucket.io/rml).
+Full doxygen-generated documentation can be found at: [RML Documentation](https://www.graal.dibris.unige.it/docs/rml/).
 
 ## Features
 Its major features are:
