@@ -31,8 +31,12 @@ Eigen::Matrix6d RotationMatrix::CartesianRotationMatrix() const
 
 rml::EulerRPY RotationMatrix::ToEulerRPY() const
 {
-    Eigen::Vector3d ypr = this->eulerAngles(2, 1, 0);
-    return rml::EulerRPY(ypr(2), ypr(1), ypr(0));
+    const auto& R = *this;
+    double yaw = std::atan2(R(1, 0), R(0, 0));
+    double pitch = std::atan2(-R(2, 0), std::sqrt(R(0, 0) * R(0, 0) + R(1, 0) * R(1, 0)));
+    double roll = std::atan2(R(2, 1), R(2, 2));
+
+    return rml::EulerRPY(roll, pitch, yaw);
 }
 
 Eigen::Quaterniond RotationMatrix::ToQuaternion() const
