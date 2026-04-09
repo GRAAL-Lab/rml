@@ -154,6 +154,35 @@ void SaturateScalar(double sat, double& value);
  * @param[in,out] vector 	the vector which is saturated to the maximum value
  */
 void SaturateVector(const double sat, Eigen::VectorXd& vector);
+
+/**
+ * @brief Saturate the vector within the specified limits.
+ *
+ * This function ensures that all components of a given vector remain within the bounds
+ * defined by the provided upper and lower limits. If any component of the vector exceeds
+ * its corresponding upper limit or falls below its lower limit, the entire vector is scaled
+ * proportionally to keep all components within the valid range.
+ *
+ * The scaling process ensures that the direction of the vector is preserved while bringing
+ * all components within bounds. The scaling factor is calculated based on the strictest limit
+ * violation across all components.
+ *
+ * @param[in] upper_limits  The upper limits for each component of the vector.
+ *                          This must be the same size as the input vector.
+ * @param[in] lower_limits  The lower limits for each component of the vector.
+ *                          This must be the same size as the input vector.
+ * @param[in,out] vect      The vector to be saturated. This vector is updated in place
+ *                          to ensure all its components lie within the specified bounds.
+ *
+ * @note If the size of the `upper_limits` or `lower_limits` vectors does not match the size
+ *       of the input `vect`, the function will throw a `std::invalid_argument` exception.
+ *
+ * @throws std::invalid_argument If the size of the `upper_limits` or `lower_limits`
+ *                               does not match the size of `vect`.
+ */
+void SaturateVector(const Eigen::VectorXd& upper_limits, const Eigen::VectorXd& lower_limits, Eigen::VectorXd& vect);
+
+
 /**
  * @brief Evaluates the norm of the shortest distance vector among a point and a given plane
  *
@@ -190,8 +219,8 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
  * This method assumes that the three values stored in the Vect3 correspond to a translation r between two frames
  * Then it computes the rigid body transformation matrix defined as\n
  *
- * \f$
-
+ *
+\f$
 \left| \begin{array}{c}
 		\omega  \\
 		   v
@@ -205,7 +234,7 @@ Eigen::Matrix3d Vect3ToSkew(const Eigen::Vector3d& t);
 		\omega  \\
 		   v
 		\end{array} \right|
-		 \f$
+\f$
  *
  *
  *

@@ -106,7 +106,7 @@ Eigen::TransformationMatrix VehicleModel::TransformationMatrix(const std::string
 {
     if (transformation_.find(frameID) == transformation_.end()) {
         WrongFrameException vehicleModelWrongLabel;
-        std::string how = "[VEHICLE MODEL] The frame does not exist " + frameID;
+        std::string how = "[VEHICLE MODEL] The frame does not exist: " + frameID;
         vehicleModelWrongLabel.SetHow(how);
         throw(vehicleModelWrongLabel);
     }
@@ -122,7 +122,7 @@ Eigen::MatrixXd VehicleModel::Jacobian(const std::string& ID) noexcept(false)
 {
     if (jacobians_.find(ID) == jacobians_.end()) {
         WrongFrameException vehicleModelWrongLabel;
-        std::string how = "[VEHICLE MODEL] The frame does not exist " + ID;
+        std::string how = "[VEHICLE MODEL] The frame does not exist: " + ID;
         vehicleModelWrongLabel.SetHow(how);
         throw(vehicleModelWrongLabel);
     }

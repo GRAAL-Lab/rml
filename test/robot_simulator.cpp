@@ -22,6 +22,14 @@ std::shared_ptr<rml::ArmModel> armModel;
 bool goalReached;
 double goal[6];
 
+std::string robotID = "youbot";
+
+// Base to tool transformation matrix
+Eigen::TransformationMatrix bTt;
+
+// Base to goal transformation matrix
+Eigen::TransformationMatrix bTg;
+
 // **********************************************************
 // ***************** ODE Simulator Function *****************
 void single_arm_sim(const state_type& q, state_type& dqdt, double t)
@@ -29,7 +37,7 @@ void single_arm_sim(const state_type& q, state_type& dqdt, double t)
 
     //! Update Control state and compute new control Command
     if ((t - t_old) > 0.01 || (t - t_old) < 0.0) {
-        cout << "************* solver: " << t << endl;
+        cout << "***** Solver: " << t << std::endl;
 
         for (int i = 0; i < numJoints; i++)
             qfb_single(i) = q[i];
@@ -37,15 +45,25 @@ void single_arm_sim(const state_type& q, state_type& dqdt, double t)
         armModel->JointsPosition(qfb_single);
         armModel->JointsVelocity(qdotcontrol_single);
 
-        ////TODO
-        /// SET GOAL TO CARTERROR
-        /// COMPUTE J_PSEUDOINVERSE
-        /// COMPUTE REFERENCE
-
         rml::RegularizationData regData;
-        Eigen::MatrixXd JPinv = rml::RegularizedPseudoInverse(armModel->Jacobian(""), regData);
-        //multiArmCtrl->ComputeControl();
-        //qdotcontrol_single = multiArmCtrl->GetJointControl();
+
+        std::string eeFrameID = armModel->GetEndEffectorFrameID();
+
+        Eigen::MatrixXd JPinv;
+        try{
+            JPinv = rml::RegularizedPseudoInverse(armModel->Jacobian(eeFrameID), regData);
+        } catch(rml::WrongFrameException& e){
+            cout << "Exception in RegularizedPseudoInverse: " << e.how() << endl;
+        }
+        
+        // Compute Control Command
+        // bTg is defined outside this function as goal pose
+        bTt = armModel->TransformationMatrix(armModel->GetEndEffectorFrameID());
+        Eigen::Vector6d cart_err = rml::CartesianError(bTt, bTg);
+        Eigen::Vector6d x_dot = cart_err * 1.0; // P controller with gain 1.0
+
+        // Compute joint velocities
+        qdotcontrol_single = JPinv * x_dot;
 
         t_old = t;
     }
@@ -81,7 +99,6 @@ void write_single_arm_sim(const state_type& q, const double t)
         for (int i = 0; i < q_single_final.rows(); i++)
             cout << q_single_final(i) << " ";
         cout << endl;
-        //		return;
     }
 };
 
@@ -94,17 +111,40 @@ int main(int, char**)
     goalReached = false;
 
     std::shared_ptr<rml::YouBotArmModel> youbotAM = std::make_shared<rml::YouBotArmModel>("youbot");
+    
     armModel = std::make_shared<rml::ArmModel>("genericAM");
 
     armModel = youbotAM;
+
+    auto rigidBodyFramesIDs = armModel->GetRigidBodyFrameIDs();
+    cout << "Rigid Body Frame IDs size: " << rigidBodyFramesIDs.size() << endl;
+    for (const auto& id : rigidBodyFramesIDs) {
+        cout << "Rigid Body Frame ID: " << id << endl;
+    }
+
+    auto jointFramesIDs = armModel->GetJointFrameIDs();
+    cout << "Joint Frame IDs size: " << jointFramesIDs.size() << endl;
+    for (const auto& id : jointFramesIDs) {
+        cout << "Joint Frame ID: " << id << endl;
+    }
+
+    auto jacobianFramesIDs = armModel->GetJacobianFrameIDs();
+    cout << "Jacobian Frame IDs size: " << jacobianFramesIDs.size() << endl;
+    for (const auto& id : jacobianFramesIDs) {
+        cout << "Jacobian Frame ID: " << id << endl;
+    }
+
     numJoints = armModel->NumJoints();
+    std::cout << "Number of Joints: " << numJoints << std::endl;
+
+    // Control Vectors Initialization
     qfb_single = qdotcontrol_single = q_single_final = Eigen::VectorXd::Zero(numJoints);
 
     // YouBot Q_unfolded
     init_q_single = { { 0.011, 0.11, -1.4, -0.11, 1.57 } };
 
     // Save File
-    std::string DataLogPathStr = futils::get_selfpath() + "log_" + futils::GetCurrentDateFormatted() + ".txt";
+    std::string DataLogPathStr = futils::get_selfpath() + "/robot_sim_log_" + futils::GetCurrentDateFormatted() + ".txt";
     cout << "Saving to: " << DataLogPathStr << "\n";
     fileLog.open(DataLogPathStr.c_str(), std::ios::app);
 
@@ -124,16 +164,17 @@ int main(int, char**)
     armModel->JointsPosition(qfb_single);
     armModel->JointsVelocity(qdotcontrol_single);
 
-    //    Eigen::TransformationMatrix bTt = armModel->GetBase2ToolTransf();
-    //    Eigen::TransformationMatrix bTg = bTt;
-    //    bTg.TranslationVector(bTg.TranslationVector() + Eigen::Vector3d(0.1, 0.0, 0.0));
-    //    Eigen::Vector6d cart_err = rml::CartesianError(bTt, bTg);
+    /** Generating a goal 0.1 meters forward in the x direction w.r.t to the EE */
+    bTt = armModel->TransformationMatrix(armModel->GetEndEffectorFrameID());
+    Eigen::TransformationMatrix bTg = bTt;
+    bTg.TranslationVector(bTg.TranslationVector() + Eigen::Vector3d(0.1, 0.0, 0.0));
 
+    Eigen::Vector6d goal = bTg.ToVector();
     cout << "goal Pose: ";
     fileLog << "goal Pose: ";
     for (int i = 0; i < 6; i++) {
-        fileLog << goal[i] << " ";
         cout << goal[i] << " ";
+        fileLog << goal[i] << " ";
     }
     fileLog << "\n";
     cout << endl;
@@ -154,14 +195,12 @@ int main(int, char**)
     fileLog << "simulation start: "
             << "\n";
 
-    //multiArmCtrl->SetCartGoalEE(armIndex, goal);
-
-    //auto rhs_wrapper = [this](const state_type& q, state_type& dqdt, double t) { single_arm_sim(q, dqdt, t); };
-    //auto obs = [this](const state_type& q, const double t) { write_single_arm_sim(q, t); };
     auto rhs_wrapper = [](const state_type& q, state_type& dqdt, double t) { single_arm_sim(q, dqdt, t); };
     auto obs = [](const state_type& q, const double t) { write_single_arm_sim(q, t); };
 
-    //			boost::numeric::odeint::integrate( std::bind(&simulator_class::single_arm_sim, std::ref(*this), PH::_1,PH::_2,PH::_3 ) , init_q_single , start_time ,end_time , step_time , write_single_arm_sim );
+    // boost::numeric::odeint::integrate( std::bind(&simulator_class::single_arm_sim, std::ref(*this), PH::_1,PH::_2,PH::_3 ),
+    //                                      init_q_single , start_time ,end_time , step_time , write_single_arm_sim );
+    
     boost::numeric::odeint::integrate(rhs_wrapper, init_q_single, start_time, end_time, step_time, obs);
 
     return 0;

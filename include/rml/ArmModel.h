@@ -211,6 +211,30 @@ public:
      */
     auto ID() -> std::string& { return id_; }
 
+    /**
+     * @brief Method returning the list of rigid body frame IDs
+     * @return vector of frame IDs
+     */
+    std::vector<std::string> GetRigidBodyFrameIDs() const noexcept;
+
+    /**
+     * @brief Method returning the list of joint frame IDs
+     * @return vector of frame IDs
+     */
+    std::vector<std::string> GetJointFrameIDs() const noexcept;
+
+    /**
+     * @brief Method returning the list of Jacobian frame IDs
+     * @return vector of frame IDs
+     */
+    std::vector<std::string> GetJacobianFrameIDs() const noexcept;
+
+    /**
+     * @brief Method returning the end-effector frame ID
+     * @return frame ID
+     */
+    std::string GetEndEffectorFrameID() const noexcept;
+    
 protected:
     /**
      * @brief Method evaluating the total forward geometry for the arm

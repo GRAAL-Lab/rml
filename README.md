@@ -1,8 +1,8 @@
 # RML: Robotics Mathematical Library
-The **RML** library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators.
+The **RML** library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators. The library can be found in the [GRAAL Robotics Toolbox](https://bitbucket.org/isme_robotics/workspace/projects/RTB) repositories.
 
 ## Documentation
-Full doxygen-generated documentation can be found at: [RML Documentation](https://merosss.bitbucket.io/rml).
+Full doxygen-generated documentation can be found at: [RML Documentation](https://www.graal.dibris.unige.it/docs/rml/).
 
 ## Features
 Its major features are:
@@ -12,7 +12,7 @@ Its major features are:
 3. Implementation of a **Pseudo-Inversion** algorithm (rml::RegularizedPseudoInverse()).
 4. Implementation of a slim **RobotModel** class able to manage multi arm mobile robotic platforms (rml::RobotModel), in which we can load a rml::VehicleModel and many rml::ArmModel(s), providing frame and jacobian utilities, also including dJdq and manipulability measurements.
 5. Implementation of the **Newton-Euler** algorithm (rml::NewtonEuler), with some utility functions to simulate dynamic systems.
-6. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more ().
+6. Providing a set of robotic related functions such as: lemma versor, bell shaped functions, point to plane distance and more.
 
 Check out the doxygen ::rml namespace documentation for a brief overview of all functionalities.
 Where not explicitly stated so, the default units are the SI ones (meters, kg, seconds, etc.).
@@ -27,15 +27,23 @@ Before building the repository you will have to install the following dependenci
 
 The build tool used for this project is CMake. To build and install the project navigate to the root of the cloned repo and execute the following commands:
 
-    $ mkdir build
-    $ cd build
-    $ cmake ..
-    $ sudo make install
+```bash
+$ mkdir build
+$ cd build
+$ cmake ..
+$ sudo make install
+```
 
 The CMakeLists.txt provides also an additional BUILD_TESTS option, which by default is set to OFF. If you want to build also the tests just run:
 
-    $ cmake .. -DBUILD_TESTS=ON
+```bash
+$ cmake .. -DBUILD_TESTS=ON
+```    
+
+### License
+
+The software is released under the MIT License, as reported in the [LICENSE.md](/LICENSE.md) file.
 
 ### Mantainer
 
-* <fwanderlingh@gmail.com>
+This project is mantained by the [GRAAL Laboratory](https://www.graal.dibris.unige.it), University of Genoa (Italy).

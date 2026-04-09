@@ -59,7 +59,7 @@ struct RegularizationData {
  *
  * @brief Computes the SVD-based regularized matrix pseudoinversion (A = U*S*V')
  */
-void GT_RegPinv(const double* J, int m, int n, double* JPInv, double treshold, double lambda, double* prod, int* flag);
+void RegPinv(const double* J, int m, int n, double* JPInv, double treshold, double lambda, double* prod, int* flag);
 
 /**
  * @brief Computes the SVD-based regularized matrix pseudoinversion (A = U*S*V')
@@ -91,7 +91,7 @@ Eigen::Matrix<typename MatT::Scalar, MatT::ColsAtCompileTime, MatT::RowsAtCompil
     //Here we convert the input type to a double array which is the type used by the GT_RegPinv
     Eigen::Map<MatT>(J, m, n) = mat;
 
-    GT_RegPinv(J, m, n, JPInv, regData.params.threshold, regData.params.lambda, &(regData.results.mu), &(regData.results.flag));
+    RegPinv(J, m, n, JPInv, regData.params.threshold, regData.params.lambda, &(regData.results.mu), &(regData.results.flag));
 
     //Here the results of the GT_RegPinv algorithm are mapped back to the input type
     MatT eigenPinv = Eigen::Map<MatT>(JPInv, n, m);

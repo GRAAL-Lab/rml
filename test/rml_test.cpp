@@ -50,10 +50,10 @@ int main(int, char**)
     PrettyPrint(vect3_1.transpose(), "vect3_1'");
     PrettyPrint(vect3_2.transpose(), "vect3_2'");
 
-    vect6_1.AngularVector() = vect3_1;
-    PrettyPrint(vect6_1.transpose(), "vect6' after SetFirstVect3()");
-    vect6_1.LinearVector() = vect3_2;
-    PrettyPrint(vect6_1.transpose(), "vect6' after SetSecondVect3()");
+    vect6_1.LinearVector(vect3_1);
+    PrettyPrint(vect6_1.transpose(), "vect6' after .LinearVector(vect3_1)");
+    vect6_1.AngularVector(vect3_2);
+    PrettyPrint(vect6_1.transpose(), "vect6' after .AngularVector(vect3_2)");
 
     Eigen::TransformationMatrix Tmat = A.setRandom(4, 4);
     PrettyPrint(Tmat, "Tmat");
