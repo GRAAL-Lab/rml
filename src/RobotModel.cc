@@ -268,7 +268,7 @@ Eigen::MatrixXd RobotModel::JointSpaceJacobian(const std::string& armID) noexcep
     if (CheckArm(armID)) {
         unsigned int taskSize = armsModel_.at(armID)->NumJoints();
         if (isMobileRobot_) {
-            totJac = Eigen::MatrixXd::Zero(taskSize, 6);
+            totJac = RightJuxtapose(totJac, Eigen::MatrixXd::Zero(taskSize, 6));
         }
         for (std::map<std::string, std::shared_ptr<rml::ArmModel>>::iterator iter = armsModel_.begin(); iter != armsModel_.end();
              ++iter) {
