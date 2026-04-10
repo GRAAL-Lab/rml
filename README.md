@@ -1,5 +1,5 @@
 # RML: Robotics Mathematical Library
-![CI](https://github.com/GRAAL-Lab/your-repo/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/GRAAL-Lab/rml/actions/workflows/ci.yml/badge.svg)
 
 The **RML** library is built on top of the *Eigen* library to provide all the necessary tools to operate with mobile robotic manipulators. The library can be found in the [GRAAL Robotics Toolbox](https://github.com/topics/graal-robotics-toolbox) repositories.
 
