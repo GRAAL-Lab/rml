@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: graalunige/devel-testbench
+      credentials:
+        username: ${{ secrets.DOCKER_HUB_USERNAME_GRAAL }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD_GRAAL }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake .
+
+      - name: Build
+        run: make
