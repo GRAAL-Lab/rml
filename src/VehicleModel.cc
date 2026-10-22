@@ -115,7 +115,7 @@ Eigen::TransformationMatrix VehicleModel::TransformationMatrix(const std::string
 
 Eigen::TransformationMatrix VehicleModel::TransformationMatrix(const std::string& frameID_j, const std::string& frameID_k)
 {
-    return TransformationMatrix(frameID_j).transpose() * TransformationMatrix(frameID_k);
+    return TransformationMatrix(frameID_j).inverse() * TransformationMatrix(frameID_k);
 }
 
 Eigen::MatrixXd VehicleModel::Jacobian(const std::string& ID) noexcept(false)

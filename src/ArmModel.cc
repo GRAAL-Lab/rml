@@ -402,7 +402,7 @@ Eigen::TransformationMatrix ArmModel::TransformationMatrix(const std::string& fr
 
 Eigen::TransformationMatrix ArmModel::TransformationMatrix(const std::string& frameID_j, const std::string& frameID_k)
 {
-    return TransformationMatrix(frameID_j).transpose() * TransformationMatrix(frameID_k);
+    return TransformationMatrix(frameID_j).inverse() * TransformationMatrix(frameID_k);
 }
 
 Eigen::MatrixXd ArmModel::Jacobian(const std::string& frameID) noexcept(false)
